@@ -1,4 +1,4 @@
-const SESSION_KEY = "syndicat-ontario-payload";
+const SESSION_KEY = "syndicat-ontario-payload-v2";
 const GATE_SCRIPT_URL =
   (document.currentScript && document.currentScript.src) ||
   new URL("./gate.js", window.location.href).href;
@@ -47,7 +47,6 @@ function gateLang() {
   const nav = (navigator.language || "en").toLowerCase();
   if (nav.startsWith("fr")) return "fr";
   if (nav.startsWith("pt")) return "pt";
-  if (nav.startsWith("ar") || nav === "ary") return "ary";
   return "en";
 }
 
@@ -90,11 +89,15 @@ function applyPayload(payload) {
   window.FUND = payload.FUND;
 }
 
+function payloadIsCurrent(payload) {
+  return Boolean(payload && payload.I18N && payload.I18N.ary && payload.FUND_I18N && payload.FUND_I18N.ary);
+}
+
 function loadApp() {
   if (document.querySelector("script[data-app]")) return;
   const script = document.createElement("script");
   const base = GATE_SCRIPT_URL.replace(/gate\.js(\?.*)?$/, "");
-  script.src = `${base}app.js?v=4`;
+  script.src = `${base}app.js?v=5`;
   script.dataset.app = "true";
   script.onerror = () => {
     document.getElementById("app").hidden = false;
@@ -155,13 +158,18 @@ async function start() {
   const response = await fetch("./payload.json", { cache: "no-store" });
   window.__PAYLOAD__ = await response.json();
   const cached = sessionStorage.getItem(SESSION_KEY);
+  sessionStorage.removeItem("syndicat-ontario-payload");
   if (cached) {
     try {
-      openSite(JSON.parse(cached));
-      return;
+      const payload = JSON.parse(cached);
+      if (payloadIsCurrent(payload)) {
+        openSite(payload);
+        return;
+      }
     } catch (err) {
       sessionStorage.removeItem(SESSION_KEY);
     }
+    sessionStorage.removeItem(SESSION_KEY);
   }
   showGate(false);
 }

@@ -37,19 +37,18 @@ const LANGS = [
   { id: "en", label: "English" },
   { id: "fr", label: "Français" },
   { id: "pt", label: "Português" },
-  { id: "ary", label: "الدارجة" },
+  { id: "ary", label: "Darija" },
 ];
 
 function detectLang() {
   const params = new URLSearchParams(window.location.search);
   const fromUrl = params.get("lang");
-  if (fromUrl && I18N[fromUrl]) return fromUrl;
+  if (fromUrl && I18N && I18N[fromUrl]) return fromUrl;
   const stored = localStorage.getItem("lang");
-  if (stored && I18N[stored]) return stored;
+  if (stored && I18N && I18N[stored]) return stored;
   const nav = (navigator.language || "en").toLowerCase();
   if (nav.startsWith("fr")) return "fr";
   if (nav.startsWith("pt")) return "pt";
-  if (nav.startsWith("ar") || nav === "ary") return "ary";
   return "en";
 }
 
@@ -95,6 +94,7 @@ function syncUrl() {
 }
 
 function setLang(next) {
+  if (!I18N[next]) return;
   lang = next;
   localStorage.setItem("lang", next);
   syncUrl();
@@ -138,7 +138,9 @@ function chrome(inner) {
           <div class="lang" role="group" aria-label="Language">
             ${LANGS.map(
               (item) => `
-                <button type="button" data-lang="${item.id}" aria-pressed="${
+                <button type="button" data-lang="${item.id}" title="${esc(
+                  item.label
+                )}" aria-pressed="${
                   item.id === lang
                 }">${esc(item.label)}</button>
               `
@@ -163,7 +165,7 @@ function bindChrome() {
   });
   document.querySelectorAll("[data-lock]").forEach((button) => {
     button.addEventListener("click", () => {
-      sessionStorage.removeItem("syndicat-ontario-payload");
+      sessionStorage.removeItem("syndicat-ontario-payload-v2");
       window.location.reload();
     });
   });
