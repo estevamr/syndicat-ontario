@@ -468,10 +468,97 @@ tr:last-child td {
   margin-left: 8px;
 }
 
-.sim input[type="range"] {
+.sim-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 18px;
+  margin-bottom: 16px;
+}
+
+.sim label.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  margin: 4px 0 16px;
+}
+
+.sim label.check input {
+  width: auto;
+}
+
+.sim .sim-grid input[type="number"],
+.sim input[type="text"] {
   display: block;
   width: 100%;
   margin-top: 8px;
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.sim-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 16px;
+}
+
+button.action {
+  appearance: none;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+button.action.ghost,
+.card.pick button.action {
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.card.pick {
+  display: grid;
+  gap: 8px;
+}
+
+.year-input {
+  width: 5.5rem;
+  font: inherit;
+  padding: 4px 6px;
+  border: 1px solid var(--line);
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--danger);
+  margin-top: 4px;
+}
+
+.neg-cell {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.saved-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.saved-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
 }
 
 .chart-label {
@@ -534,7 +621,8 @@ td .pill {
 @media (max-width: 800px) {
   .stats,
   .grid-2,
-  .grid-3 {
+  .grid-3,
+  .sim-grid {
     grid-template-columns: 1fr;
   }
 }

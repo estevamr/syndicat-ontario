@@ -1,23 +1,71 @@
+function roundCad(value) {
+  return Math.round(Number(value) || 0);
+}
+
+function hasShifts(shifts) {
+  return Object.keys(shifts || {}).some((id) => Number(shifts[id]) !== 0);
+}
+
+function spendPlan(shifts) {
+  const years = FUND.expenses.length;
+  if (!hasShifts(shifts)) {
+    return { expenses: FUND.expenses.slice(), dropped: [] };
+  }
+  const expenses = Array(years).fill(0);
+  const dropped = [];
+  FUND.works.forEach((work) => {
+    const delta = Number(shifts[work.id] || 0);
+    const year = work.year + delta;
+    const cost = roundCad(work.cost * Math.pow(1 + FUND.inflation, delta));
+    const idx = year - FUND.startYear;
+    if (idx >= years) dropped.push({ id: work.id, year, cost });
+    else if (idx < 0) expenses[0] += cost;
+    else expenses[idx] += cost;
+  });
+  return { expenses, dropped };
+}
+
 window.projectFund = function projectFund(opts) {
-  const annual = opts.annual;
-  const increase = opts.increase;
-  let balance = FUND.startBalance;
-  let contribution = annual;
+  const plan = spendPlan(opts.shifts);
+  const expenses = plan.expenses;
+  const annual = Number(opts.annual);
+  const increase = Number(opts.increase) || 0;
+  const phaseYears = Math.min(
+    expenses.length,
+    Math.max(1, Number(opts.phaseYears) || expenses.length)
+  );
+  const usePhase2 = Boolean(opts.usePhase2);
+  const annual2 = Number(opts.annual2);
+  const increase2 = Number(opts.increase2) || 0;
+  let balance = Number(opts.startBalance ?? FUND.startBalance);
+  const rate = Number(opts.interest ?? FUND.interest);
+  const specialYear = Number(opts.specialYear);
+  const specialAmount = roundCad(opts.specialAmount || 0);
   const rows = [];
   let firstGap = null;
   let minBalance = balance;
   let totalContrib = 0;
-  FUND.expenses.forEach((expense, index) => {
-    if (index > 0) contribution *= 1 + increase;
-    totalContrib += contribution;
-    const after = balance + contribution - expense;
-    const interest = after > 0 ? after * FUND.interest : 0;
+  expenses.forEach((expense, index) => {
+    let contribution;
+    if (!usePhase2 || index < phaseYears) {
+      contribution = roundCad(annual * Math.pow(1 + increase, index));
+    } else {
+      contribution = roundCad(
+        annual2 * Math.pow(1 + increase2, index - phaseYears)
+      );
+    }
+    const year = FUND.startYear + index;
+    const special = year === specialYear ? specialAmount : 0;
+    totalContrib += contribution + special;
+    const after = balance + contribution + special - expense;
+    const interest = after > 0 ? roundCad(after * rate) : 0;
     balance = after + interest;
-    if (balance < 0 && firstGap === null) firstGap = FUND.startYear + index;
+    if (balance < 0 && firstGap === null) firstGap = year;
     if (balance < minBalance) minBalance = balance;
     rows.push({
-      year: FUND.startYear + index,
+      year,
       contribution,
+      special,
       expense,
       interest,
       balance,
@@ -30,6 +78,8 @@ window.projectFund = function projectFund(opts) {
     end: balance,
     totalContrib,
     ok: firstGap === null,
+    dropped: plan.dropped,
+    expenses,
   };
 };
 
@@ -62,8 +112,80 @@ function detectTab() {
 let lang = detectLang();
 let tab = detectTab();
 let filter = "all";
-let simAnnual = FUND.currentContribution;
-let simIncrease = 0;
+
+const SIM_STORE = "syndicat-ontario-sim-v1";
+const SESSION_KEY = "syndicat-ontario-payload-v3";
+
+function defaultWorkshop() {
+  return {
+    annual: FUND.currentContribution,
+    increase: 0,
+    usePhase2: false,
+    phaseYears: 10,
+    annual2: FUND.law16Contribution,
+    increase2: FUND.inflation,
+    specialYear: FUND.startYear,
+    specialAmount: 0,
+    startBalance: FUND.startBalance,
+    interestPct: FUND.interest * 100,
+    shifts: {},
+    saved: [],
+    saveLabel: "",
+  };
+}
+
+function loadWorkshop() {
+  const base = defaultWorkshop();
+  try {
+    const raw = JSON.parse(localStorage.getItem(SIM_STORE) || "null");
+    if (!raw || typeof raw !== "object") return base;
+    return {
+      ...base,
+      ...raw,
+      shifts: { ...(raw.shifts || {}) },
+      saved: Array.isArray(raw.saved) ? raw.saved : [],
+    };
+  } catch (err) {
+    return base;
+  }
+}
+
+function persistWorkshop() {
+  localStorage.setItem(SIM_STORE, JSON.stringify(workshop));
+}
+
+let workshop = loadWorkshop();
+
+function workshopOpts() {
+  return {
+    annual: workshop.annual,
+    increase: workshop.increase,
+    usePhase2: workshop.usePhase2,
+    phaseYears: workshop.phaseYears,
+    annual2: workshop.annual2,
+    increase2: workshop.increase2,
+    specialYear: workshop.specialYear,
+    specialAmount: workshop.specialAmount,
+    startBalance: workshop.startBalance,
+    interest: Number(workshop.interestPct) / 100,
+    shifts: workshop.shifts,
+  };
+}
+
+function applyStudyPath(item) {
+  workshop.annual = item.annual;
+  workshop.increase = item.increase || 0;
+  workshop.usePhase2 = (item.phaseYears || 25) < 25;
+  workshop.phaseYears = item.phaseYears && item.phaseYears < 25 ? item.phaseYears : 10;
+  workshop.annual2 = item.annual2 ?? FUND.law16Contribution;
+  workshop.increase2 = item.increase2 ?? FUND.inflation;
+  workshop.specialAmount = 0;
+  workshop.specialYear = FUND.startYear;
+  workshop.startBalance = FUND.startBalance;
+  workshop.interestPct = FUND.interest * 100;
+  workshop.shifts = {};
+  persistWorkshop();
+}
 
 function locale() {
   if (lang === "fr") return "fr-CA";
@@ -170,6 +292,7 @@ function bindChrome() {
   });
   document.querySelectorAll("[data-lock]").forEach((button) => {
     button.addEventListener("click", () => {
+      sessionStorage.removeItem(SESSION_KEY);
       sessionStorage.removeItem("syndicat-ontario-payload-v2");
       window.location.reload();
     });
@@ -305,24 +428,39 @@ function chartBars(values, max, className) {
     .join("");
 }
 
+function workYear(work) {
+  return work.year + Number(workshop.shifts[work.id] || 0);
+}
+
+function workCost(work) {
+  const delta = Number(workshop.shifts[work.id] || 0);
+  return roundCad(work.cost * Math.pow(1 + FUND.inflation, delta));
+}
+
 function renderFund() {
   const t = I18N[lang];
   const f = FUND_I18N[lang];
   document.title = f.title;
-  const sim = projectFund({ annual: simAnnual, increase: simIncrease });
-  const spendMax = Math.max(...FUND.expenses);
+  const sim = projectFund(workshopOpts());
+  const spendMax = Math.max(1, ...sim.expenses);
   const balanceMax = Math.max(
     spendMax,
     ...sim.rows.map((row) => Math.abs(row.balance))
   );
-  const perUnitYear = simAnnual / FUND.units;
+  const perUnitYear = workshop.annual / FUND.units;
   const perUnitMonth = perUnitYear / 12;
+  const lastYear = FUND.startYear + FUND.expenses.length - 1;
 
   const workRows = FUND.works
-    .map(
-      (work) => `
+    .map((work) => {
+      const year = workYear(work);
+      const dropped = year > lastYear;
+      return `
         <tr>
-          <td>${work.year}</td>
+          <td>
+            <input class="year-input" data-shift="${esc(work.id)}" type="number" min="${FUND.startYear}" max="2075" value="${year}" />
+            ${dropped ? `<div class="hint">${esc(f.dropped)}</div>` : ""}
+          </td>
           <td>${esc(f.workNames[work.id])}${
             work.linked
               ? ` <span class="pill now">${esc(f.linked)}</span>`
@@ -330,7 +468,21 @@ function renderFund() {
           }</td>
           <td>${work.remaining} ${esc(f.yearsLeft)}</td>
           <td>${work.avg} ${esc(f.avgLife)}</td>
-          <td>${money(work.cost)}</td>
+          <td>${money(workCost(work))}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  const outsideRows = (FUND.outsideHorizon || [])
+    .map(
+      (item) => `
+        <tr>
+          <td>—</td>
+          <td>${esc(f.workNames[item.id] || item.id)}</td>
+          <td>${item.remaining} ${esc(f.yearsLeft)}</td>
+          <td>${item.avg} ${esc(f.avgLife)}</td>
+          <td>—</td>
         </tr>
       `
     )
@@ -340,7 +492,7 @@ function renderFund() {
     .map((item) => {
       const meta = f.scenarioMeta[item.id];
       return `
-        <article class="card">
+        <article class="card pick">
           <div class="meta">
             <span class="pill ${item.ok ? "ok" : "now"}">${
               item.ok ? "OK" : "—"
@@ -348,10 +500,49 @@ function renderFund() {
           </div>
           <h3>${esc(meta.name)}</h3>
           <p>${esc(meta.detail)}</p>
+          <button type="button" class="action" data-apply="${esc(item.id)}">${esc(
+            f.applyStudy
+          )}</button>
         </article>
       `;
     })
     .join("");
+
+  const yearRows = sim.rows
+    .map(
+      (row) => `
+        <tr>
+          <td>${row.year}</td>
+          <td>${money(row.contribution)}</td>
+          <td>${row.special ? money(row.special) : "—"}</td>
+          <td>${row.expense ? money(row.expense) : "—"}</td>
+          <td>${row.interest ? money(row.interest) : "—"}</td>
+          <td class="${row.balance < 0 ? "neg-cell" : ""}">${money(row.balance)}</td>
+        </tr>
+      `
+    )
+    .join("");
+
+  const savedBlock =
+    workshop.saved.length === 0
+      ? `<p class="lede">${esc(f.noSaved)}</p>`
+      : `<ul class="saved-list">${workshop.saved
+          .map(
+            (item) => `
+              <li>
+                <span>${esc(item.name)}</span>
+                <span>
+                  <button type="button" class="action" data-load="${esc(item.id)}">${esc(
+                    f.loadBtn
+                  )}</button>
+                  <button type="button" class="action ghost" data-forget="${esc(
+                    item.id
+                  )}">${esc(f.deleteBtn)}</button>
+                </span>
+              </li>
+            `
+          )
+          .join("")}</ul>`;
 
   document.getElementById("app").innerHTML = chrome(`
         <h1>${esc(f.h1)}</h1>
@@ -374,18 +565,58 @@ function renderFund() {
         <h2>${esc(f.tryTitle)}</h2>
         <p class="lede">${esc(f.tryLead)}</p>
         <article class="card sim">
-          <label>
-            ${esc(f.annualLabel)}
-            <strong id="annual-val">${money(simAnnual)}</strong>
-            <input id="annual" type="range" min="500" max="20000" step="50" value="${simAnnual}" />
+          <div class="sim-grid">
+            <label>
+              ${esc(f.annualLabel)}
+              <strong id="annual-val">${money(workshop.annual)}</strong>
+              <input id="annual" type="range" min="500" max="25000" step="50" value="${workshop.annual}" />
+            </label>
+            <label>
+              ${esc(f.increaseLabel)}
+              <strong id="increase-val">${pct(workshop.increase)}</strong>
+              <input id="increase" type="range" min="0" max="8" step="0.5" value="${
+                workshop.increase * 100
+              }" />
+            </label>
+            <label>
+              ${esc(f.startBalance)}
+              <input id="start-balance" type="number" min="0" step="100" value="${workshop.startBalance}" />
+            </label>
+            <label>
+              ${esc(f.interestLabel)}
+              <strong id="interest-val">${pct(workshop.interestPct / 100)}</strong>
+              <input id="interest" type="range" min="0" max="5" step="0.1" value="${workshop.interestPct}" />
+            </label>
+            <label>
+              ${esc(f.specialYear)}
+              <input id="special-year" type="number" min="${FUND.startYear}" max="${lastYear}" value="${workshop.specialYear}" />
+            </label>
+            <label>
+              ${esc(f.specialAmount)}
+              <input id="special-amount" type="number" min="0" step="100" value="${workshop.specialAmount}" />
+            </label>
+          </div>
+          <label class="check">
+            <input id="use-phase2" type="checkbox" ${workshop.usePhase2 ? "checked" : ""} />
+            ${esc(f.phase2)}
           </label>
-          <label>
-            ${esc(f.increaseLabel)}
-            <strong id="increase-val">${pct(simIncrease)}</strong>
-            <input id="increase" type="range" min="0" max="8" step="0.5" value="${
-              simIncrease * 100
-            }" />
-          </label>
+          <div class="sim-grid" id="phase2-fields" ${workshop.usePhase2 ? "" : "hidden"}>
+            <label>
+              ${esc(f.phaseYears)}
+              <input id="phase-years" type="number" min="1" max="24" value="${workshop.phaseYears}" />
+            </label>
+            <label>
+              ${esc(f.annualAfter)}
+              <input id="annual2" type="number" min="0" step="50" value="${workshop.annual2}" />
+            </label>
+            <label>
+              ${esc(f.increaseAfter)}
+              <strong id="increase2-val">${pct(workshop.increase2)}</strong>
+              <input id="increase2" type="range" min="0" max="8" step="0.5" value="${
+                workshop.increase2 * 100
+              }" />
+            </label>
+          </div>
           <p id="sim-per">${esc(f.perUnit)}: ${money(perUnitYear)} (${money(
             perUnitMonth
           )}${esc(f.perMonth)})</p>
@@ -401,7 +632,7 @@ function renderFund() {
           </aside>
           <div class="chart-label">${esc(f.chartSpend)}</div>
           <div id="chart-spend" class="chart">${chartBars(
-            FUND.expenses,
+            sim.expenses,
             spendMax,
             "spend"
           )}</div>
@@ -411,20 +642,59 @@ function renderFund() {
             balanceMax,
             "bal"
           )}</div>
+          <h3>${esc(f.yearTable)}</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>${esc(f.colYear)}</th>
+                  <th>${esc(f.colContrib)}</th>
+                  <th>${esc(f.colSpecial)}</th>
+                  <th>${esc(f.colSpend)}</th>
+                  <th>${esc(f.colInterest)}</th>
+                  <th>${esc(f.colBalance)}</th>
+                </tr>
+              </thead>
+              <tbody>${yearRows}</tbody>
+            </table>
+          </div>
+          <div class="sim-actions">
+            <button type="button" class="action" data-reset="true">${esc(f.resetStudy)}</button>
+          </div>
+          <label>
+            ${esc(f.saveName)}
+            <input id="save-label" type="text" maxlength="80" value="${esc(workshop.saveLabel)}" />
+          </label>
+          <div class="sim-actions">
+            <button type="button" class="action" data-save="true">${esc(f.saveBtn)}</button>
+          </div>
+          <h3>${esc(f.savedTitle)}</h3>
+          ${savedBlock}
         </article>
         <h2>${esc(f.scenarios)}</h2>
         <p class="lede">${esc(f.scenarioNote)}</p>
         <div class="cards">${scenarioCards}</div>
-        <h2>${esc(f.timeline)}</h2>
+        <h2>${esc(f.shiftTitle)}</h2>
+        <p class="lede">${esc(f.shiftLead)}</p>
         <h3>${esc(f.works)}</h3>
         <div class="table-wrap">
           <table>
             <thead>
-              <tr>${f.workHeaders
-                .map((header) => `<th>${esc(header)}</th>`)
-                .join("")}</tr>
+              <tr>
+                <th>${esc(f.targetYear)}</th>
+                ${f.workHeaders.slice(1).map((header) => `<th>${esc(header)}</th>`).join("")}
+              </tr>
             </thead>
             <tbody>${workRows}</tbody>
+          </table>
+        </div>
+        <h3>${esc(f.outsideTitle)}</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>${f.workHeaders.map((header) => `<th>${esc(header)}</th>`).join("")}</tr>
+            </thead>
+            <tbody>${outsideRows}</tbody>
           </table>
         </div>
         <section class="footnote">
@@ -437,27 +707,54 @@ function renderFund() {
 }
 
 function bindSim() {
-  const annual = document.getElementById("annual");
-  const increase = document.getElementById("increase");
-  if (!annual || !increase) return;
-  const refresh = () => {
-    simAnnual = Number(annual.value);
-    simIncrease = Number(increase.value) / 100;
+  const readFields = () => {
+    const annual = document.getElementById("annual");
+    const increase = document.getElementById("increase");
+    const start = document.getElementById("start-balance");
+    const interest = document.getElementById("interest");
+    const specialYear = document.getElementById("special-year");
+    const specialAmount = document.getElementById("special-amount");
+    const usePhase2 = document.getElementById("use-phase2");
+    const phaseYears = document.getElementById("phase-years");
+    const annual2 = document.getElementById("annual2");
+    const increase2 = document.getElementById("increase2");
+    const saveLabel = document.getElementById("save-label");
+    if (annual) workshop.annual = Number(annual.value);
+    if (increase) workshop.increase = Number(increase.value) / 100;
+    if (start) workshop.startBalance = Number(start.value);
+    if (interest) workshop.interestPct = Number(interest.value);
+    if (specialYear) workshop.specialYear = Number(specialYear.value);
+    if (specialAmount) workshop.specialAmount = Number(specialAmount.value);
+    if (usePhase2) workshop.usePhase2 = usePhase2.checked;
+    if (phaseYears) workshop.phaseYears = Number(phaseYears.value);
+    if (annual2) workshop.annual2 = Number(annual2.value);
+    if (increase2) workshop.increase2 = Number(increase2.value) / 100;
+    if (saveLabel) workshop.saveLabel = saveLabel.value;
+    persistWorkshop();
+  };
+
+  const paint = () => {
     const f = FUND_I18N[lang];
-    const sim = projectFund({ annual: simAnnual, increase: simIncrease });
-    const spendMax = Math.max(...FUND.expenses);
+    const sim = projectFund(workshopOpts());
+    const spendMax = Math.max(1, ...sim.expenses);
     const balanceMax = Math.max(
       spendMax,
       ...sim.rows.map((row) => Math.abs(row.balance))
     );
     const annualVal = document.getElementById("annual-val");
     const increaseVal = document.getElementById("increase-val");
-    if (annualVal) annualVal.textContent = money(simAnnual);
-    if (increaseVal) increaseVal.textContent = pct(simIncrease);
+    const interestVal = document.getElementById("interest-val");
+    const increase2Val = document.getElementById("increase2-val");
+    if (annualVal) annualVal.textContent = money(workshop.annual);
+    if (increaseVal) increaseVal.textContent = pct(workshop.increase);
+    if (interestVal) interestVal.textContent = pct(workshop.interestPct / 100);
+    if (increase2Val) increase2Val.textContent = pct(workshop.increase2);
+    const phaseBox = document.getElementById("phase2-fields");
+    if (phaseBox) phaseBox.hidden = !workshop.usePhase2;
     const per = document.getElementById("sim-per");
     if (per) {
-      per.textContent = `${f.perUnit}: ${money(simAnnual / FUND.units)} (${money(
-        simAnnual / FUND.units / 12
+      per.textContent = `${f.perUnit}: ${money(workshop.annual / FUND.units)} (${money(
+        workshop.annual / FUND.units / 12
       )}${f.perMonth})`;
     }
     const result = document.getElementById("sim-result");
@@ -474,7 +771,7 @@ function bindSim() {
     const spendChart = document.getElementById("chart-spend");
     const balChart = document.getElementById("chart-balance");
     if (spendChart) {
-      spendChart.innerHTML = chartBars(FUND.expenses, spendMax, "spend");
+      spendChart.innerHTML = chartBars(sim.expenses, spendMax, "spend");
     }
     if (balChart) {
       balChart.innerHTML = chartBars(
@@ -484,8 +781,107 @@ function bindSim() {
       );
     }
   };
-  annual.addEventListener("input", refresh);
-  increase.addEventListener("input", refresh);
+
+  const live = () => {
+    readFields();
+    paint();
+  };
+
+  [
+    "annual",
+    "increase",
+    "start-balance",
+    "interest",
+    "special-year",
+    "special-amount",
+    "phase-years",
+    "annual2",
+    "increase2",
+    "save-label",
+  ].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("input", live);
+  });
+  const usePhase2 = document.getElementById("use-phase2");
+  if (usePhase2) {
+    usePhase2.addEventListener("change", () => {
+      readFields();
+      render();
+    });
+  }
+  document.querySelectorAll("[data-shift]").forEach((input) => {
+    input.addEventListener("change", () => {
+      const id = input.dataset.shift;
+      const work = FUND.works.find((item) => item.id === id);
+      if (!work) return;
+      workshop.shifts[id] = Number(input.value) - work.year;
+      persistWorkshop();
+      render();
+    });
+  });
+  document.querySelectorAll("[data-apply]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const item = FUND.scenarios.find((row) => row.id === button.dataset.apply);
+      if (!item) return;
+      applyStudyPath(item);
+      render();
+    });
+  });
+  document.querySelectorAll("[data-reset]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const saved = workshop.saved;
+      workshop = defaultWorkshop();
+      workshop.saved = saved;
+      persistWorkshop();
+      render();
+    });
+  });
+  document.querySelectorAll("[data-save]").forEach((button) => {
+    button.addEventListener("click", () => {
+      readFields();
+      const name = (workshop.saveLabel || "").trim();
+      if (!name) return;
+      workshop.saved.push({
+        id: String(Date.now()),
+        name,
+        state: {
+          annual: workshop.annual,
+          increase: workshop.increase,
+          usePhase2: workshop.usePhase2,
+          phaseYears: workshop.phaseYears,
+          annual2: workshop.annual2,
+          increase2: workshop.increase2,
+          specialYear: workshop.specialYear,
+          specialAmount: workshop.specialAmount,
+          startBalance: workshop.startBalance,
+          interestPct: workshop.interestPct,
+          shifts: { ...workshop.shifts },
+        },
+      });
+      workshop.saveLabel = "";
+      persistWorkshop();
+      render();
+    });
+  });
+  document.querySelectorAll("[data-load]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const item = workshop.saved.find((row) => row.id === button.dataset.load);
+      if (!item) return;
+      Object.assign(workshop, item.state);
+      workshop.shifts = { ...(item.state.shifts || {}) };
+      persistWorkshop();
+      render();
+    });
+  });
+  document.querySelectorAll("[data-forget]").forEach((button) => {
+    button.addEventListener("click", () => {
+      workshop.saved = workshop.saved.filter(
+        (row) => row.id !== button.dataset.forget
+      );
+      persistWorkshop();
+      render();
+    });
+  });
 }
 
 function renderMaint() {
