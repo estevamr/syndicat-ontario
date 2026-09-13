@@ -1,3 +1,36 @@
+function projectFund({ annual, increase }) {
+  let balance = FUND.startBalance;
+  let contribution = annual;
+  const rows = [];
+  let firstGap = null;
+  let minBalance = balance;
+  let totalContrib = 0;
+  FUND.expenses.forEach((expense, index) => {
+    if (index > 0) contribution *= 1 + increase;
+    totalContrib += contribution;
+    const after = balance + contribution - expense;
+    const interest = after > 0 ? after * FUND.interest : 0;
+    balance = after + interest;
+    if (balance < 0 && firstGap === null) firstGap = FUND.startYear + index;
+    if (balance < minBalance) minBalance = balance;
+    rows.push({
+      year: FUND.startYear + index,
+      contribution,
+      expense,
+      interest,
+      balance,
+    });
+  });
+  return {
+    rows,
+    firstGap,
+    minBalance,
+    end: balance,
+    totalContrib,
+    ok: firstGap === null,
+  };
+}
+
 const LANGS = [
   { id: "en", label: "English" },
   { id: "fr", label: "Français" },
@@ -101,6 +134,9 @@ function chrome(inner) {
               `
             ).join("")}
           </div>
+          <button type="button" class="lock" data-lock="true">${esc(
+            t.navLock
+          )}</button>
         </div>
       </header>
       <main id="main">${inner}</main>
@@ -114,6 +150,12 @@ function bindChrome() {
   });
   document.querySelectorAll("[data-tab]").forEach((button) => {
     button.addEventListener("click", () => setTab(button.dataset.tab));
+  });
+  document.querySelectorAll("[data-lock]").forEach((button) => {
+    button.addEventListener("click", () => {
+      sessionStorage.removeItem("syndicat-ontario-payload");
+      window.location.reload();
+    });
   });
 }
 
