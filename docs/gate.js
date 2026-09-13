@@ -43,7 +43,7 @@ const GATE_COPY = {
   },
 };
 
-const LANGS = [
+const GATE_LANGS = [
   { id: "en", label: "English" },
   { id: "fr", label: "Français" },
   { id: "pt", label: "Português" },
@@ -132,7 +132,7 @@ function loadApp() {
   if (document.querySelector("script[data-app]")) return;
   const script = document.createElement("script");
   const base = GATE_SCRIPT_URL.replace(/gate\.js(\?.*)?$/, "");
-  script.src = `${base}app.js?v=6`;
+  script.src = `${base}app.js?v=7`;
   script.dataset.app = "true";
   script.onerror = () => {
     document.getElementById("app").hidden = false;
@@ -154,7 +154,7 @@ function showGate(error) {
   gate.innerHTML = `
     <form class="gate-card" id="gate-form">
       <div class="lang" role="group" aria-label="Language">
-        ${LANGS.map(
+        ${GATE_LANGS.map(
           (item) => `
             <button type="button" data-lang="${item.id}" title="${item.label}" aria-pressed="${
               item.id === lang
