@@ -1,4 +1,4 @@
-const SESSION_KEY = "syndicat-ontario-payload-v3";
+const SESSION_KEY = "syndicat-ontario-payload-v4";
 const GATE_SCRIPT_URL =
   (document.currentScript && document.currentScript.src) ||
   new URL("./gate.js", window.location.href).href;
@@ -114,6 +114,8 @@ function applyPayload(payload) {
   window.FUND = payload.FUND;
   window.MAINT_I18N = payload.MAINT_I18N;
   window.MAINT = payload.MAINT;
+  window.ASSEMBLY_I18N = payload.ASSEMBLY_I18N;
+  window.ASSEMBLY = payload.ASSEMBLY;
 }
 
 function payloadIsCurrent(payload) {
@@ -126,7 +128,10 @@ function payloadIsCurrent(payload) {
       payload.MAINT_I18N &&
       payload.MAINT_I18N.ary &&
       payload.FUND_I18N.en &&
-      payload.FUND_I18N.en.saveBtn
+      payload.FUND_I18N.en.saveBtn &&
+      payload.ASSEMBLY &&
+      payload.ASSEMBLY_I18N &&
+      payload.ASSEMBLY_I18N.ary
   );
 }
 
@@ -134,7 +139,7 @@ function loadApp() {
   if (document.querySelector("script[data-app]")) return;
   const script = document.createElement("script");
   const base = GATE_SCRIPT_URL.replace(/gate\.js(\?.*)?$/, "");
-  script.src = `${base}app.js?v=9`;
+  script.src = `${base}app.js?v=11`;
   script.dataset.app = "true";
   script.onerror = () => {
     document.getElementById("app").hidden = false;

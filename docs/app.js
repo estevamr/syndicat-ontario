@@ -105,7 +105,7 @@ function detectLang() {
 function detectTab() {
   const params = new URLSearchParams(window.location.search);
   const next = params.get("tab");
-  if (next === "fund" || next === "maint") return next;
+  if (next === "fund" || next === "maint" || next === "assembly") return next;
   return "inspection";
 }
 
@@ -114,7 +114,6 @@ let tab = detectTab();
 let filter = "all";
 
 const SIM_STORE = "syndicat-ontario-sim-v1";
-const SESSION_KEY = "syndicat-ontario-payload-v3";
 
 function defaultWorkshop() {
   return {
@@ -202,6 +201,81 @@ function money(value) {
   }).format(Math.round(value));
 }
 
+function money2(value) {
+  return new Intl.NumberFormat(locale(), {
+    style: "currency",
+    currency: "CAD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number(value) || 0);
+}
+
+function portionFees(annual) {
+  const current = FUND.currentContribution;
+  const names = (ASSEMBLY_I18N[lang] && ASSEMBLY_I18N[lang].owners) || {};
+  return FUND.portions.map((portion) => {
+    const reserveNow = (current * portion.share) / 12;
+    const reserveNew = (annual * portion.share) / 12;
+    const rest = portion.monthlyNow - reserveNow;
+    return {
+      ...portion,
+      name: names[portion.id] || portion.address,
+      reserveNow,
+      reserveNew,
+      monthlyNew: rest + reserveNew,
+    };
+  });
+}
+
+function feeTable(annual) {
+  const f = FUND_I18N[lang];
+  const rows = portionFees(annual)
+    .map(
+      (row) => `
+        <tr>
+          <td>${esc(row.name)}</td>
+          <td>${pct(row.share)}</td>
+          <td>${money2(row.monthlyNow)}</td>
+          <td>${money2(row.reserveNow)}</td>
+          <td>${money2(row.reserveNew)}</td>
+          <td>${money2(row.monthlyNew)}</td>
+        </tr>
+      `
+    )
+    .join("");
+  return `
+    <h2>${esc(f.feeTitle)}</h2>
+    <p class="lede">${esc(f.feeLead)}</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>${f.feeHeaders.map((h) => `<th>${esc(h)}</th>`).join("")}</tr>
+        </thead>
+        <tbody id="fee-body">${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function photoGrid(ids) {
+  const t = I18N[lang];
+  const list = (FUND.photos || []).filter((item) => !ids || ids.includes(item.id));
+  return `
+    <div class="gallery">
+      ${list
+        .map(
+          (item) => `
+            <figure>
+              <img src="${esc(item.src)}" alt="${esc(t.photos[item.id] || "")}" loading="lazy" />
+              <figcaption>${esc(t.photos[item.id] || "")}</figcaption>
+            </figure>
+          `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
 function pct(value) {
   return new Intl.NumberFormat(locale(), {
     style: "percent",
@@ -261,6 +335,11 @@ function chrome(inner) {
             <button type="button" role="tab" data-tab="maint" title="${esc(
               t.navMaint
             )}" aria-selected="${tab === "maint"}">${esc(t.navMaint)}</button>
+            <button type="button" role="tab" data-tab="assembly" title="${esc(
+              t.navAssembly
+            )}" aria-selected="${tab === "assembly"}">${esc(
+              t.navAssembly
+            )}</button>
           </nav>
           <div class="lang" role="group" aria-label="Language">
             ${LANGS.map(
@@ -292,8 +371,12 @@ function bindChrome() {
   });
   document.querySelectorAll("[data-lock]").forEach((button) => {
     button.addEventListener("click", () => {
-      sessionStorage.removeItem(SESSION_KEY);
-      sessionStorage.removeItem("syndicat-ontario-payload-v2");
+      [
+        "syndicat-ontario-payload",
+        "syndicat-ontario-payload-v2",
+        "syndicat-ontario-payload-v3",
+        "syndicat-ontario-payload-v4",
+      ].forEach((key) => sessionStorage.removeItem(key));
       window.location.reload();
     });
   });
@@ -395,6 +478,8 @@ function renderInspection() {
             <p>${esc(t.recurringBody)}</p>
           </article>
         </div>
+        <h2>${esc(t.gallery)}</h2>
+        ${photoGrid(["front", "rear", "rubble", "crack", "infil", "guard", "drain", "terrace"])}
         <section class="footnote">
           <h3>${esc(t.limits)}</h3>
           <p>${esc(t.limitsBody)}</p>
@@ -562,6 +647,7 @@ function renderFund() {
           ${esc(f.callout)}
         </aside>
         <p class="lede">${esc(f.perUnitNow)}</p>
+        ${feeTable(workshop.annual)}
         <h2>${esc(f.tryTitle)}</h2>
         <p class="lede">${esc(f.tryLead)}</p>
         <article class="card sim">
@@ -797,6 +883,23 @@ function bindSim() {
         )
         .join("");
     }
+    const feeBody = document.getElementById("fee-body");
+    if (feeBody) {
+      feeBody.innerHTML = portionFees(workshop.annual)
+        .map(
+          (row) => `
+        <tr>
+          <td>${esc(row.name)}</td>
+          <td>${pct(row.share)}</td>
+          <td>${money2(row.monthlyNow)}</td>
+          <td>${money2(row.reserveNow)}</td>
+          <td>${money2(row.reserveNew)}</td>
+          <td>${money2(row.monthlyNew)}</td>
+        </tr>
+      `
+        )
+        .join("");
+    }
   };
 
   const live = () => {
@@ -925,6 +1028,29 @@ function renderMaint() {
   const yearly = MAINT.yearly
     .map((item) => `<li>${esc(m.yearly[item.id])}</li>`)
     .join("");
+  const inventory = (MAINT.inventory || [])
+    .map(
+      (item) => `
+        <article class="card">
+          <div class="meta"><span class="pill ${item.flag}">${esc(
+            item.flag === "now"
+              ? t.filterNow
+              : item.flag === "soon"
+                ? t.filterSoon
+                : t.filterLater
+          )}</span></div>
+          <p>${esc(m.inventory[item.id])}</p>
+        </article>
+      `
+    )
+    .join("");
+  const carnetPlan = (MAINT.carnetPlan || [])
+    .map((item) => {
+      const name = (FUND_I18N[lang].workNames && FUND_I18N[lang].workNames[item.id]) || item.id;
+      const cost = item.cost == null ? esc(m.afterWindow) : money(item.cost);
+      return `<tr><td>${esc(name)}</td><td>${cost}</td></tr>`;
+    })
+    .join("");
   document.getElementById("app").innerHTML = chrome(`
         <h1>${esc(m.h1)}</h1>
         <p class="lede">${esc(m.lede)}</p>
@@ -934,6 +1060,8 @@ function renderMaint() {
         </aside>
         <h2>${esc(m.urgentTitle)}</h2>
         <div class="cards">${urgent}</div>
+        <h2>${esc(m.inventoryTitle)}</h2>
+        <div class="cards">${inventory}</div>
         <h2>${esc(m.historyTitle)}</h2>
         <div class="table-wrap">
           <table>
@@ -943,14 +1071,82 @@ function renderMaint() {
             <tbody>${history}</tbody>
           </table>
         </div>
+        <h2>${esc(m.carnetPlanTitle)}</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>${esc(FUND_I18N[lang].workHeaders[1])}</th><th>${esc(
+                FUND_I18N[lang].workHeaders[4]
+              )}</th></tr>
+            </thead>
+            <tbody>${carnetPlan}</tbody>
+          </table>
+        </div>
         <h2>${esc(m.yearlyTitle)}</h2>
         <article class="card">
           <ul class="plain">${yearly}</ul>
         </article>
+        ${photoGrid(["rubble", "infil", "guard", "drain"])}
         <h2>${esc(m.skipTitle)}</h2>
         <p class="lede">${esc(m.skipBody)}</p>
         <section class="footnote">
           <p>${esc(m.limits)}</p>
+        </section>
+  `);
+  bindChrome();
+}
+
+function renderAssembly() {
+  const a = ASSEMBLY_I18N[lang];
+  document.title = a.title;
+  const feeRows = ASSEMBLY.portions
+    .map(
+      (row) => `
+        <tr>
+          <td>${esc(a.owners[row.id])}</td>
+          <td>${pct(row.share)}</td>
+          <td>${money2(row.monthlyNow)}</td>
+          <td>${money2(row.monthly2027)}</td>
+          <td>${money2(row.reserve2027)}</td>
+          <td>${money2(row.ins2027)}</td>
+          <td>${money2(row.ops2027)}</td>
+        </tr>
+      `
+    )
+    .join("");
+  document.getElementById("app").innerHTML = chrome(`
+        <h1>${esc(a.h1)}</h1>
+        <p class="lede">${esc(a.lede)}</p>
+        <aside class="callout">
+          <strong>${esc(a.calloutTitle)}</strong>
+          ${esc(a.callout)}
+        </aside>
+        <h2>${esc(a.selfTitle)}</h2>
+        <p>${esc(a.selfBody)}</p>
+        <h2>${esc(a.feesTitle)}</h2>
+        <p class="lede">${esc(a.feesLead)}</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>${a.feeHeaders.map((h) => `<th>${esc(h)}</th>`).join("")}</tr>
+            </thead>
+            <tbody>${feeRows}</tbody>
+          </table>
+        </div>
+        <h2>${esc(a.planTitle)}</h2>
+        <p>${esc(a.planBody)}</p>
+        <figure class="plan-fig">
+          <img src="${esc(ASSEMBLY.planImg)}" alt="${esc(a.planCaption)}" />
+          <figcaption>${esc(a.planCaption)}</figcaption>
+        </figure>
+        <h2>${esc(a.decisionsTitle)}</h2>
+        <article class="card">
+          <ul class="plain">
+            ${a.decisions.map((item) => `<li>${esc(item)}</li>`).join("")}
+          </ul>
+        </article>
+        <section class="footnote">
+          <p>${esc(a.limits)}</p>
         </section>
   `);
   bindChrome();
@@ -962,6 +1158,7 @@ function render() {
   try {
     if (tab === "fund") renderFund();
     else if (tab === "maint") renderMaint();
+    else if (tab === "assembly") renderAssembly();
     else renderInspection();
   } catch (err) {
     document.getElementById("app").hidden = false;
