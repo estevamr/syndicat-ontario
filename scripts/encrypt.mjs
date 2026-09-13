@@ -16,7 +16,7 @@ if (!password) {
 }
 
 const context = vm.createContext({});
-for (const file of ["i18n.js", "fund-i18n.js", "data.js", "maint-i18n.js", "maint.js"]) {
+for (const file of ["i18n.js", "fund-i18n.js", "data.js", "maint-i18n.js", "maint.js", "assembly-i18n.js", "assembly.js"]) {
   const source = readFileSync(join(root, "src", file), "utf8");
   const exported = {
     "i18n.js": "this.I18N = I18N;",
@@ -24,6 +24,8 @@ for (const file of ["i18n.js", "fund-i18n.js", "data.js", "maint-i18n.js", "main
     "data.js": "this.FUND = FUND;",
     "maint-i18n.js": "this.MAINT_I18N = MAINT_I18N;",
     "maint.js": "this.MAINT = MAINT;",
+    "assembly-i18n.js": "this.ASSEMBLY_I18N = ASSEMBLY_I18N;",
+    "assembly.js": "this.ASSEMBLY = ASSEMBLY;",
   }[file];
   vm.runInContext(`${source}\n${exported}`, context);
 }
@@ -33,7 +35,9 @@ if (
   !context.FUND_I18N ||
   !context.FUND ||
   !context.MAINT_I18N ||
-  !context.MAINT
+  !context.MAINT ||
+  !context.ASSEMBLY_I18N ||
+  !context.ASSEMBLY
 ) {
   console.error("Encrypt failed: missing payload objects");
   process.exit(1);
@@ -45,6 +49,8 @@ const payload = JSON.stringify({
   FUND: context.FUND,
   MAINT_I18N: context.MAINT_I18N,
   MAINT: context.MAINT,
+  ASSEMBLY_I18N: context.ASSEMBLY_I18N,
+  ASSEMBLY: context.ASSEMBLY,
 });
 
 const salt = webcrypto.getRandomValues(new Uint8Array(16));

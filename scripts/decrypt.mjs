@@ -55,4 +55,12 @@ writeFileSync(
   join(root, "src/maint.js"),
   `const MAINT = ${JSON.stringify(plain.MAINT, null, 2)};\n`
 );
+writeFileSync(
+  join(root, "src/assembly-i18n.js"),
+  `const ASSEMBLY_I18N = ${JSON.stringify(plain.ASSEMBLY_I18N, null, 2)};\n`
+);
+writeFileSync(
+  join(root, "src/assembly.js"),
+  `const ASSEMBLY = ${JSON.stringify(plain.ASSEMBLY, null, 2)};\n`
+);
 console.log("Restored src/ from payload.json");

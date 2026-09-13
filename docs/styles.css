@@ -618,11 +618,45 @@ td .pill {
   vertical-align: middle;
 }
 
+.gallery,
+.plan-fig {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 16px 0 28px;
+}
+
+.plan-fig {
+  grid-template-columns: 1fr;
+}
+
+.gallery figure,
+.plan-fig {
+  margin: 0;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+
+.gallery img,
+.plan-fig img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.gallery figcaption,
+.plan-fig figcaption {
+  padding: 8px 12px 12px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
 @media (max-width: 800px) {
   .stats,
   .grid-2,
   .grid-3,
-  .sim-grid {
+  .sim-grid,
+  .gallery {
     grid-template-columns: 1fr;
   }
 }
