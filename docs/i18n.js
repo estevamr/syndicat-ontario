@@ -2,6 +2,8 @@ const I18N = {
   en: {
     htmlLang: "en",
     brand: "Syndicate of co-ownership",
+    navInspection: "Inspection",
+    navFund: "Reserve fund",
     title: "4267-4271 Ontario Est — Inspection",
     h1: "Inspection summary — 4267-4271, rue Ontario Est",
     lede: "Visual inspection of common areas by Inspect 2000 (Hakim Maldji, T.P.). Visit 10 June 2026, report 30 July 2026. Client: syndicate of co-ownership, a/s Murilo Felipe Da Silva. File FP-100626-MF.",
@@ -133,6 +135,8 @@ const I18N = {
   fr: {
     htmlLang: "fr",
     brand: "Syndicat de copropriété",
+    navInspection: "Inspection",
+    navFund: "Fonds de prévoyance",
     title: "4267-4271 Ontario Est — Inspection",
     h1: "Synthèse d’inspection — 4267-4271, rue Ontario Est",
     lede: "Inspection visuelle des parties communes par Inspect 2000 (Hakim Maldji, T.P.). Visite le 10 juin 2026, rapport le 30 juillet 2026. Client : Syndicat de copropriété, a/s Murilo Felipe Da Silva. Dossier FP-100626-MF.",
@@ -268,6 +272,8 @@ const I18N = {
   pt: {
     htmlLang: "pt-BR",
     brand: "Sindicato de copropriedade",
+    navInspection: "Inspeção",
+    navFund: "Fundo de reserva",
     title: "4267-4271 Ontario Est — Inspeção",
     h1: "Resumo da inspeção — 4267-4271, rue Ontario Est",
     lede: "Inspeção visual das partes comuns pela Inspect 2000 (Hakim Maldji, T.P.). Visita em 10 de junho de 2026, relatório em 30 de julho de 2026. Cliente: sindicato de copropriedade, a/s Murilo Felipe Da Silva. Processo FP-100626-MF.",

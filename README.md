@@ -6,6 +6,8 @@ Live URL after Pages is enabled: **https://estevamr.github.io/syndicat-ontario/*
 
 Languages: English, français, português (`?lang=en`, `?lang=fr`, `?lang=pt`).
 
+Tabs: inspection (default) and reserve fund (`?tab=fund`).
+
 ## Publish on GitHub Pages
 
 The repository already exists and is public-ready. You only need to point Pages at the `docs` folder:

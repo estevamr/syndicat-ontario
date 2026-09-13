@@ -73,6 +73,38 @@ body {
   padding: 4px;
 }
 
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 4px;
+}
+
+.tabs button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 11px;
+  cursor: pointer;
+}
+
+.tabs button[aria-selected="true"] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
 .lang button {
   appearance: none;
   border: 0;
@@ -101,7 +133,7 @@ h3 {
 
 h1 {
   font-size: clamp(1.8rem, 4vw, 2.6rem);
-  max-width: 22ch;
+  max-width: 28ch;
 }
 
 h2 {
@@ -294,6 +326,84 @@ tr:last-child td {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 12px;
+}
+
+.callout.ok {
+  background: var(--ok-soft);
+  border-left-color: var(--ok);
+}
+
+.sim label {
+  display: block;
+  margin-bottom: 14px;
+}
+
+.sim label strong {
+  display: inline-block;
+  margin-left: 8px;
+}
+
+.sim input[type="range"] {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.chart-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin: 16px 0 8px;
+}
+
+.chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 140px;
+  padding: 8px 0 0;
+}
+
+.bar-col {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  min-width: 0;
+}
+
+.bar {
+  width: 100%;
+  min-height: 2px;
+  background: var(--info);
+}
+
+.bar.spend {
+  background: var(--warn);
+}
+
+.bar.bal {
+  background: var(--ok);
+}
+
+.bar.neg {
+  background: var(--danger);
+}
+
+.bar-col i {
+  font-style: normal;
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+td .pill {
+  display: inline-block;
+  margin-left: 6px;
+  vertical-align: middle;
 }
 
 @media (max-width: 800px) {
