@@ -1,4 +1,6 @@
-function projectFund({ annual, increase }) {
+window.projectFund = function projectFund(opts) {
+  const annual = opts.annual;
+  const increase = opts.increase;
   let balance = FUND.startBalance;
   let contribution = annual;
   const rows = [];
@@ -29,7 +31,7 @@ function projectFund({ annual, increase }) {
     totalContrib,
     ok: firstGap === null,
   };
-}
+};
 
 const LANGS = [
   { id: "en", label: "English" },
@@ -473,8 +475,15 @@ function bindSim() {
 
 function render() {
   document.documentElement.lang = I18N[lang].htmlLang;
-  if (tab === "fund") renderFund();
-  else renderInspection();
+  try {
+    if (tab === "fund") renderFund();
+    else renderInspection();
+  } catch (err) {
+    document.getElementById("app").hidden = false;
+    document.getElementById("app").innerHTML =
+      "<p class='lede'>Could not render this tab. Try a hard refresh (Ctrl+Shift+R).</p>";
+    console.error(err);
+  }
 }
 
 render();

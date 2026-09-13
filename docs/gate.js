@@ -1,4 +1,7 @@
 const SESSION_KEY = "syndicat-ontario-payload";
+const GATE_SCRIPT_URL =
+  (document.currentScript && document.currentScript.src) ||
+  new URL("./gate.js", window.location.href).href;
 const GATE_COPY = {
   en: {
     title: "Syndicate documents",
@@ -75,8 +78,14 @@ function applyPayload(payload) {
 function loadApp() {
   if (document.querySelector("script[data-app]")) return;
   const script = document.createElement("script");
-  script.src = "./app.js";
+  const base = GATE_SCRIPT_URL.replace(/gate\.js(\?.*)?$/, "");
+  script.src = `${base}app.js?v=3`;
   script.dataset.app = "true";
+  script.onerror = () => {
+    document.getElementById("app").hidden = false;
+    document.getElementById("app").textContent =
+      "Could not load app.js. Hard-refresh the page.";
+  };
   document.body.appendChild(script);
 }
 
