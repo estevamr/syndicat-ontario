@@ -655,7 +655,7 @@ function renderFund() {
                   <th>${esc(f.colBalance)}</th>
                 </tr>
               </thead>
-              <tbody>${yearRows}</tbody>
+              <tbody id="year-body">${yearRows}</tbody>
             </table>
           </div>
           <div class="sim-actions">
@@ -779,6 +779,23 @@ function bindSim() {
         balanceMax,
         "bal"
       );
+    }
+    const yearBody = document.getElementById("year-body");
+    if (yearBody) {
+      yearBody.innerHTML = sim.rows
+        .map(
+          (row) => `
+        <tr>
+          <td>${row.year}</td>
+          <td>${money(row.contribution)}</td>
+          <td>${row.special ? money(row.special) : "—"}</td>
+          <td>${row.expense ? money(row.expense) : "—"}</td>
+          <td>${row.interest ? money(row.interest) : "—"}</td>
+          <td class="${row.balance < 0 ? "neg-cell" : ""}">${money(row.balance)}</td>
+        </tr>
+      `
+        )
+        .join("");
     }
   };
 
