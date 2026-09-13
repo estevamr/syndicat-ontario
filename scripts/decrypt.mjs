@@ -47,4 +47,12 @@ writeFileSync(
   join(root, "src/data.js"),
   `const FUND = ${JSON.stringify(plain.FUND, null, 2)};\n`
 );
+writeFileSync(
+  join(root, "src/maint-i18n.js"),
+  `const MAINT_I18N = ${JSON.stringify(plain.MAINT_I18N, null, 2)};\n`
+);
+writeFileSync(
+  join(root, "src/maint.js"),
+  `const MAINT = ${JSON.stringify(plain.MAINT, null, 2)};\n`
+);
 console.log("Restored src/ from payload.json");

@@ -43,11 +43,36 @@ const GATE_COPY = {
   },
 };
 
+const LANGS = [
+  { id: "en", label: "English" },
+  { id: "fr", label: "Français" },
+  { id: "pt", label: "Português" },
+  { id: "ary", label: "Darija" },
+];
+
 function gateLang() {
+  const stored = localStorage.getItem("lang");
+  if (stored && GATE_COPY[stored]) return stored;
   const nav = (navigator.language || "en").toLowerCase();
   if (nav.startsWith("fr")) return "fr";
   if (nav.startsWith("pt")) return "pt";
   return "en";
+}
+
+function setGateLang(next) {
+  if (!GATE_COPY[next]) return;
+  localStorage.setItem("lang", next);
+  const typed = document.getElementById("gate-pass")?.value || "";
+  const hadError = Boolean(
+    document.getElementById("gate-error") &&
+      !document.getElementById("gate-error").hidden
+  );
+  showGate(hadError);
+  const input = document.getElementById("gate-pass");
+  if (input) {
+    input.value = typed;
+    input.focus();
+  }
 }
 
 function b64ToBytes(value) {
@@ -87,17 +112,27 @@ function applyPayload(payload) {
   window.I18N = payload.I18N;
   window.FUND_I18N = payload.FUND_I18N;
   window.FUND = payload.FUND;
+  window.MAINT_I18N = payload.MAINT_I18N;
+  window.MAINT = payload.MAINT;
 }
 
 function payloadIsCurrent(payload) {
-  return Boolean(payload && payload.I18N && payload.I18N.ary && payload.FUND_I18N && payload.FUND_I18N.ary);
+  return Boolean(
+    payload &&
+      payload.I18N &&
+      payload.I18N.ary &&
+      payload.FUND_I18N &&
+      payload.FUND_I18N.ary &&
+      payload.MAINT_I18N &&
+      payload.MAINT_I18N.ary
+  );
 }
 
 function loadApp() {
   if (document.querySelector("script[data-app]")) return;
   const script = document.createElement("script");
   const base = GATE_SCRIPT_URL.replace(/gate\.js(\?.*)?$/, "");
-  script.src = `${base}app.js?v=5`;
+  script.src = `${base}app.js?v=6`;
   script.dataset.app = "true";
   script.onerror = () => {
     document.getElementById("app").hidden = false;
@@ -108,15 +143,26 @@ function loadApp() {
 }
 
 function showGate(error) {
-  const copy = GATE_COPY[gateLang()];
+  const lang = gateLang();
+  const copy = GATE_COPY[lang];
   document.title = copy.docTitle || "4267-4271 Ontario Est";
-  document.documentElement.lang = copy.htmlLang || gateLang();
+  document.documentElement.lang = copy.htmlLang || lang;
   document.documentElement.dir = copy.dir === "rtl" ? "rtl" : "ltr";
   const gate = document.getElementById("gate");
   gate.hidden = false;
   document.getElementById("app").hidden = true;
   gate.innerHTML = `
     <form class="gate-card" id="gate-form">
+      <div class="lang" role="group" aria-label="Language">
+        ${LANGS.map(
+          (item) => `
+            <button type="button" data-lang="${item.id}" title="${item.label}" aria-pressed="${
+              item.id === lang
+            }">${item.label}</button>
+          `
+        ).join("")}
+      </div>
+      <p class="site-title">${copy.docTitle}</p>
       <p class="brand">${copy.title}</p>
       <h1>${copy.title}</h1>
       <p class="lede">${copy.lead}</p>
@@ -129,6 +175,12 @@ function showGate(error) {
     </form>
   `;
   document.getElementById("gate-form").addEventListener("submit", onSubmit);
+  document.querySelectorAll("#gate [data-lang]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      setGateLang(button.dataset.lang);
+    });
+  });
   document.getElementById("gate-pass").focus();
 }
 

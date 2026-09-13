@@ -54,7 +54,9 @@ function detectLang() {
 
 function detectTab() {
   const params = new URLSearchParams(window.location.search);
-  return params.get("tab") === "fund" ? "fund" : "inspection";
+  const next = params.get("tab");
+  if (next === "fund" || next === "maint") return next;
+  return "inspection";
 }
 
 let lang = detectLang();
@@ -88,8 +90,8 @@ function pct(value) {
 function syncUrl() {
   const url = new URL(window.location.href);
   url.searchParams.set("lang", lang);
-  if (tab === "fund") url.searchParams.set("tab", "fund");
-  else url.searchParams.delete("tab");
+  if (tab === "inspection") url.searchParams.delete("tab");
+  else url.searchParams.set("tab", tab);
   history.replaceState({}, "", url);
 }
 
@@ -134,6 +136,9 @@ function chrome(inner) {
             <button type="button" role="tab" data-tab="fund" title="${esc(
               t.navFund
             )}" aria-selected="${tab === "fund"}">${esc(t.navFund)}</button>
+            <button type="button" role="tab" data-tab="maint" title="${esc(
+              t.navMaint
+            )}" aria-selected="${tab === "maint"}">${esc(t.navMaint)}</button>
           </nav>
           <div class="lang" role="group" aria-label="Language">
             ${LANGS.map(
@@ -483,11 +488,67 @@ function bindSim() {
   increase.addEventListener("input", refresh);
 }
 
+function renderMaint() {
+  const t = I18N[lang];
+  const m = MAINT_I18N[lang];
+  document.title = m.title;
+  const urgent = MAINT.urgent
+    .map(
+      (item) => `
+        <article class="card">
+          <div class="meta"><span class="pill now">${esc(t.filterNow)}</span></div>
+          <p>${esc(m.urgent[item.id])}</p>
+        </article>
+      `
+    )
+    .join("");
+  const history = MAINT.history
+    .map((row) => {
+      const cost =
+        row.cost == null ? esc(m.noCost) : money(row.cost);
+      return `<tr><td>${row.year}</td><td>${esc(m.history[row.id])}</td><td>${cost}</td></tr>`;
+    })
+    .join("");
+  const yearly = MAINT.yearly
+    .map((item) => `<li>${esc(m.yearly[item.id])}</li>`)
+    .join("");
+  document.getElementById("app").innerHTML = chrome(`
+        <h1>${esc(m.h1)}</h1>
+        <p class="lede">${esc(m.lede)}</p>
+        <aside class="callout">
+          <strong>${esc(m.calloutTitle)}</strong>
+          ${esc(m.callout)}
+        </aside>
+        <h2>${esc(m.urgentTitle)}</h2>
+        <div class="cards">${urgent}</div>
+        <h2>${esc(m.historyTitle)}</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>${m.histHeaders.map((h) => `<th>${esc(h)}</th>`).join("")}</tr>
+            </thead>
+            <tbody>${history}</tbody>
+          </table>
+        </div>
+        <h2>${esc(m.yearlyTitle)}</h2>
+        <article class="card">
+          <ul class="plain">${yearly}</ul>
+        </article>
+        <h2>${esc(m.skipTitle)}</h2>
+        <p class="lede">${esc(m.skipBody)}</p>
+        <section class="footnote">
+          <p>${esc(m.limits)}</p>
+        </section>
+  `);
+  bindChrome();
+}
+
 function render() {
   document.documentElement.lang = I18N[lang].htmlLang;
   document.documentElement.dir = I18N[lang].dir === "rtl" ? "rtl" : "ltr";
   try {
     if (tab === "fund") renderFund();
+    else if (tab === "maint") renderMaint();
     else renderInspection();
   } catch (err) {
     document.getElementById("app").hidden = false;

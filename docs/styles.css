@@ -53,9 +53,8 @@ html[dir="rtl"] {
   padding: 28px 24px;
 }
 
-.gate-card h1 {
-  max-width: none;
-  font-size: 1.8rem;
+.gate-card .lang {
+  margin-bottom: 16px;
 }
 
 .gate-card label {
@@ -187,6 +186,7 @@ html[dir="rtl"] .brand {
 
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   background: var(--panel);
   border: 1px solid var(--line);
