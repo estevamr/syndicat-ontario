@@ -24,9 +24,13 @@ body {
   padding: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: "Source Sans 3", system-ui, sans-serif;
+  font-family: "Source Sans 3", "Noto Naskh Arabic", system-ui, sans-serif;
   font-size: 17px;
   line-height: 1.55;
+}
+
+html[dir="rtl"] {
+  font-family: "Noto Naskh Arabic", "Source Sans 3", system-ui, sans-serif;
 }
 
 .gate {
@@ -130,15 +134,41 @@ body {
   margin-bottom: 28px;
 }
 
+.titles {
+  min-width: 0;
+}
+
+.site-title {
+  margin: 0 0 4px;
+  font-family: "Source Serif 4", "Noto Naskh Arabic", Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+html[dir="rtl"] .site-title,
+html[dir="rtl"] h1,
+html[dir="rtl"] h2,
+html[dir="rtl"] h3 {
+  font-family: "Noto Naskh Arabic", "Source Serif 4", Georgia, serif;
+}
+
 .brand {
+  margin: 0;
   font-size: 13px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
 }
 
+html[dir="rtl"] .brand {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 .lang {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   background: var(--panel);
   border: 1px solid var(--line);
@@ -206,6 +236,10 @@ h3 {
 h1 {
   font-size: clamp(1.8rem, 4vw, 2.6rem);
   max-width: 28ch;
+}
+
+html[dir="rtl"] h1 {
+  max-width: none;
 }
 
 h2 {

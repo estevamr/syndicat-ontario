@@ -37,6 +37,7 @@ const LANGS = [
   { id: "en", label: "English" },
   { id: "fr", label: "Français" },
   { id: "pt", label: "Português" },
+  { id: "ary", label: "الدارجة" },
 ];
 
 function detectLang() {
@@ -48,6 +49,7 @@ function detectLang() {
   const nav = (navigator.language || "en").toLowerCase();
   if (nav.startsWith("fr")) return "fr";
   if (nav.startsWith("pt")) return "pt";
+  if (nav.startsWith("ar") || nav === "ary") return "ary";
   return "en";
 }
 
@@ -65,6 +67,7 @@ let simIncrease = 0;
 function locale() {
   if (lang === "fr") return "fr-CA";
   if (lang === "pt") return "pt-BR";
+  if (lang === "ary") return "ar-MA";
   return "en-CA";
 }
 
@@ -117,15 +120,20 @@ function chrome(inner) {
   return `
     <div class="wrap">
       <header class="topbar">
-        <div class="brand">${esc(t.brand)}</div>
+        <div class="titles">
+          <p class="site-title">${esc(t.tabTitle)}</p>
+          <p class="brand">${esc(t.brand)}</p>
+        </div>
         <div class="toolbar">
-          <nav class="tabs" role="tablist">
-            <button type="button" role="tab" data-tab="inspection" aria-selected="${
-              tab === "inspection"
-            }">${esc(t.navInspection)}</button>
-            <button type="button" role="tab" data-tab="fund" aria-selected="${
-              tab === "fund"
-            }">${esc(t.navFund)}</button>
+          <nav class="tabs" role="tablist" aria-label="${esc(t.tabTitle)}">
+            <button type="button" role="tab" data-tab="inspection" title="${esc(
+              t.navInspection
+            )}" aria-selected="${tab === "inspection"}">${esc(
+              t.navInspection
+            )}</button>
+            <button type="button" role="tab" data-tab="fund" title="${esc(
+              t.navFund
+            )}" aria-selected="${tab === "fund"}">${esc(t.navFund)}</button>
           </nav>
           <div class="lang" role="group" aria-label="Language">
             ${LANGS.map(
@@ -475,6 +483,7 @@ function bindSim() {
 
 function render() {
   document.documentElement.lang = I18N[lang].htmlLang;
+  document.documentElement.dir = I18N[lang].dir === "rtl" ? "rtl" : "ltr";
   try {
     if (tab === "fund") renderFund();
     else renderInspection();
