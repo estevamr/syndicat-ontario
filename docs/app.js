@@ -120,7 +120,7 @@ function marketTable() {
       <tr>
         <td>${esc(workLabel(work.id))}</td>
         <td>${esc(marketRange(work))}</td>
-        <td>${money(work.cost)}</td>
+        <td>${money(workBaseCost(work))}</td>
       </tr>
     `
   ).join("");
@@ -219,7 +219,7 @@ function extraCheckList() {
       } />
       <span>
         ${esc(workLabel(work.id))}
-        <span class="extra-meta">${money(work.cost)} · ${esc(h.marketRange)} ${esc(
+        <span class="extra-meta">${money(workBaseCost(work))} · ${esc(h.marketRange)} ${esc(
           marketRange(work)
         )}</span>
       </span>
@@ -250,6 +250,58 @@ function findWork(id) {
     EXTRA_WORK.find((item) => item.id === id) ||
     null
   );
+}
+
+const COST_STORE = "syndicat-ontario-costs-v1";
+
+function loadCostOverrides() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(COST_STORE) || "null");
+    if (!raw || typeof raw !== "object") return {};
+    const next = {};
+    Object.keys(raw).forEach((id) => {
+      const value = Number(raw[id]);
+      if (Number.isFinite(value) && value >= 0) next[id] = roundCad(value);
+    });
+    return next;
+  } catch (err) {
+    return {};
+  }
+}
+
+function persistCostOverrides() {
+  localStorage.setItem(COST_STORE, JSON.stringify(costOverrides));
+}
+
+let costOverrides = loadCostOverrides();
+
+function workBaseCost(work) {
+  if (!work) return 0;
+  const over = costOverrides[work.id];
+  if (over != null && Number.isFinite(Number(over))) return roundCad(over);
+  return roundCad(work.cost || 0);
+}
+
+function isCostEdited(work) {
+  if (!work) return false;
+  const over = costOverrides[work.id];
+  if (over == null) return false;
+  return roundCad(over) !== roundCad(work.cost || 0);
+}
+
+function workCostInYear(work, year) {
+  const target = year == null ? work.year : year;
+  const delta = target - work.year;
+  return roundCad(workBaseCost(work) * Math.pow(1 + FUND.inflation, delta));
+}
+
+function setWorkCost(id, raw) {
+  const work = findWork(id);
+  if (!work) return;
+  const value = Math.max(0, roundCad(raw));
+  if (value === roundCad(work.cost || 0)) delete costOverrides[id];
+  else costOverrides[id] = value;
+  persistCostOverrides();
 }
 
 function workCostHtml(work) {
@@ -314,7 +366,7 @@ function spendPlan(shifts, extraList, workList) {
   const add = (work) => {
     const delta = Number(shifts[work.id] || 0);
     const year = work.year + delta;
-    const cost = roundCad(work.cost * Math.pow(1 + FUND.inflation, delta));
+    const cost = roundCad(workBaseCost(work) * Math.pow(1 + FUND.inflation, delta));
     const idx = year - FUND.startYear;
     if (idx >= years) {
       expenses[years - 1] += cost;
@@ -974,6 +1026,13 @@ const PLAN_I18N = {
     cannot: "Even $45,000 / year does not cover this mix. Skip or delay a big item.",
     loadWorkshop: "Open What if (sliders and charts)",
     reset: "Reset to inspector years",
+    resetCosts: "Reset amounts to the estimates",
+    costHint:
+      "Each job has a 2026 estimate you can edit. Later years still add 3% / year. Reset amounts puts the study and market figures back.",
+    costRestore: "Default",
+    costLabel: "2026 estimate",
+    costEdited: "edited",
+    costInYear: "in",
     skipTitle: "Skipped (not in the pot)",
     footnote:
       "Moving a job later adds 3% / year. Skipped jobs are omitted — the building still ages. Get RBQ quotes before you vote a fee.",
@@ -1048,6 +1107,13 @@ const PLAN_I18N = {
     cannot: "Même 45 000 $ / an ne couvrent pas ce mélange. Ignorez ou reportez un gros poste.",
     loadWorkshop: "Ouvrir Et si (curseurs et graphiques)",
     reset: "Revenir aux années de l’inspecteur",
+    resetCosts: "Remettre les montants aux estimations",
+    costHint:
+      "Chaque poste a une estimation 2026 que vous pouvez modifier. Les années plus tard ajoutent encore 3 % / an. Remettre les montants ramène les chiffres de l’étude et du marché.",
+    costRestore: "Défaut",
+    costLabel: "Estimation 2026",
+    costEdited: "modifié",
+    costInYear: "en",
     skipTitle: "Ignorés (hors cagnotte)",
     footnote:
       "Reporter un poste ajoute 3 % / an. Un poste ignoré n’est pas financé — l’immeuble vieillit quand même. Obtenir des soumissions RBQ avant de voter les frais.",
@@ -1122,6 +1188,13 @@ const PLAN_I18N = {
     cannot: "Nem 45.000 $ / ano cobrem esta mistura. Saltem ou atrasem uma obra grande.",
     loadWorkshop: "Abrir E se (cursores e gráficos)",
     reset: "Voltar aos anos do inspetor",
+    resetCosts: "Repor os valores nas estimativas",
+    costHint:
+      "Cada obra tem uma estimativa de 2026 que podem editar. Anos mais tarde somam 3% / ano. Repor os valores traz de volta as figuras do estudo e do mercado.",
+    costRestore: "Predefinição",
+    costLabel: "Estimativa 2026",
+    costEdited: "editado",
+    costInYear: "em",
     skipTitle: "Saltadas (fora do pote)",
     footnote:
       "Atrasar uma obra soma 3% / ano. Obras saltadas não são financiadas — o prédio continua a envelhecer. Peçam orçamentos RBQ antes de votar a taxa.",
@@ -1196,6 +1269,13 @@ const PLAN_I18N = {
     cannot: "حتى 45 000 $ فالسنة ما يكفيوش. تخطّاو ولا أخّرو خدمة كبيرة.",
     loadWorkshop: "حلّ واش لو (سلايدر ورسوم)",
     reset: "رجع لسنين الإنسپكتور",
+    resetCosts: "رجع المبالغ للتقديرات",
+    costHint:
+      "كل خدمة عندها تقدير 2026 تقدر تبدّلو. السنين من بعد كيزيدو 3% فالسنة. رجع المبالغ كيرجع أرقام الدراسة والسوق.",
+    costRestore: "الأصلي",
+    costLabel: "تقدير 2026",
+    costEdited: "تبدّل",
+    costInYear: "فـ",
     skipTitle: "متخطّيين (برا القادّة)",
     footnote:
       "إلا أخّرتي الخدمة كاتزيد 3% فالسنة. المتخطّاة ما ممولةش — العمارة كتكبر فالعمر. خدّاو دوڤيز RBQ قبل ما تصوّتو على المصاريف.",
@@ -1370,9 +1450,12 @@ function assignmentsKey(assignments) {
 }
 
 function feeContextKey() {
+  const costs = planJobCatalog()
+    .map((work) => `${work.id}:${workBaseCost(work)}`)
+    .join(",");
   return `${assignmentsKey(planState())}|${Number(workshop.specialYear) || 0}|${
     Number(workshop.specialAmount) || 0
-  }`;
+  }|${costs}`;
 }
 
 function planMix(assignments) {
@@ -2108,7 +2191,7 @@ function workYear(work) {
 
 function workCost(work) {
   const delta = Number(workshop.shifts[work.id] || 0);
-  return roundCad(work.cost * Math.pow(1 + FUND.inflation, delta));
+  return roundCad(workBaseCost(work) * Math.pow(1 + FUND.inflation, delta));
 }
 
 function renderFund() {
@@ -3135,6 +3218,35 @@ function paintPlanOutputs() {
       render();
     });
   });
+  paintPlanJobCosts();
+}
+
+function paintPlanJobCosts() {
+  const p = planCopy();
+  const assignments = planState();
+  const byYear = planJobsByYear(assignments);
+  planJobCatalog().forEach((work) => {
+    const year = planTargetYear(work, assignments[work.id]);
+    const shown = workCostInYear(work, year == null ? work.year : year);
+    const delta = year == null ? 0 : year - work.year;
+    const inflated = document.querySelector(`[data-cost-inflated="${work.id}"]`);
+    if (inflated) {
+      inflated.hidden = !year || delta === 0;
+      inflated.textContent = `${p.costInYear} ${year}: ${money(shown)}`;
+    }
+    const edited = document.querySelector(`[data-cost-edited="${work.id}"]`);
+    if (edited) edited.hidden = !isCostEdited(work);
+    const reset = document.querySelector(`[data-cost-reset="${work.id}"]`);
+    if (reset) reset.hidden = !isCostEdited(work);
+  });
+  document.querySelectorAll("[data-year-spend]").forEach((el) => {
+    const year = Number(el.dataset.yearSpend);
+    const jobs = byYear.get(year) || [];
+    const spend = jobs.reduce((sum, work) => sum + workCostInYear(work, year), 0);
+    el.textContent = jobs.length
+      ? `${money(spend)} · ${jobs.length} ${p.worksIn}`
+      : p.emptyDrop;
+  });
 }
 
 function planStartCards(solved) {
@@ -3182,10 +3294,10 @@ function planScheduleTable(solved, byYear) {
   const body = sortedYears
     .map((year) => {
       const jobs = byYear.get(year) || [];
-      const spend = jobs.reduce((sum, work) => {
-        const delta = year - work.year;
-        return sum + roundCad(work.cost * Math.pow(1 + FUND.inflation, delta));
-      }, 0);
+      const spend = jobs.reduce(
+        (sum, work) => sum + workCostInYear(work, year),
+        0
+      );
       const labels = jobs.map((work) => workLabel(work.id)).join(", ");
       const fees = planMonthlyInYear(annual0, increase, year);
       return `
@@ -3228,16 +3340,32 @@ function planJobRow(work, assignment) {
   const p = planCopy();
   const year = planTargetYear(work, assignment);
   const delta = year == null ? 0 : year - work.year;
-  const shown = roundCad(work.cost * Math.pow(1 + FUND.inflation, delta));
+  const shown = workCostInYear(work, year == null ? work.year : year);
+  const base = workBaseCost(work);
+  const edited = isCostEdited(work);
   const moved = planMovedJob === work.id ? " just-changed" : "";
   return `
     <li class="plan-job${moved}" data-plan-job-row="${esc(work.id)}" draggable="true">
       <button type="button" class="plan-drag" data-plan-drag="${esc(
         work.id
       )}" aria-label="${esc(p.dragHint)}" draggable="true">⋮⋮</button>
-      <div>
+      <div class="plan-job-main">
         <strong>${esc(workLabel(work.id))}</strong>
-        <span class="extra-meta">${money(shown)}</span>
+        <label class="plan-cost">
+          <span class="visually-hidden">${esc(p.costLabel)}</span>
+          <input data-plan-cost="${esc(work.id)}" type="number" min="0" step="100" value="${base}" />
+          <span class="plan-cost-meta">
+            <span data-cost-inflated="${esc(work.id)}" ${
+              delta === 0 ? "hidden" : ""
+            }>${esc(p.costInYear)} ${year}: ${money(shown)}</span>
+            <span data-cost-edited="${esc(work.id)}" ${
+              edited ? "" : "hidden"
+            }>${esc(p.costEdited)}</span>
+          </span>
+        </label>
+        <button type="button" class="plan-cost-reset" data-cost-reset="${esc(
+          work.id
+        )}" ${edited ? "" : "hidden"}>${esc(p.costRestore)}</button>
       </div>
       ${planYearSelect(work, assignment)}
     </li>
@@ -3255,16 +3383,16 @@ function renderPlan() {
   const columns = planColumnYears(byYear)
     .map((year) => {
       const jobs = byYear.get(year) || [];
-      const spend = jobs.reduce((sum, work) => {
-        const delta = year - work.year;
-        return sum + roundCad(work.cost * Math.pow(1 + FUND.inflation, delta));
-      }, 0);
+      const spend = jobs.reduce(
+        (sum, work) => sum + workCostInYear(work, year),
+        0
+      );
       const dest =
         planMovedJob && assignments[planMovedJob] === year ? " just-changed" : "";
       return `
         <article class="card plan-col${dest}${jobs.length ? "" : " plan-col-empty"}" data-plan-drop="${year}">
           <h2>${year}</h2>
-          <p class="lede">${
+          <p class="lede" data-year-spend="${year}">${
             jobs.length
               ? `${money(spend)} · ${jobs.length} ${esc(p.worksIn)}`
               : esc(p.emptyDrop)
@@ -3295,6 +3423,7 @@ function renderPlan() {
         ${planSpecialBox()}
         <h2>${esc(p.pickTitle)}</h2>
         <p class="lede">${esc(p.dragHint)}</p>
+        <p class="lede">${esc(p.costHint)}</p>
         <div class="plan-buckets">${columns}</div>
         ${
           skipped.length
@@ -3316,6 +3445,9 @@ function renderPlan() {
         <div class="sim-actions">
           <button type="button" class="action" data-plan-workshop="true">${esc(
             p.loadWorkshop
+          )}</button>
+          <button type="button" class="action ghost" data-plan-reset-costs="true">${esc(
+            p.resetCosts
           )}</button>
           <button type="button" class="action ghost" data-plan-reset="true">${esc(
             p.reset
@@ -3400,6 +3532,36 @@ function bindPlan(solved) {
     });
     specialAmount.addEventListener("input", commit);
   }
+  document.querySelectorAll("[data-plan-cost]").forEach((input) => {
+    const commit = () => {
+      setWorkCost(input.dataset.planCost, input.value);
+      paintPlanOutputs();
+    };
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+        event.stopPropagation();
+      }
+    });
+    input.addEventListener("input", commit);
+  });
+  document.querySelectorAll("[data-cost-reset]").forEach((button) => {
+    button.addEventListener("click", () => {
+      delete costOverrides[button.dataset.costReset];
+      persistCostOverrides();
+      const scrollY = window.scrollY;
+      syncWorkshopToPlanYears(true);
+      render();
+      window.scrollTo(0, scrollY);
+    });
+  });
+  document.querySelectorAll("[data-plan-reset-costs]").forEach((button) => {
+    button.addEventListener("click", () => {
+      costOverrides = {};
+      persistCostOverrides();
+      syncWorkshopToPlanYears(true);
+      render();
+    });
+  });
   document.querySelectorAll("[data-plan-reset]").forEach((button) => {
     button.addEventListener("click", () => {
       planAssignments = defaultPlanAssignments();
