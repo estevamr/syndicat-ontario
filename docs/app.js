@@ -102,6 +102,16 @@ const WORKSHOP_HELP = {
     ],
     pathPicks: "Start from a printed path",
     loadedNote: "Loaded into the sliders. Change anything to explore.",
+    unitBreak: "Breakdown per unit",
+    unit: "Unit",
+    share: "Quote-part",
+    reserveYear: "Reserve / year",
+    reserveMonth: "Reserve / month",
+    thenYear: "Then / year",
+    thenMonth: "Then / month",
+    specialOnce: "Special (once)",
+    newFee: "New monthly fee",
+    reserveNow: "Reserve today / month",
     tips: {
       annual:
         "Total reserve for the year, all three portions together. The fee table splits it 27.5% / 27.5% / 45%.",
@@ -150,6 +160,16 @@ const WORKSHOP_HELP = {
     ],
     pathPicks: "Partir d’un chemin imprimé",
     loadedNote: "Chargé dans les curseurs. Changez ce que vous voulez pour explorer.",
+    unitBreak: "Répartition par unité",
+    unit: "Unité",
+    share: "Quote-part",
+    reserveYear: "Prévoyance / an",
+    reserveMonth: "Prévoyance / mois",
+    thenYear: "Ensuite / an",
+    thenMonth: "Ensuite / mois",
+    specialOnce: "Spéciale (une fois)",
+    newFee: "Nouveau frais mensuel",
+    reserveNow: "Prévoyance aujourd’hui / mois",
     tips: {
       annual:
         "Cotisation de prévoyance de l’année, les trois portions ensemble. Le tableau la répartit 27,5 % / 27,5 % / 45 %.",
@@ -198,6 +218,16 @@ const WORKSHOP_HELP = {
     ],
     pathPicks: "Começar por um caminho impresso",
     loadedNote: "Carregado nos cursores. Mexam no que quiserem para explorar.",
+    unitBreak: "Repartição por unidade",
+    unit: "Unidade",
+    share: "Quota",
+    reserveYear: "Reserva / ano",
+    reserveMonth: "Reserva / mês",
+    thenYear: "Depois / ano",
+    thenMonth: "Depois / mês",
+    specialOnce: "Especial (uma vez)",
+    newFee: "Nova taxa mensal",
+    reserveNow: "Reserva hoje / mês",
     tips: {
       annual:
         "Reserva do ano, as três porções juntas. A tabela reparte 27,5% / 27,5% / 45%.",
@@ -246,6 +276,16 @@ const WORKSHOP_HELP = {
     ],
     pathPicks: "بدا من طريق مطبوع",
     loadedNote: "تحمّل فالسلايدر. بدّل اللي بغيتي باش تجرّب.",
+    unitBreak: "التقسيم لكل وحدة",
+    unit: "الوحدة",
+    share: "الكوت-پار",
+    reserveYear: "الاحتياط / عام",
+    reserveMonth: "الاحتياط / شهر",
+    thenYear: "من بعد / عام",
+    thenMonth: "من بعد / شهر",
+    specialOnce: "سبيسيال (مرة)",
+    newFee: "الشهري الجديد",
+    reserveNow: "الاحتياط دابا / شهر",
     tips: {
       annual:
         "الاحتياط ديال العام، التلاتة دالحصص مجموعين. الجدول كيقسمو 27,5% / 27,5% / 45%.",
@@ -390,7 +430,7 @@ function applyStudyPath(item) {
 function revealPathChange() {
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      ["annual-val", "increase-val", "sim-per", "sim-result", "path-loaded"].forEach(
+      ["annual-val", "increase-val", "unit-break", "sim-result", "path-loaded"].forEach(
         (id) => {
           const el = document.getElementById(id);
           if (!el) return;
@@ -452,6 +492,86 @@ function portionFees(annual) {
       monthlyNew: rest + reserveNew,
     };
   });
+}
+
+function unitBreakHead() {
+  const h = helpCopy();
+  return `
+    <th>${esc(h.unit)}</th>
+    <th>${esc(h.share)}</th>
+    <th>${esc(h.reserveYear)}</th>
+    <th>${esc(h.reserveMonth)}</th>
+    ${
+      workshop.usePhase2
+        ? `<th>${esc(h.thenYear)}</th><th>${esc(h.thenMonth)}</th>`
+        : ""
+    }
+    <th>${esc(h.specialOnce)}</th>
+    <th>${esc(h.newFee)}</th>
+  `;
+}
+
+function unitBreakBody(annual) {
+  const special = Number(workshop.specialAmount) || 0;
+  return portionFees(annual)
+    .map((row) => {
+      const thenYear = (Number(workshop.annual2) || 0) * row.share;
+      return `
+        <tr>
+          <td>${esc(row.name)}</td>
+          <td>${pct(row.share)}</td>
+          <td>${money2(row.reserveNew * 12)}</td>
+          <td>${money2(row.reserveNew)}</td>
+          ${
+            workshop.usePhase2
+              ? `<td>${money2(thenYear)}</td><td>${money2(thenYear / 12)}</td>`
+              : ""
+          }
+          <td>${special ? money2(special * row.share) : "—"}</td>
+          <td>${money2(row.monthlyNew)}</td>
+        </tr>
+      `;
+    })
+    .join("");
+}
+
+function unitBreakTable(annual) {
+  if (!FUND.portions) return "";
+  const h = helpCopy();
+  return `
+    <div class="unit-break" id="unit-break">
+      <div class="chart-label">${esc(h.unitBreak)}</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr id="unit-break-head">${unitBreakHead()}</tr>
+          </thead>
+          <tbody id="unit-break-body">${unitBreakBody(annual)}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function unitStatCards() {
+  if (!FUND.portions) return "";
+  const h = helpCopy();
+  return `
+    <section class="stats unit-stats">
+      ${portionFees(FUND.currentContribution)
+        .map(
+          (row) => `
+            <div class="stat">
+              <b>${esc(row.name)}</b>
+              <span>${pct(row.share)} · ${money2(row.reserveNow)} ${esc(
+                h.reserveNow
+              )}</span>
+            </div>
+          `
+        )
+        .join("")}
+    </section>
+  `;
 }
 
 function feeTable(annual) {
@@ -798,8 +918,6 @@ function renderFund() {
     spendMax,
     ...sim.rows.map((row) => Math.abs(row.balance))
   );
-  const perUnitYear = workshop.annual / FUND.units;
-  const perUnitMonth = perUnitYear / 12;
   const lastYear = FUND.startYear + FUND.expenses.length - 1;
 
   const workRows = FUND.works
@@ -915,6 +1033,7 @@ function renderFund() {
           ${esc(f.callout)}
         </aside>
         <p class="lede">${esc(f.perUnitNow)}</p>
+        ${unitStatCards()}
         ${feeTable(workshop.annual)}
         <h2>${esc(f.tryTitle)}</h2>
         <p class="lede">${esc(f.tryLead)}</p>
@@ -985,9 +1104,7 @@ function renderFund() {
               }" />
             </label>
           </div>
-          <p id="sim-per">${esc(f.perUnit)}: ${money(perUnitYear)} (${money(
-            perUnitMonth
-          )}${esc(f.perMonth)})</p>
+          ${unitBreakTable(workshop.annual)}
           <aside id="sim-result" class="callout ${sim.ok ? "ok" : ""}" tabindex="-1">
             <strong>${
               sim.ok
@@ -1177,12 +1294,10 @@ function bindSim() {
     if (increase2Val) increase2Val.textContent = pct(workshop.increase2);
     const phaseBox = document.getElementById("phase2-fields");
     if (phaseBox) phaseBox.hidden = !workshop.usePhase2;
-    const per = document.getElementById("sim-per");
-    if (per) {
-      per.textContent = `${f.perUnit}: ${money(workshop.annual / FUND.units)} (${money(
-        workshop.annual / FUND.units / 12
-      )}${f.perMonth})`;
-    }
+    const unitHead = document.getElementById("unit-break-head");
+    const unitBody = document.getElementById("unit-break-body");
+    if (unitHead) unitHead.innerHTML = unitBreakHead();
+    if (unitBody) unitBody.innerHTML = unitBreakBody(workshop.annual);
     const result = document.getElementById("sim-result");
     if (result) {
       result.className = `callout ${sim.ok ? "ok" : ""}`;

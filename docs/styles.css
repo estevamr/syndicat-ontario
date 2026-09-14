@@ -486,6 +486,14 @@ tr:last-child td {
   margin-bottom: 0;
 }
 
+.unit-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.unit-break .chart-label {
+  margin-bottom: 10px;
+}
+
 .fund-page .callout {
   margin: 0;
   padding: 22px 24px;
@@ -876,6 +884,7 @@ td .pill {
 
 @media (max-width: 800px) {
   .stats,
+  .unit-stats,
   .grid-2,
   .grid-3,
   .sim-grid,
