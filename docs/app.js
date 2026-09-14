@@ -6,22 +6,99 @@ function hasShifts(shifts) {
   return Object.keys(shifts || {}).some((id) => Number(shifts[id]) !== 0);
 }
 
+const EXTRA_WORK = [
+  {
+    id: "backflow",
+    year: 2027,
+    remaining: 1,
+    avg: 40,
+    cost: 2500,
+    kind: "near",
+    est: true,
+  },
+  {
+    id: "guardRaise",
+    year: 2027,
+    remaining: 1,
+    avg: 45,
+    cost: 3500,
+    kind: "near",
+    est: true,
+  },
+  {
+    id: "roofMembrane",
+    year: 2051,
+    remaining: 25,
+    avg: 30,
+    cost: 38580,
+    kind: "later",
+    est: true,
+  },
+  {
+    id: "alumGuards",
+    year: 2051,
+    remaining: 25,
+    avg: 45,
+    cost: 6851,
+    kind: "later",
+    est: true,
+  },
+  {
+    id: "blockCladding",
+    year: 2051,
+    remaining: 25,
+    avg: 25,
+    cost: 23840,
+    kind: "later",
+    est: true,
+  },
+];
+
+function extraWorksSelected() {
+  return EXTRA_WORK.filter((work) => {
+    if (work.kind === "near") return workshop && workshop.includeNear;
+    if (work.kind === "later") return workshop && workshop.includeLater;
+    return false;
+  });
+}
+
+function workLabel(id) {
+  const extra = (helpCopy().extraNames || {})[id];
+  if (extra) return extra;
+  const names = FUND_I18N[lang] && FUND_I18N[lang].workNames;
+  return (names && names[id]) || id;
+}
+
+function studyWorkStats() {
+  const costs = (FUND.works || []).map((work) => Number(work.cost) || 0).filter((cost) => cost > 0);
+  const total = costs.reduce((sum, cost) => sum + cost, 0);
+  const count = costs.length;
+  return {
+    total,
+    count,
+    avg: count ? total / count : 0,
+  };
+}
+
 function spendPlan(shifts) {
   const years = FUND.expenses.length;
-  if (!hasShifts(shifts)) {
-    return { expenses: FUND.expenses.slice(), dropped: [] };
-  }
-  const expenses = Array(years).fill(0);
+  const extras = extraWorksSelected();
+  const rebuild = hasShifts(shifts);
+  const expenses = rebuild ? Array(years).fill(0) : FUND.expenses.slice();
   const dropped = [];
-  FUND.works.forEach((work) => {
+  const add = (work) => {
     const delta = Number(shifts[work.id] || 0);
     const year = work.year + delta;
     const cost = roundCad(work.cost * Math.pow(1 + FUND.inflation, delta));
     const idx = year - FUND.startYear;
-    if (idx >= years) dropped.push({ id: work.id, year, cost });
-    else if (idx < 0) expenses[0] += cost;
+    if (idx >= years) {
+      expenses[years - 1] += cost;
+      dropped.push({ id: work.id, year, cost, folded: true });
+    } else if (idx < 0) expenses[0] += cost;
     else expenses[idx] += cost;
-  });
+  };
+  if (rebuild) (FUND.works || []).forEach(add);
+  extras.forEach(add);
   return { expenses, dropped };
 }
 
@@ -148,6 +225,23 @@ const WORKSHOP_HELP = {
       saved:
         "Load puts a named path back on the sliders. Delete removes it from this computer only.",
     },
+    extraNear:
+      "Also count near-term carnet jobs not in the 25-year study: backflow valve and raising balcony guards. These are estimates — get quotes.",
+    extraLater:
+      "Also count work after 2050 (roof membrane, aluminum guards, block cladding). Costs are estimates, inflated 3%/year and folded into 2050 so the path has to fund them.",
+    avgWork: "Average priced item in the 25-year list",
+    extraNames: {
+      backflow: "Sewer backflow valve (estimate)",
+      guardRaise: "Raise balcony guards to 42 in. (estimate)",
+      roofMembrane: "Elastomeric roof membrane (est. from 2023 roof)",
+      alumGuards: "Aluminum guards (estimate, steel-stairs order)",
+      blockCladding: "Concrete-block cladding (est. ~2% of reconstruction)",
+    },
+    maintAvgTitle: "Upcoming work — average budget",
+    maintEst: "Estimate",
+    maintInStudy: "In the reserve study",
+    maintAvgLead:
+      "Priced items in the 25-year study average this much each. Urgent carnet jobs already in the study use those figures. Jobs with no study price use the estimates and can be switched on in the reserve-fund workshop.",
   },
   fr: {
     tipLabel: "Aide",
@@ -206,6 +300,23 @@ const WORKSHOP_HELP = {
       saved:
         "Charger remet un chemin nommé sur les curseurs. Supprimer l’enlève seulement de cet ordinateur.",
     },
+    extraNear:
+      "Compter aussi les travaux de carnet hors étude 25 ans : clapet anti-retour et rehaussement des garde-corps. Estimations — obtenir des soumissions.",
+    extraLater:
+      "Compter aussi les travaux après 2050 (membrane, garde-corps alu, blocs). Estimations, gonflées de 3 %/an et placées en 2050 pour que le chemin les finance.",
+    avgWork: "Poste moyen (prix) dans la liste 25 ans",
+    extraNames: {
+      backflow: "Clapet anti-retour (estimation)",
+      guardRaise: "Rehausser les garde-corps à 42 po (estimation)",
+      roofMembrane: "Membrane élastomère (est. toiture 2023)",
+      alumGuards: "Garde-corps aluminium (est., ordre des escaliers acier)",
+      blockCladding: "Revêtement en blocs (est. ~2 % de la reconstruction)",
+    },
+    maintAvgTitle: "Travaux à venir — budget moyen",
+    maintEst: "Estimation",
+    maintInStudy: "Dans l’étude de prévoyance",
+    maintAvgLead:
+      "Les postes chiffrés de l’étude 25 ans ont ce coût moyen. Les urgences déjà dans l’étude gardent ces montants. Sans prix d’étude : estimations, activables dans l’atelier du fonds.",
   },
   pt: {
     tipLabel: "Ajuda",
@@ -264,6 +375,23 @@ const WORKSHOP_HELP = {
       saved:
         "Carregar põe um caminho com nome de volta nos cursores. Apagar tira-o só deste computador.",
     },
+    extraNear:
+      "Contar também as obras do caderno fora do estudo de 25 anos: válvula anti-retorno e elevar guarda-corpos. Estimativas — peçam orçamentos.",
+    extraLater:
+      "Contar também obras depois de 2050 (membrana, guarda-corpos, blocos). Estimativas, inflacionadas 3%/ano e somadas em 2050 para o caminho as financiar.",
+    avgWork: "Item médio (com preço) na lista de 25 anos",
+    extraNames: {
+      backflow: "Válvula anti-retorno (estimativa)",
+      guardRaise: "Elevar guarda-corpos para 42 pol. (estimativa)",
+      roofMembrane: "Membrana do telhado (est. do telhado 2023)",
+      alumGuards: "Guarda-corpos de alumínio (est., ordem das escadas de aço)",
+      blockCladding: "Revestimento de blocos (est. ~2% da reconstrução)",
+    },
+    maintAvgTitle: "Obras futuras — orçamento médio",
+    maintEst: "Estimativa",
+    maintInStudy: "No estudo de reserva",
+    maintAvgLead:
+      "Os itens com preço no estudo de 25 anos têm este custo médio. Urgências já no estudo usam esses valores. Sem preço: estimativas, ligáveis na oficina do fundo.",
   },
   ary: {
     tipLabel: "شرح",
@@ -322,6 +450,23 @@ const WORKSHOP_HELP = {
       saved:
         "حمّل كيرجع طريق مسمّى للسلايدر. مسح كيمحيها غير من هاد الجهاز.",
     },
+    extraNear:
+      "حسب حتى الأشغال ديال الكارني اللي ما داخلينش فـ 25 عام: صمام الرجوع وتعلية الكارد-كور. تقديرات — خدّاو دوڤيز.",
+    extraLater:
+      "حسب حتى الأشغال من بعد 2050 (الميمبران، الكارد-كور، البلوك). تقديرات، كيزيدو 3% فالسنة وكيتجمعو فـ 2050.",
+    avgWork: "المعدل ديال عنصر مسعّر فلائحة 25 عام",
+    extraNames: {
+      backflow: "صمام رجوع الواد (تقدير)",
+      guardRaise: "طلع الكارد-كور لـ 42 إنش (تقدير)",
+      roofMembrane: "ميمبران السطح (تقدير من سطح 2023)",
+      alumGuards: "كارد-كور ألومنيوم (تقدير، بحال سلالم الحديد)",
+      blockCladding: "كسوة البلوك (تقدير ~2% من إعادة البناء)",
+    },
+    maintAvgTitle: "الأشغال الجايين — معدل الميزانية",
+    maintEst: "تقدير",
+    maintInStudy: "فدراسة الاحتياط",
+    maintAvgLead:
+      "العناصر المسعّرة فدراسة 25 عام عندها هاد المعدل. الطوارئ اللي ديجا فالدراسة كيبقاو بنفس الثمن. بلا ثمن: تقديرات تقدر تحسبهم فالورشة.",
   },
 };
 
@@ -370,6 +515,8 @@ function defaultWorkshop() {
     saved: [],
     saveLabel: "",
     loadedStudy: "",
+    includeNear: true,
+    includeLater: false,
   };
 }
 
@@ -920,19 +1067,24 @@ function renderFund() {
   );
   const lastYear = FUND.startYear + FUND.expenses.length - 1;
 
-  const workRows = FUND.works
+  const workRows = [...(FUND.works || []), ...extraWorksSelected()]
     .map((work) => {
       const year = workYear(work);
       const dropped = year > lastYear;
+      const name = workLabel(work.id);
       return `
         <tr>
           <td>
             <input class="year-input" data-shift="${esc(work.id)}" type="number" min="${FUND.startYear}" max="2075" value="${year}" />
             ${dropped ? `<div class="hint">${esc(f.dropped)}</div>` : ""}
           </td>
-          <td>${esc(f.workNames[work.id])}${
+          <td>${esc(name)}${
             work.linked
               ? ` <span class="pill now">${esc(f.linked)}</span>`
+              : ""
+          }${
+            work.est
+              ? ` <span class="pill info">${esc(h.maintEst)}</span>`
               : ""
           }</td>
           <td>${work.remaining} ${esc(f.yearsLeft)}</td>
@@ -944,17 +1096,21 @@ function renderFund() {
     .join("");
 
   const outsideRows = (FUND.outsideHorizon || [])
-    .map(
-      (item) => `
+    .map((item) => {
+      const extra = EXTRA_WORK.find((work) => work.id === item.id);
+      const cost = extra
+        ? `${money(extra.cost)} <span class="pill info">${esc(h.maintEst)}</span>`
+        : "—";
+      return `
         <tr>
           <td>—</td>
-          <td>${esc(f.workNames[item.id] || item.id)}</td>
+          <td>${esc(workLabel(item.id))}</td>
           <td>${item.remaining} ${esc(f.yearsLeft)}</td>
           <td>${item.avg} ${esc(f.avgLife)}</td>
-          <td>—</td>
+          <td>${cost}</td>
         </tr>
-      `
-    )
+      `;
+    })
     .join("");
 
   const scenarioCards = FUND.scenarios
@@ -1027,6 +1183,10 @@ function renderFund() {
                 )}</span></div>`
             )
             .join("")}
+          <div class="stat">
+            <b>${money(studyWorkStats().avg)}</b>
+            <span>${esc(h.avgWork)}</span>
+          </div>
         </section>
         <aside class="callout">
           <strong>${esc(f.calloutTitle)}</strong>
@@ -1086,6 +1246,14 @@ function renderFund() {
             <input id="use-phase2" type="checkbox" ${workshop.usePhase2 ? "checked" : ""} />
             ${esc(f.phase2)}
             ${tip("phase2", h.tips.phase2)}
+          </label>
+          <label class="check">
+            <input id="include-near" type="checkbox" ${workshop.includeNear ? "checked" : ""} />
+            ${esc(h.extraNear)}
+          </label>
+          <label class="check">
+            <input id="include-later" type="checkbox" ${workshop.includeLater ? "checked" : ""} />
+            ${esc(h.extraLater)}
           </label>
           <div class="sim-grid" id="phase2-fields" ${workshop.usePhase2 ? "" : "hidden"}>
             <label>
@@ -1257,6 +1425,8 @@ function bindSim() {
     const specialYear = document.getElementById("special-year");
     const specialAmount = document.getElementById("special-amount");
     const usePhase2 = document.getElementById("use-phase2");
+    const includeNear = document.getElementById("include-near");
+    const includeLater = document.getElementById("include-later");
     const phaseYears = document.getElementById("phase-years");
     const annual2 = document.getElementById("annual2");
     const increase2 = document.getElementById("increase2");
@@ -1268,6 +1438,8 @@ function bindSim() {
     if (specialYear) workshop.specialYear = Number(specialYear.value);
     if (specialAmount) workshop.specialAmount = Number(specialAmount.value);
     if (usePhase2) workshop.usePhase2 = usePhase2.checked;
+    if (includeNear) workshop.includeNear = includeNear.checked;
+    if (includeLater) workshop.includeLater = includeLater.checked;
     if (phaseYears) workshop.phaseYears = Number(phaseYears.value);
     if (annual2) workshop.annual2 = Number(annual2.value);
     if (increase2) workshop.increase2 = Number(increase2.value) / 100;
@@ -1398,10 +1570,21 @@ function bindSim() {
       render();
     });
   }
+  ["include-near", "include-later"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("change", () => {
+        readFields();
+        render();
+      });
+    }
+  });
   document.querySelectorAll("[data-shift]").forEach((input) => {
     input.addEventListener("change", () => {
       const id = input.dataset.shift;
-      const work = FUND.works.find((item) => item.id === id);
+      const work =
+        (FUND.works || []).find((item) => item.id === id) ||
+        EXTRA_WORK.find((item) => item.id === id);
       if (!work) return;
       workshop.shifts[id] = Number(input.value) - work.year;
       persistWorkshop();
@@ -1446,6 +1629,8 @@ function bindSim() {
           specialAmount: workshop.specialAmount,
           startBalance: workshop.startBalance,
           interestPct: workshop.interestPct,
+          includeNear: workshop.includeNear,
+          includeLater: workshop.includeLater,
           shifts: { ...workshop.shifts },
         },
       });
@@ -1480,16 +1665,38 @@ function bindSim() {
 function renderMaint() {
   const t = I18N[lang];
   const m = MAINT_I18N[lang];
+  const h = helpCopy();
   document.title = withCivic(m.title);
+  const urgentCosts = {
+    wall: { cost: 24258, study: true },
+    drain: { cost: 19468, study: true },
+    ceiling: { cost: 14037, study: true },
+    backflow: { cost: 2500, study: false },
+    guard: { cost: 3500, study: false },
+  };
+  const study = studyWorkStats();
+  const urgentPriced = MAINT.urgent
+    .map((item) => urgentCosts[item.id])
+    .filter((item) => item && item.cost);
+  const urgentTotal = urgentPriced.reduce((sum, item) => sum + item.cost, 0);
+  const urgentAvg = urgentPriced.length ? urgentTotal / urgentPriced.length : 0;
   const urgent = MAINT.urgent
-    .map(
-      (item) => `
+    .map((item) => {
+      const price = urgentCosts[item.id];
+      return `
         <article class="card">
           <div class="meta"><span class="pill now">${esc(t.filterNow)}</span></div>
           <p>${esc(m.urgent[item.id])}</p>
+          ${
+            price
+              ? `<p class="lede">${money(price.cost)} · ${esc(
+                  price.study ? h.maintInStudy : h.maintEst
+                )}</p>`
+              : ""
+          }
         </article>
-      `
-    )
+      `;
+    })
     .join("");
   const history = MAINT.history
     .map((row) => {
@@ -1519,8 +1726,14 @@ function renderMaint() {
     .join("");
   const carnetPlan = (MAINT.carnetPlan || [])
     .map((item) => {
-      const name = (FUND_I18N[lang].workNames && FUND_I18N[lang].workNames[item.id]) || item.id;
-      const cost = item.cost == null ? esc(m.afterWindow) : money(item.cost);
+      const name = workLabel(item.id);
+      const extra = EXTRA_WORK.find((work) => work.id === item.id);
+      const cost =
+        item.cost != null
+          ? money(item.cost)
+          : extra
+            ? `${money(extra.cost)} <span class="pill info">${esc(h.maintEst)}</span>`
+            : esc(m.afterWindow);
       return `<tr><td>${esc(name)}</td><td>${cost}</td></tr>`;
     })
     .join("");
@@ -1531,6 +1744,22 @@ function renderMaint() {
           <strong>${esc(m.calloutTitle)}</strong>
           ${esc(m.callout)}
         </aside>
+        <h2>${esc(h.maintAvgTitle)}</h2>
+        <p class="lede">${esc(h.maintAvgLead)}</p>
+        <section class="stats unit-stats">
+          <div class="stat">
+            <b>${money(study.avg)}</b>
+            <span>${esc(h.avgWork)}</span>
+          </div>
+          <div class="stat">
+            <b>${money(urgentAvg)}</b>
+            <span>${esc(m.urgentTitle)}</span>
+          </div>
+          <div class="stat">
+            <b>${money(urgentTotal)}</b>
+            <span>${esc(m.urgentTitle)} · ${urgentPriced.length}</span>
+          </div>
+        </section>
         <h2>${esc(m.urgentTitle)}</h2>
         <div class="cards">${urgent}</div>
         <h2>${esc(m.inventoryTitle)}</h2>

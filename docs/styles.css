@@ -708,10 +708,14 @@ tr:last-child td {
 
 .sim label.check {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   font-weight: 600;
   margin: 4px 0 16px;
+}
+
+.sim label.check input {
+  margin-top: 4px;
 }
 
 .sim label.check input {
