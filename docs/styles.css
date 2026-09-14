@@ -1040,6 +1040,49 @@ td .pill {
   gap: 12px;
 }
 
+.plan-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin: 0 0 20px;
+  padding: 12px 14px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+
+.plan-sticky-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.plan-sticky-item b {
+  font-size: 1.15rem;
+}
+
+.plan-sticky-item span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.plan-special {
+  margin: 0 0 24px;
+}
+
+.plan-col.is-over,
+.plan-skipped.is-over {
+  outline: 2px dashed var(--info);
+  outline-offset: 4px;
+}
+
+.plan-col-empty {
+  min-height: 8rem;
+  border-style: dashed;
+}
+
 .plan-job {
   display: flex;
   justify-content: space-between;
@@ -1047,6 +1090,21 @@ td .pill {
   gap: 12px;
   padding: 12px 0 0;
   border-top: 1px solid var(--line);
+}
+
+.plan-drag {
+  flex: 0 0 auto;
+  cursor: grab;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 0 4px;
+  font: inherit;
+  line-height: 1;
+}
+
+.plan-drag:active {
+  cursor: grabbing;
 }
 
 .plan-job:first-child {
