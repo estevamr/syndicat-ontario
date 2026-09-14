@@ -5,7 +5,7 @@ const GATE_SCRIPT_URL =
 const GATE_COPY = {
   en: {
     title: "Syndicate documents",
-    docTitle: "4267-4271 Ontario Est",
+    docTitle: "4267, 4269, 4271 Ontario Est",
     lead: "This page is locked. Enter the shared password to view the inspection and reserve-fund summaries.",
     label: "Password",
     button: "Open",
@@ -14,7 +14,7 @@ const GATE_COPY = {
   },
   fr: {
     title: "Documents du syndicat",
-    docTitle: "4267-4271 Ontario Est",
+    docTitle: "4267, 4269, 4271 Ontario Est",
     lead: "Cette page est verrouillée. Entrez le mot de passe partagé pour voir les synthèses d’inspection et du fonds de prévoyance.",
     label: "Mot de passe",
     button: "Ouvrir",
@@ -23,7 +23,7 @@ const GATE_COPY = {
   },
   pt: {
     title: "Documentos do sindicato",
-    docTitle: "4267-4271 Ontario Est",
+    docTitle: "4267, 4269, 4271 Ontario Est",
     lead: "Esta página está bloqueada. Introduza a senha partilhada para ver os resumos da inspeção e do fundo de reserva.",
     label: "Senha",
     button: "Abrir",
@@ -32,7 +32,7 @@ const GATE_COPY = {
   },
   ary: {
     title: "وثائق السينديك",
-    docTitle: "4267-4271 أونتاريو شرق",
+    docTitle: "4267، 4269، 4271 أونتاريو شرق",
     lead: "هاد الصفحة مسكورة. دخل كلمة السر باش تشوف خلاصة الإنسپكسيون وصندوق الاحتياط.",
     label: "كلمة السر",
     button: "حلّ",
@@ -139,7 +139,7 @@ function loadApp() {
   if (document.querySelector("script[data-app]")) return;
   const script = document.createElement("script");
   const base = GATE_SCRIPT_URL.replace(/gate\.js(\?.*)?$/, "");
-  script.src = `${base}app.js?v=16`;
+  script.src = `${base}app.js?v=17`;
   script.dataset.app = "true";
   script.onerror = () => {
     document.getElementById("app").hidden = false;
@@ -152,7 +152,7 @@ function loadApp() {
 function showGate(error) {
   const lang = gateLang();
   const copy = GATE_COPY[lang];
-  document.title = copy.docTitle || "4267-4271 Ontario Est";
+  document.title = copy.docTitle || "4267, 4269, 4271 Ontario Est";
   document.documentElement.lang = copy.htmlLang || lang;
   document.documentElement.dir = copy.dir === "rtl" ? "rtl" : "ltr";
   const gate = document.getElementById("gate");

@@ -570,17 +570,25 @@ function pathPickButtons() {
     .join("");
 }
 
+function civicNums() {
+  return lang === "ary" ? "4267، 4269، 4271" : "4267, 4269, 4271";
+}
+
+function withCivic(text) {
+  return String(text || "").replaceAll("4267-4271", civicNums());
+}
+
 function chrome(inner) {
   const t = I18N[lang];
   return `
     <div class="wrap ${tab === "fund" ? "fund-page" : ""}">
       <header class="topbar">
         <div class="titles">
-          <p class="site-title">${esc(t.tabTitle)}</p>
+          <p class="site-title">${esc(withCivic(t.tabTitle))}</p>
           <p class="brand">${esc(t.brand)}</p>
         </div>
         <div class="toolbar">
-          <nav class="tabs" role="tablist" aria-label="${esc(t.tabTitle)}">
+          <nav class="tabs" role="tablist" aria-label="${esc(withCivic(t.tabTitle))}">
             <button type="button" role="tab" data-tab="inspection" title="${esc(
               t.navInspection
             )}" aria-selected="${tab === "inspection"}">${esc(
@@ -641,7 +649,7 @@ function bindChrome() {
 
 function renderInspection() {
   const t = I18N[lang];
-  document.title = t.title;
+  document.title = withCivic(t.title);
   const priorities = t.priorities
     .filter((item) => filter === "all" || item.id === filter)
     .map(
@@ -663,7 +671,7 @@ function renderInspection() {
     .join("");
 
   document.getElementById("app").innerHTML = chrome(`
-        <h1>${esc(t.h1)}</h1>
+        <h1>${esc(withCivic(t.h1))}</h1>
         <p class="lede">${esc(t.lede)}</p>
         <section class="stats">
           ${t.stats
@@ -783,7 +791,7 @@ function renderFund() {
   const t = I18N[lang];
   const f = FUND_I18N[lang];
   const h = helpCopy();
-  document.title = f.title;
+  document.title = withCivic(f.title);
   const sim = projectFund(workshopOpts());
   const spendMax = Math.max(1, ...sim.expenses);
   const balanceMax = Math.max(
@@ -890,7 +898,7 @@ function renderFund() {
           .join("")}</ul>`;
 
   document.getElementById("app").innerHTML = chrome(`
-        <h1>${esc(f.h1)}</h1>
+        <h1>${esc(withCivic(f.h1))}</h1>
         <p class="lede">${esc(f.lede)}</p>
         <section class="stats">
           ${f.stats
@@ -1357,7 +1365,7 @@ function bindSim() {
 function renderMaint() {
   const t = I18N[lang];
   const m = MAINT_I18N[lang];
-  document.title = m.title;
+  document.title = withCivic(m.title);
   const urgent = MAINT.urgent
     .map(
       (item) => `
@@ -1402,7 +1410,7 @@ function renderMaint() {
     })
     .join("");
   document.getElementById("app").innerHTML = chrome(`
-        <h1>${esc(m.h1)}</h1>
+        <h1>${esc(withCivic(m.h1))}</h1>
         <p class="lede">${esc(m.lede)}</p>
         <aside class="callout">
           <strong>${esc(m.calloutTitle)}</strong>
