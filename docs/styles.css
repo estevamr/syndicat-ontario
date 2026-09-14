@@ -575,9 +575,15 @@ tr:last-child td {
 }
 
 .how-box {
+  margin: 0 0 28px;
+  padding: 22px 24px;
+  border: 1px solid var(--line);
   background: var(--info-soft);
   border-inline-start: 4px solid var(--info);
-  padding: 22px 24px;
+}
+
+.plan-page .how-box {
+  margin-top: 8px;
 }
 
 .how-box strong {

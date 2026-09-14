@@ -175,6 +175,12 @@ function normalizeExtras(raw) {
 }
 
 function extraWorksSelected() {
+  const assign = typeof planState === "function" ? planState() : null;
+  if (assign) {
+    return EXTRA_WORK.filter(
+      (work) => assign[work.id] && assign[work.id] !== "off"
+    );
+  }
   return EXTRA_WORK.filter(
     (work) => workshop && workshop.extras && workshop.extras[work.id]
   );
@@ -274,7 +280,15 @@ function applyYearShift(input) {
   if (!work) return false;
   const year = Number(input.value);
   if (!Number.isFinite(year) || year < 1900 || year > 2100) return false;
-  workshop.shifts[work.id] = Math.round(year) - work.year;
+  const rounded = Math.round(year);
+  workshop.shifts[work.id] = rounded - work.year;
+  if (isExtraWork(work.id)) {
+    if (!workshop.extras) workshop.extras = defaultExtras();
+    workshop.extras[work.id] = true;
+  }
+  const assignments = planState();
+  assignments[work.id] = rounded;
+  persistPlanAssignments(assignments);
   persistWorkshop();
   return true;
 }
@@ -383,10 +397,12 @@ const WORKSHOP_HELP = {
     tipLabel: "Help",
     howTitle: "Three steps",
     howSteps: [
-      "Tap an idea below (today’s fees, or a mix from the study).",
-      "Read the green or red box — that is the answer.",
-      "Move the two sliders if you want a different yearly amount.",
+      "Job years are the same as Plan. Change them here or there.",
+      "Read the green or red box — does this pot last?",
+      "Move the two sliders to try a different yearly amount. Plan’s monthly cards follow.",
     ],
+    fundLead:
+      "Sandbox for the yearly pot. Years match Plan. Sliders here change what Plan shows as the monthly fee.",
     pathPicks: "Start from a printed idea",
     loadedNote: "Loaded. Change the sliders or tap another idea.",
     guideTitle: "What this workshop is",
@@ -404,7 +420,7 @@ const WORKSHOP_HELP = {
       "Starting cash, interest, a one-time special, a second phase, extras the study left out, and save.",
     chartsTitle: "Work cost vs pot, year by year",
     yearsTitle: "Numbers for each year",
-    shiftWrapTitle: "Optional: move a job to another year",
+    shiftWrapTitle: "Job years (same as Plan)",
     nearShort:
       "Also count the backflow valve and raising balcony guards (soon, estimates)",
     laterShort:
@@ -482,7 +498,7 @@ const WORKSHOP_HELP = {
       smokeAlarms: "Replace common-area smoke alarms (Montréal mid-market)",
     },
     extraListLead:
-      "Jobs the 25-year study skipped. Tick one to add it to the pot.",
+      "Same extras as Plan. Untick to skip — Plan updates too.",
     extraLaterHead: "After 2050 (folded into the last year)",
     extraInResult: "Extra jobs on the work side",
     extraTallyNone:
@@ -506,10 +522,12 @@ const WORKSHOP_HELP = {
     tipLabel: "Aide",
     howTitle: "Trois étapes",
     howSteps: [
-      "Touchez une idée ci-dessous (frais d’aujourd’hui, ou un mélange de l’étude).",
-      "Lisez l’encadré vert ou rouge — c’est la réponse.",
-      "Bougez les deux curseurs pour essayer un autre montant annuel.",
+      "Les années des postes sont les mêmes que sur Plan. Changez-les ici ou là.",
+      "Lisez l’encadré vert ou rouge — la cagnotte tient-elle ?",
+      "Bougez les deux curseurs pour un autre montant annuel. Les mensuels du Plan suivent.",
     ],
+    fundLead:
+      "Bac à sable pour la cagnotte annuelle. Les années suivent Plan. Les curseurs ici changent le mensuel affiché sur Plan.",
     pathPicks: "Partir d’une idée imprimée",
     loadedNote: "Chargé. Changez les curseurs ou touchez une autre idée.",
     guideTitle: "À quoi sert cet atelier",
@@ -527,7 +545,7 @@ const WORKSHOP_HELP = {
       "Solde de départ, intérêt, cotisation spéciale, deuxième phase, travaux hors étude, et enregistrement.",
     chartsTitle: "Travaux vs cagnotte, année par année",
     yearsTitle: "Chiffres pour chaque année",
-    shiftWrapTitle: "Optionnel : déplacer un chantier",
+    shiftWrapTitle: "Années des postes (les mêmes que Plan)",
     nearShort:
       "Compter aussi le clapet anti-retour et le rehaussement des garde-corps (bientôt, estimations)",
     laterShort:
@@ -605,7 +623,7 @@ const WORKSHOP_HELP = {
       smokeAlarms: "Remplacer les détecteurs des communs (milieu de marché Montréal)",
     },
     extraListLead:
-      "Travaux absents de l’étude 25 ans. Cochez pour les ajouter à la cagnotte.",
+      "Mêmes extras que Plan. Décochez pour ignorer — Plan suit.",
     extraLaterHead: "Après 2050 (placés dans la dernière année)",
     extraInResult: "Travaux extras côté dépenses",
     extraTallyNone:
@@ -629,10 +647,12 @@ const WORKSHOP_HELP = {
     tipLabel: "Ajuda",
     howTitle: "Três passos",
     howSteps: [
-      "Toquem numa ideia abaixo (taxas de hoje, ou uma mistura do estudo).",
-      "Leiam a caixa verde ou vermelha — essa é a resposta.",
-      "Mexam nos dois cursores para tentar outro valor anual.",
+      "Os anos das obras são os mesmos do Plano. Mexam aqui ou lá.",
+      "Leiam a caixa verde ou vermelha — o pote aguenta?",
+      "Mexam nos dois cursores para outro valor anual. Os mensais do Plano seguem.",
     ],
+    fundLead:
+      "Caixa de areia para o pote anual. Os anos seguem o Plano. Os cursores daqui mudam o mensal no Plano.",
     pathPicks: "Começar por uma ideia impressa",
     loadedNote: "Carregado. Mexam nos cursores ou toquem noutra ideia.",
     guideTitle: "Para que serve esta oficina",
@@ -650,7 +670,7 @@ const WORKSHOP_HELP = {
       "Saldo inicial, juro, contribuição especial, segunda fase, obras fora do estudo, e guardar.",
     chartsTitle: "Obras vs pote, ano a ano",
     yearsTitle: "Números de cada ano",
-    shiftWrapTitle: "Opcional: mudar o ano de uma obra",
+    shiftWrapTitle: "Anos das obras (os mesmos do Plano)",
     nearShort:
       "Contar também a válvula anti-retorno e elevar guarda-corpos (em breve, estimativas)",
     laterShort:
@@ -728,7 +748,7 @@ const WORKSHOP_HELP = {
       smokeAlarms: "Substituir detetores das zonas comuns (médio de mercado em Montreal)",
     },
     extraListLead:
-      "Obras que o estudo de 25 anos saltou. Marquem para as somar ao pote.",
+      "Os mesmos extras do Plano. Desmarquem para saltar — o Plano segue.",
     extraLaterHead: "Depois de 2050 (somadas no último ano)",
     extraInResult: "Obras extra no lado das despesas",
     extraTallyNone:
@@ -752,10 +772,12 @@ const WORKSHOP_HELP = {
     tipLabel: "شرح",
     howTitle: "تلاتة خطوات",
     howSteps: [
-      "ضغط على فكرة لتحت (المصاريف دابا، ولا خلطة من الدراسة).",
-      "قرا الصندوق الأخضر ولا الحمر — هادي هي الجواب.",
-      "حرّك جوج سلايدر إلا بغيتي مبلغ سنوي آخر.",
+      "سنين الخدمات بحال المخطط. بدّلهم هنا ولا تما.",
+      "قرا الصندوق الأخضر ولا الحمر — واش القادّة كاتصمد؟",
+      "حرّك جوج سلايدر لمبلغ سنوي آخر. الشهري دالمخطط كيتبع.",
     ],
+    fundLead:
+      "ورشة دالمبلغ السنوي. السنين بحال المخطط. السلايدر هنا كيبدّلو الشهري فالمخطط.",
     pathPicks: "بدا من فكرة مطبوعة",
     loadedNote: "تحمّل. بدّل السلايدر ولا ضغط على فكرة خرا.",
     guideTitle: "علاش هاد الورشة",
@@ -773,7 +795,7 @@ const WORKSHOP_HELP = {
       "الرصيد اللول، الفايدة، دفعة مرة، مرحلة تانية، أشغال برا الدراسة، والتسجيل.",
     chartsTitle: "الأشغال مقابل القادّة، عام بعام",
     yearsTitle: "الأرقام لكل عام",
-    shiftWrapTitle: "اختياري: بدّل عام الخدمة",
+    shiftWrapTitle: "سنين الخدمات (بحال المخطط)",
     nearShort:
       "حسب حتى صمام الرجوع وتعلية الكارد-كور (قريب، تقديرات)",
     laterShort:
@@ -851,7 +873,7 @@ const WORKSHOP_HELP = {
       smokeAlarms: "بدّل كاشف الدخان دالمشترك (وسط سوق مونتريال)",
     },
     extraListLead:
-      "أشغال اللي الدراسة ديال 25 عام ما حسباتهمش. علّم باش تزيدهم للقادّة.",
+      "نفس الزيادات دالمخطط. حيّد العلامة باش تخطّى — المخطط كيتبع.",
     extraLaterHead: "من بعد 2050 (كيتجمعو فآخر عام)",
     extraInResult: "الأشغال الزايدة فجهة الخرج",
     extraTallyNone:
@@ -897,7 +919,19 @@ const PLAN_I18N = {
     title: "Renovation plan — when, and what you pay",
     h1: "Renovation plan",
     lede:
-      "You pay a monthly condo fee every month. That money sits in a shared pot. The pot pays the contractor in the year of the repair — you do not pay the whole job in that month. Set the year on each job, then read the table.",
+      "You pay a monthly condo fee every month. That money sits in a shared pot. The pot pays the contractor in the year of the repair — you do not pay the whole job in that month.",
+    howTitle: "In 30 seconds",
+    howSteps: [
+      "Set the year of each repair (or Skip).",
+      "Read your monthly fee. Same amount every month that year, from January 2027.",
+      "The pot pays the contractor in the job year — you do not pay that invoice yourself.",
+    ],
+    otherTitle: "Other figures you will hear",
+    otherBody:
+      "Today’s reserve is $5,647 / year. Law 16’s proxy is $5,960. The May meeting aimed at $6,140 / year for 5 years. The study’s Proposed 1 (study jobs only, no extras) is about $338 / month for 4269 and 4271, $571 for 4267. A flat $11,500 / year also covers the study list if you refuse a 2% rise. None of those replace the monthly cards above.",
+    customFee:
+      "These monthlies follow the What if sliders. The mix on this page needs",
+    useNeeded: "Use the fee this mix needs",
     payStart: "Start paying this in January 2027",
     payHow:
       "Same fee every month that year. It rises 2% each January so the pot can cover later jobs (especially brick in 2050).",
@@ -927,7 +961,7 @@ const PLAN_I18N = {
     yearPot: "Shared reserve / year",
     worksIn: "jobs in this mix",
     cannot: "Even $45,000 / year does not cover this mix. Skip or delay a big item.",
-    loadWorkshop: "Open this mix in the reserve workshop",
+    loadWorkshop: "Open What if (sliders and charts)",
     reset: "Reset to inspector years",
     skipTitle: "Skipped (not in the pot)",
     footnote:
@@ -948,7 +982,19 @@ const PLAN_I18N = {
     title: "Plan des travaux — quand, et combien",
     h1: "Plan des travaux",
     lede:
-      "Vous payez des frais mensuels tous les mois. Cet argent va dans une cagnotte commune. La cagnotte paie l’entrepreneur l’année du chantier — vous ne payez pas tout le poste ce mois-là. Fixez l’année de chaque poste, puis lisez le tableau.",
+      "Vous payez des frais mensuels tous les mois. Cet argent va dans une cagnotte commune. La cagnotte paie l’entrepreneur l’année du chantier — vous ne payez pas tout le poste ce mois-là.",
+    howTitle: "En 30 secondes",
+    howSteps: [
+      "Fixez l’année de chaque poste (ou Ignorer).",
+      "Lisez votre frais mensuel. Le même montant chaque mois de l’année, dès janvier 2027.",
+      "La cagnotte paie l’entrepreneur l’année du chantier — vous ne payez pas cette facture vous-même.",
+    ],
+    otherTitle: "Autres chiffres que vous entendrez",
+    otherBody:
+      "La prévoyance d’aujourd’hui est 5 647 $ / an. La loi 16 vise 5 960 $. L’assemblée de mai visait 6 140 $ / an sur 5 ans. Le proposé 1 de l’étude (postes de l’étude seulement) est environ 338 $ / mois pour 4269 et 4271, 571 $ pour 4267. 11 500 $ / an sans hausse couvre aussi la liste de l’étude. Rien de tout cela ne remplace les cartes mensuelles ci-dessus.",
+    customFee:
+      "Ces mensuels suivent les curseurs de « Et si ». Ce mélange a besoin de",
+    useNeeded: "Utiliser le frais que ce mélange exige",
     payStart: "Commencer à payer ça en janvier 2027",
     payHow:
       "Le même frais chaque mois de l’année. Il monte de 2 % chaque janvier pour les postes plus tard (surtout la brique en 2050).",
@@ -978,7 +1024,7 @@ const PLAN_I18N = {
     yearPot: "Prévoyance commune / an",
     worksIn: "postes dans ce mélange",
     cannot: "Même 45 000 $ / an ne couvrent pas ce mélange. Ignorez ou reportez un gros poste.",
-    loadWorkshop: "Ouvrir ce mélange dans l’atelier du fonds",
+    loadWorkshop: "Ouvrir Et si (curseurs et graphiques)",
     reset: "Revenir aux années de l’inspecteur",
     skipTitle: "Ignorés (hors cagnotte)",
     footnote:
@@ -999,7 +1045,19 @@ const PLAN_I18N = {
     title: "Plano de obras — quando, e quanto pagam",
     h1: "Plano de obras",
     lede:
-      "Pagam uma taxa mensal todos os meses. Esse dinheiro fica num pote comum. O pote paga o empreiteiro no ano da obra — não pagam a obra inteira nesse mês. Marquem o ano de cada obra e leiam a tabela.",
+      "Pagam uma taxa mensal todos os meses. Esse dinheiro fica num pote comum. O pote paga o empreiteiro no ano da obra — não pagam a obra inteira nesse mês.",
+    howTitle: "Em 30 segundos",
+    howSteps: [
+      "Marquem o ano de cada obra (ou Saltar).",
+      "Leiam a taxa mensal. O mesmo valor em todos os meses desse ano, desde janeiro de 2027.",
+      "O pote paga o empreiteiro no ano da obra — não pagam essa fatura vocês.",
+    ],
+    otherTitle: "Outros números que vão ouvir",
+    otherBody:
+      "A reserva de hoje é 5.647 $ / ano. A lei 16 aponta 5.960 $. A reunião de maio visava 6.140 $ / ano durante 5 anos. O proposto 1 do estudo (só obras do estudo) é cerca de 338 $ / mês para 4269 e 4271, 571 $ para 4267. 11.500 $ / ano sem aumento também cobre a lista do estudo. Nada disso substitui os cartões mensais acima.",
+    customFee:
+      "Estes mensais seguem os cursores de « E se ». Esta mistura precisa de",
+    useNeeded: "Usar a taxa que esta mistura precisa",
     payStart: "Começar a pagar isto em janeiro de 2027",
     payHow:
       "A mesma taxa em todos os meses desse ano. Sobe 2% em cada janeiro para as obras mais tarde (sobretudo o tijolo em 2050).",
@@ -1029,7 +1087,7 @@ const PLAN_I18N = {
     yearPot: "Reserva comum / ano",
     worksIn: "obras nesta mistura",
     cannot: "Nem 45.000 $ / ano cobrem esta mistura. Saltem ou atrasem uma obra grande.",
-    loadWorkshop: "Abrir esta mistura na oficina do fundo",
+    loadWorkshop: "Abrir E se (cursores e gráficos)",
     reset: "Voltar aos anos do inspetor",
     skipTitle: "Saltadas (fora do pote)",
     footnote:
@@ -1050,7 +1108,19 @@ const PLAN_I18N = {
     title: "مخطط الإصلاح — إيمتى، وشنو تخلصو",
     h1: "مخطط الإصلاح",
     lede:
-      "كاتخلصو شهري كل شهر. هاد الفلوس كيمشيو لقادّة مشتركة. القادّة كاتخلّص المقاول عام الخدمة — ما كاتخلصش الخدمة كاملة فداك الشهر. حدّد العام ديال كل خدمة، وقرا الجدول.",
+      "كاتخلصو شهري كل شهر. هاد الفلوس كيمشيو لقادّة مشتركة. القادّة كاتخلّص المقاول عام الخدمة — ما كاتخلصش الخدمة كاملة فداك الشهر.",
+    howTitle: "فـ 30 ثانية",
+    howSteps: [
+      "حدّد العام ديال كل خدمة (ولا تخطّى).",
+      "قرا الشهري ديالك. نفس المبلغ كل شهر فداك العام، من يناير 2027.",
+      "القادّة كاتخلّص المقاول عام الخدمة — ما كاتخلصش نتا الفاتورة.",
+    ],
+    otherTitle: "أرقام خرا غادي تسمعو",
+    otherBody:
+      "الاحتياط دابا 5 647 $ فالسنة. القانون 16 كيهضر على 5 960 $. اجتماع ماي بغا 6 140 $ فالسنة لـ 5 سنين. المقترح 1 دالدراسة (غير أشغال الدراسة) تقريبا 338 $ فالشهر لـ 4269 و4271، و571 $ لـ 4267. 11 500 $ فالسنة بلا زيادة حتى هي كاتغطي ليستة الدراسة. حتى واحد ما كيعوّض الكارط الشهرية لفوق.",
+    customFee:
+      "هاد الشهري كيتبع سلايدر « واش لو ». هاد الخلطة خصّها",
+    useNeeded: "ستعمل المصروف اللي هاد الخلطة خصّها",
     payStart: "بدا تخلّص هاد الشي من يناير 2027",
     payHow:
       "نفس الشهري كل شهر فداك العام. كيزيد 2% كل يناير باش يغطي الخدمات من بعد (خصوصا الابريك فـ 2050).",
@@ -1080,7 +1150,7 @@ const PLAN_I18N = {
     yearPot: "الاحتياط المشترك / عام",
     worksIn: "خدمات فهاد الخلطة",
     cannot: "حتى 45 000 $ فالسنة ما يكفيوش. تخطّاو ولا أخّرو خدمة كبيرة.",
-    loadWorkshop: "حلّ هاد الخلطة فورشة الصندوق",
+    loadWorkshop: "حلّ واش لو (سلايدر ورسوم)",
     reset: "رجع لسنين الإنسپكتور",
     skipTitle: "متخطّيين (برا القادّة)",
     footnote:
@@ -1100,6 +1170,57 @@ const PLAN_I18N = {
 
 function planCopy() {
   return PLAN_I18N[lang] || PLAN_I18N.en;
+}
+
+const SITE_I18N = {
+  en: {
+    navPlan: "Plan",
+    navInspection: "Inspection",
+    navFund: "What if",
+    navMaint: "Maintenance",
+    navAssembly: "Assembly",
+    inspectHint:
+      "This page is what the inspector saw. What you pay each month is on Plan.",
+    assemblyNote:
+      "The May target ($6,140 / year, about $30,700 in 5 years) is a short savings idea. It is not the 25-year monthly fee. Use Plan for that.",
+  },
+  fr: {
+    navPlan: "Plan",
+    navInspection: "Inspection",
+    navFund: "Et si",
+    navMaint: "Entretien",
+    navAssembly: "Assemblée",
+    inspectHint:
+      "Cette page, c’est ce que l’inspecteur a vu. Ce que vous payez chaque mois est dans Plan.",
+    assemblyNote:
+      "L’objectif de mai (6 140 $ / an, environ 30 700 $ en 5 ans) est une idée d’épargne courte. Ce n’est pas le frais mensuel sur 25 ans. Voyez Plan pour ça.",
+  },
+  pt: {
+    navPlan: "Plano",
+    navInspection: "Inspeção",
+    navFund: "E se",
+    navMaint: "Manutenção",
+    navAssembly: "Assembleia",
+    inspectHint:
+      "Esta página é o que o inspetor viu. O que pagam por mês está no Plano.",
+    assemblyNote:
+      "A meta de maio (6.140 $ / ano, cerca de 30.700 $ em 5 anos) é uma ideia de poupança curta. Não é a taxa mensal a 25 anos. Usem o Plano para isso.",
+  },
+  ary: {
+    navPlan: "المخطط",
+    navInspection: "الإنسپكسيون",
+    navFund: "واش لو",
+    navMaint: "الصيانة",
+    navAssembly: "الجمعية",
+    inspectHint:
+      "هاد الصفحة هي اللي شاف الإنسپكتور. شنو كاتخلص كل شهر كاين فالمخطط.",
+    assemblyNote:
+      "هدف ماي (6 140 $ فالسنة، تقريبا 30 700 $ ف 5 سنين) فكرة دالتوفير قصيرة. ماشي الشهري د 25 عام. شوف المخطط.",
+  },
+};
+
+function siteCopy() {
+  return SITE_I18N[lang] || SITE_I18N.en;
 }
 
 function defaultPlanYear(work) {
@@ -1186,18 +1307,88 @@ function planTargetYear(work, assignment) {
   return Math.min(planLastYear(), Math.max(FUND.startYear, Math.round(year)));
 }
 
-function planSolve(assignments) {
+function assignmentsKey(assignments) {
+  return planJobCatalog()
+    .map((work) => `${work.id}:${assignments[work.id] ?? "off"}`)
+    .join("|");
+}
+
+function planMix(assignments) {
+  const assign = assignments || planState();
   const included = planJobCatalog().filter(
-    (work) => assignments[work.id] && assignments[work.id] !== "off"
+    (work) => assign[work.id] && assign[work.id] !== "off"
   );
   const studyWorks = included.filter((work) => !isExtraWork(work.id));
   const extras = included.filter((work) => isExtraWork(work.id));
   const shifts = {};
   included.forEach((work) => {
-    const year = planTargetYear(work, assignments[work.id]);
+    const year = planTargetYear(work, assign[work.id]);
     if (year == null) return;
     shifts[work.id] = year - work.year;
   });
+  return { included, studyWorks, extras, shifts, key: assignmentsKey(assign) };
+}
+
+function studyOnlyAssignments() {
+  const assign = {};
+  (FUND.works || []).forEach((work) => {
+    assign[work.id] = work.year;
+  });
+  EXTRA_WORK.forEach((work) => {
+    assign[work.id] = "off";
+  });
+  return assign;
+}
+
+function writePlanFromWorkshopYears() {
+  const assign = { ...defaultPlanAssignments() };
+  (FUND.works || []).forEach((work) => {
+    assign[work.id] = work.year + Number((workshop.shifts || {})[work.id] || 0);
+  });
+  EXTRA_WORK.forEach((work) => {
+    assign[work.id] =
+      workshop.extras && workshop.extras[work.id]
+        ? work.year + Number((workshop.shifts || {})[work.id] || 0)
+        : "off";
+  });
+  planAssignments = assign;
+  persistPlanAssignments(assign);
+  workshop.planKey = assignmentsKey(assign);
+}
+
+function syncWorkshopToPlanYears(pushFee) {
+  const assign = planState();
+  const mix = planMix(assign);
+  workshop.shifts = { ...mix.shifts };
+  if (!workshop.extras) workshop.extras = defaultExtras();
+  EXTRA_WORK.forEach((work) => {
+    workshop.extras[work.id] = Boolean(
+      assign[work.id] && assign[work.id] !== "off"
+    );
+  });
+  if (pushFee) {
+    const solved = planSolve(assign);
+    if (solved.grow.sim.ok && !solved.grow.capped) {
+      workshop.annual = solved.grow.annual;
+      workshop.increase = 0.02;
+    }
+    workshop.usePhase2 = false;
+    workshop.specialAmount = 0;
+    workshop.loadedStudy = "";
+    workshop.planKey = mix.key;
+  }
+  persistWorkshop();
+  return mix;
+}
+
+function ensurePlanFeeSynced() {
+  const key = assignmentsKey(planState());
+  if (workshop.planKey !== key) syncWorkshopToPlanYears(true);
+  else syncWorkshopToPlanYears(false);
+}
+
+function planSolve(assignments) {
+  const mix = planMix(assignments);
   const base = {
     startBalance: FUND.startBalance,
     interest: FUND.interest,
@@ -1207,9 +1398,9 @@ function planSolve(assignments) {
     phaseYears: 25,
     annual2: FUND.law16Contribution,
     increase2: FUND.inflation,
-    shifts,
-    extraList: extras,
-    workList: studyWorks,
+    shifts: mix.shifts,
+    extraList: mix.extras,
+    workList: mix.studyWorks,
   };
   const search = (increase) => {
     let lo = 500;
@@ -1229,7 +1420,7 @@ function planSolve(assignments) {
     }
     return best;
   };
-  return { flat: search(0), grow: search(0.02), included, shifts };
+  return { flat: search(0), grow: search(0.02), included: mix.included, shifts: mix.shifts };
 }
 
 function verdictHtml(sim) {
@@ -1273,10 +1464,10 @@ function detectTab() {
     next === "fund" ||
     next === "maint" ||
     next === "assembly" ||
-    next === "plan"
+    next === "inspection"
   )
     return next;
-  return "inspection";
+  return "plan";
 }
 
 let lang = detectLang();
@@ -1302,6 +1493,7 @@ function defaultWorkshop() {
     saveLabel: "",
     loadedStudy: "",
     extras: defaultExtras(),
+    planKey: "",
   };
 }
 
@@ -1329,6 +1521,7 @@ function persistWorkshop() {
 let workshop = loadWorkshop();
 
 function workshopOpts() {
+  const mix = planMix(planState());
   return {
     annual: workshop.annual,
     increase: workshop.increase,
@@ -1340,11 +1533,15 @@ function workshopOpts() {
     specialAmount: workshop.specialAmount,
     startBalance: workshop.startBalance,
     interest: Number(workshop.interestPct) / 100,
-    shifts: workshop.shifts,
+    shifts: mix.shifts,
+    extraList: mix.extras,
+    workList: mix.studyWorks,
   };
 }
 
 function applyStudyPath(item) {
+  planAssignments = studyOnlyAssignments();
+  persistPlanAssignments(planAssignments);
   workshop.annual = item.annual;
   workshop.increase = item.increase || 0;
   workshop.usePhase2 = (item.phaseYears || 25) < 25;
@@ -1356,7 +1553,12 @@ function applyStudyPath(item) {
   workshop.startBalance = FUND.startBalance;
   workshop.interestPct = FUND.interest * 100;
   workshop.shifts = {};
+  workshop.extras = defaultExtras();
+  EXTRA_WORK.forEach((work) => {
+    workshop.extras[work.id] = false;
+  });
   workshop.loadedStudy = item.id;
+  workshop.planKey = assignmentsKey(planAssignments);
   persistWorkshop();
 }
 
@@ -1567,7 +1769,7 @@ function pct(value) {
 function syncUrl() {
   const url = new URL(window.location.href);
   url.searchParams.set("lang", lang);
-  if (tab === "inspection") url.searchParams.delete("tab");
+  if (tab === "plan") url.searchParams.delete("tab");
   else url.searchParams.set("tab", tab);
   history.replaceState({}, "", url);
 }
@@ -1633,6 +1835,7 @@ function withCivic(text) {
 
 function chrome(inner) {
   const t = I18N[lang];
+  const nav = siteCopy();
   return `
     <div class="wrap ${tab === "fund" || tab === "plan" ? "fund-page" : ""} ${
       tab === "plan" ? "plan-page" : ""
@@ -1644,24 +1847,24 @@ function chrome(inner) {
         </div>
         <div class="toolbar">
           <nav class="tabs" role="tablist" aria-label="${esc(withCivic(t.tabTitle))}">
-            <button type="button" role="tab" data-tab="inspection" title="${esc(
-              t.navInspection
-            )}" aria-selected="${tab === "inspection"}">${esc(
-              t.navInspection
-            )}</button>
             <button type="button" role="tab" data-tab="plan" title="${esc(
-              planCopy().tab
-            )}" aria-selected="${tab === "plan"}">${esc(planCopy().tab)}</button>
+              nav.navPlan
+            )}" aria-selected="${tab === "plan"}">${esc(nav.navPlan)}</button>
+            <button type="button" role="tab" data-tab="inspection" title="${esc(
+              nav.navInspection
+            )}" aria-selected="${tab === "inspection"}">${esc(
+              nav.navInspection
+            )}</button>
             <button type="button" role="tab" data-tab="fund" title="${esc(
-              t.navFund
-            )}" aria-selected="${tab === "fund"}">${esc(t.navFund)}</button>
+              nav.navFund
+            )}" aria-selected="${tab === "fund"}">${esc(nav.navFund)}</button>
             <button type="button" role="tab" data-tab="maint" title="${esc(
-              t.navMaint
-            )}" aria-selected="${tab === "maint"}">${esc(t.navMaint)}</button>
+              nav.navMaint
+            )}" aria-selected="${tab === "maint"}">${esc(nav.navMaint)}</button>
             <button type="button" role="tab" data-tab="assembly" title="${esc(
-              t.navAssembly
+              nav.navAssembly
             )}" aria-selected="${tab === "assembly"}">${esc(
-              t.navAssembly
+              nav.navAssembly
             )}</button>
           </nav>
           <div class="lang" role="group" aria-label="Language">
@@ -1733,6 +1936,7 @@ function renderInspection() {
   document.getElementById("app").innerHTML = chrome(`
         <h1>${esc(withCivic(t.h1))}</h1>
         <p class="lede">${esc(t.lede)}</p>
+        <aside class="callout">${esc(siteCopy().inspectHint)}</aside>
         <section class="stats">
           ${t.stats
             .map(
@@ -1851,6 +2055,7 @@ function renderFund() {
   const t = I18N[lang];
   const f = FUND_I18N[lang];
   const h = helpCopy();
+  ensurePlanFeeSynced();
   document.title = withCivic(f.title);
   const sim = projectFund(workshopOpts());
   const spendMax = Math.max(1, ...sim.expenses);
@@ -1860,7 +2065,8 @@ function renderFund() {
   );
   const lastYear = FUND.startYear + FUND.expenses.length - 1;
 
-  const workRows = [...(FUND.works || []), ...extraWorksSelected()]
+  const workRows = planMix(planState())
+    .included
     .map((work) => {
       const year = workYear(work);
       const dropped = year > lastYear;
@@ -1966,7 +2172,7 @@ function renderFund() {
 
   document.getElementById("app").innerHTML = chrome(`
         <h1>${esc(withCivic(f.h1))}</h1>
-        <p class="lede">${esc(f.lede)}</p>
+        <p class="lede">${esc(h.fundLead)}</p>
         <section class="stats">
           ${f.stats
             .map(
@@ -1985,7 +2191,6 @@ function renderFund() {
           <strong>${esc(f.calloutTitle)}</strong>
           ${esc(f.callout)}
         </aside>
-        ${recommendBox()}
         <p class="lede">${esc(f.perUnitNow)}</p>
         ${unitStatCards()}
         <h2>${esc(h.guideTitle)}</h2>
@@ -2031,7 +2236,6 @@ function renderFund() {
                 }" />
               </label>
             </div>
-            ${extraCheckList()}
             <div class="sim-actions">
               <button type="button" class="action" data-reset="true">${esc(f.resetStudy)}</button>
               ${tip("reset", h.tips.reset)}
@@ -2040,6 +2244,7 @@ function renderFund() {
           <details class="more-box">
             <summary>${esc(h.moreTitle)}</summary>
             <p class="lede">${esc(h.moreLead)}</p>
+            ${extraCheckList()}
             <div class="sim-grid">
               <label>
                 ${labelLine(f.startBalance, "start", h.tips.start)}
@@ -2128,24 +2333,24 @@ function renderFund() {
             </div>
           </details>
         </article>
-        <h2>${esc(h.studyPrinted)}</h2>
-        <p class="lede">${esc(h.studyPrintedLead)}</p>
-        <div class="cards">${scenarioCards}</div>
+        <h2>${esc(h.shiftWrapTitle)}</h2>
+        <p class="lede">${esc(f.shiftLead)}</p>
+        <h3>${esc(f.works)}</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>${esc(f.targetYear)}</th>
+                ${f.workHeaders.slice(1).map((header) => `<th>${esc(header)}</th>`).join("")}
+              </tr>
+            </thead>
+            <tbody>${workRows}</tbody>
+          </table>
+        </div>
         <details class="fold-box">
-          <summary>${labelLine(h.shiftWrapTitle, "shift", h.tips.shift)}</summary>
-          <p class="lede">${esc(f.shiftLead)}</p>
-          <h3>${esc(f.works)}</h3>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>${esc(f.targetYear)}</th>
-                  ${f.workHeaders.slice(1).map((header) => `<th>${esc(header)}</th>`).join("")}
-                </tr>
-              </thead>
-              <tbody>${workRows}</tbody>
-            </table>
-          </div>
+          <summary>${esc(h.studyPrinted)}</summary>
+          <p class="lede">${esc(h.studyPrintedLead)}</p>
+          <div class="cards">${scenarioCards}</div>
           <h3>${esc(f.outsideTitle)}</h3>
           <div class="table-wrap">
             <table>
@@ -2155,8 +2360,8 @@ function renderFund() {
               <tbody>${outsideRows}</tbody>
             </table>
           </div>
+          ${marketTable()}
         </details>
-        ${marketTable()}
         <section class="footnote">
           <h3>${esc(f.limits)}</h3>
           <p>${esc(f.limitsBody)}</p>
@@ -2369,17 +2574,22 @@ function bindSim() {
   }
   document.querySelectorAll("[data-extra]").forEach((input) => {
     input.addEventListener("change", () => {
-      if (!workshop.extras) workshop.extras = defaultExtras();
-      workshop.extras[input.dataset.extra] = input.checked;
+      const work = findWork(input.dataset.extra);
+      const assignments = planState();
+      assignments[input.dataset.extra] = input.checked
+        ? defaultPlanYear(work)
+        : "off";
+      persistPlanAssignments(assignments);
       if (workshop.loadedStudy) workshop.loadedStudy = "";
-      persistWorkshop();
-      paint();
+      syncWorkshopToPlanYears(true);
+      render();
     });
   });
   document.querySelectorAll("[data-shift]").forEach((input) => {
     const onYear = () => {
       if (!applyYearShift(input)) return;
       if (workshop.loadedStudy) workshop.loadedStudy = "";
+      syncWorkshopToPlanYears(true);
       paint();
     };
     input.addEventListener("input", onYear);
@@ -2398,8 +2608,11 @@ function bindSim() {
   document.querySelectorAll("[data-reset]").forEach((button) => {
     button.addEventListener("click", () => {
       const saved = workshop.saved;
+      planAssignments = studyOnlyAssignments();
+      persistPlanAssignments(planAssignments);
       workshop = defaultWorkshop();
       workshop.saved = saved;
+      workshop.planKey = assignmentsKey(planAssignments);
       persistWorkshop();
       render();
     });
@@ -2440,6 +2653,7 @@ function bindSim() {
       workshop.shifts = { ...(item.state.shifts || {}) };
       workshop.extras = normalizeExtras(item.state);
       workshop.loadedStudy = "";
+      writePlanFromWorkshopYears();
       persistWorkshop();
       render();
       revealPathChange();
@@ -2623,6 +2837,7 @@ function renderAssembly() {
   document.getElementById("app").innerHTML = chrome(`
         <h1>${esc(a.h1)}</h1>
         <p class="lede">${esc(a.lede)}</p>
+        <aside class="callout">${esc(siteCopy().assemblyNote)}</aside>
         <aside class="callout">
           <strong>${esc(a.calloutTitle)}</strong>
           ${esc(a.callout)}
@@ -2701,10 +2916,16 @@ function planMonthlyInYear(annual0, increase, year) {
 function planStartCards(solved) {
   const p = planCopy();
   const start = Math.max(2027, FUND.startYear);
-  const fees = planMonthlyInYear(solved.grow.annual, 0.02, start);
+  const annual0 = workshop.annual;
+  const increase = workshop.increase;
+  const fees = planMonthlyInYear(annual0, increase, start);
+  const annualStart = roundCad(
+    annual0 * Math.pow(1 + (increase || 0), start - FUND.startYear)
+  );
   return `
     <h2>${esc(p.payStart)}</h2>
     <p class="lede">${esc(p.payHow)}</p>
+    <p class="lede">${esc(p.yearPot)}: ${money(annualStart)} · ${pct(increase)}</p>
     <section class="stats plan-pay">
       ${fees
         .map((row) => {
@@ -2726,7 +2947,9 @@ function planStartCards(solved) {
 
 function planScheduleTable(solved, byYear) {
   const p = planCopy();
-  const portions = portionFees(solved.grow.annual);
+  const annual0 = workshop.annual;
+  const increase = workshop.increase;
+  const portions = portionFees(annual0);
   const years = new Set([2027, ...byYear.keys()]);
   const sortedYears = [...years].sort((left, right) => left - right);
   const head = `<tr><th>${esc(p.colYear)}</th><th>${esc(p.colRepair)}</th>${portions
@@ -2740,7 +2963,7 @@ function planScheduleTable(solved, byYear) {
         return sum + roundCad(work.cost * Math.pow(1 + FUND.inflation, delta));
       }, 0);
       const labels = jobs.map((work) => workLabel(work.id)).join(", ");
-      const fees = planMonthlyInYear(solved.grow.annual, 0.02, year);
+      const fees = planMonthlyInYear(annual0, increase, year);
       return `
         <tr${jobs.length ? "" : ' class="plan-quiet"'}>
           <td>${year}${
@@ -2784,6 +3007,7 @@ function planJobRow(work, assignment) {
 
 function renderPlan() {
   const p = planCopy();
+  ensurePlanFeeSynced();
   document.title = withCivic(p.title);
   const assignments = planState();
   const solved = planSolve(assignments);
@@ -2815,19 +3039,20 @@ function renderPlan() {
     })
     .join("");
   const skipped = catalog.filter((work) => assignments[work.id] === "off");
-  const growOk = solved.grow.sim.ok && !solved.grow.capped;
+  const sim = projectFund(workshopOpts());
+  const customFee =
+    Math.abs((workshop.annual || 0) - (solved.grow.annual || 0)) > 1 ||
+    Math.abs((workshop.increase || 0) - 0.02) > 0.0001;
 
   document.getElementById("app").innerHTML = chrome(`
         <h1>${esc(p.h1)}</h1>
         <p class="lede">${esc(p.lede)}</p>
-        <div id="plan-result">
-          ${
-            growOk
-              ? `${planStartCards(solved)}${planScheduleTable(solved, byYear)}`
-              : `<aside class="callout">${esc(p.cannot)}</aside>`
-          }
-        </div>
-        ${recommendBox(true)}
+        <aside class="how-box">
+          <strong>${esc(p.howTitle)}</strong>
+          <ol>
+            ${p.howSteps.map((step) => `<li>${esc(step)}</li>`).join("")}
+          </ol>
+        </aside>
         <h2>${esc(p.pickTitle)}</h2>
         <div class="plan-buckets">${columns}</div>
         ${
@@ -2838,6 +3063,36 @@ function renderPlan() {
                  .join("")}</ul>`
             : ""
         }
+        <div id="plan-result">
+          ${
+            !sim.ok
+              ? `<aside class="callout">${
+                  solved.grow.capped
+                    ? esc(p.cannot)
+                    : `${esc(helpCopy().resultBadLong)} ${sim.firstGap}.`
+                }</aside>`
+              : ""
+          }
+          ${planStartCards(solved)}${planScheduleTable(solved, byYear)}
+          ${
+            customFee && solved.grow.sim.ok && !solved.grow.capped
+              ? `<aside class="callout">
+                   ${esc(p.customFee)} ${money(solved.grow.annual)}
+                   (${pct(0.02)}).
+                   <div class="sim-actions">
+                     <button type="button" class="action" data-plan-needed="true">${esc(
+                       p.useNeeded
+                     )}</button>
+                   </div>
+                 </aside>`
+              : ""
+          }
+        </div>
+        <section class="footnote">
+          <h3>${esc(p.otherTitle)}</h3>
+          <p>${esc(p.otherBody)}</p>
+          <p>${esc(p.footnote)}</p>
+        </section>
         <div class="sim-actions">
           <button type="button" class="action" data-plan-workshop="true">${esc(
             p.loadWorkshop
@@ -2846,9 +3101,6 @@ function renderPlan() {
             p.reset
           )}</button>
         </div>
-        <section class="footnote">
-          <p>${esc(p.footnote)}</p>
-        </section>
   `);
   bindChrome();
   bindPlan(solved);
@@ -2867,6 +3119,7 @@ function bindPlan(solved) {
       assignments[select.dataset.planJob] =
         select.value === "off" ? "off" : Number(select.value);
       persistPlanAssignments(assignments);
+      syncWorkshopToPlanYears(true);
       render();
     });
   });
@@ -2874,24 +3127,19 @@ function bindPlan(solved) {
     button.addEventListener("click", () => {
       planAssignments = defaultPlanAssignments();
       persistPlanAssignments(planAssignments);
+      syncWorkshopToPlanYears(true);
+      render();
+    });
+  });
+  document.querySelectorAll("[data-plan-needed]").forEach((button) => {
+    button.addEventListener("click", () => {
+      syncWorkshopToPlanYears(true);
       render();
     });
   });
   document.querySelectorAll("[data-plan-workshop]").forEach((button) => {
     button.addEventListener("click", () => {
-      const assignments = planState();
-      workshop.annual = solved.grow.annual;
-      workshop.increase = 0.02;
-      workshop.usePhase2 = false;
-      workshop.specialAmount = 0;
-      workshop.shifts = { ...solved.shifts };
-      workshop.extras = defaultExtras();
-      EXTRA_WORK.forEach((work) => {
-        workshop.extras[work.id] =
-          assignments[work.id] && assignments[work.id] !== "off";
-      });
-      workshop.loadedStudy = "";
-      persistWorkshop();
+      syncWorkshopToPlanYears(false);
       setTab("fund");
     });
   });
