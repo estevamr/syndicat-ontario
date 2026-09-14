@@ -12,7 +12,9 @@ const EXTRA_WORK = [
     year: 2027,
     remaining: 1,
     avg: 40,
-    cost: 2500,
+    cost: 1800,
+    marketMin: 750,
+    marketMax: 2500,
     kind: "near",
     est: true,
   },
@@ -21,7 +23,9 @@ const EXTRA_WORK = [
     year: 2027,
     remaining: 1,
     avg: 45,
-    cost: 3500,
+    cost: 7500,
+    marketMin: 4500,
+    marketMax: 12000,
     kind: "near",
     est: true,
   },
@@ -30,7 +34,9 @@ const EXTRA_WORK = [
     year: 2051,
     remaining: 25,
     avg: 30,
-    cost: 38580,
+    cost: 36000,
+    marketMin: 18000,
+    marketMax: 46000,
     kind: "later",
     est: true,
   },
@@ -39,7 +45,9 @@ const EXTRA_WORK = [
     year: 2051,
     remaining: 25,
     avg: 45,
-    cost: 6851,
+    cost: 13000,
+    marketMin: 8000,
+    marketMax: 20000,
     kind: "later",
     est: true,
   },
@@ -48,11 +56,52 @@ const EXTRA_WORK = [
     year: 2051,
     remaining: 25,
     avg: 25,
-    cost: 23840,
+    cost: 22000,
+    marketMin: 14400,
+    marketMax: 38400,
     kind: "later",
     est: true,
   },
 ];
+
+function marketRange(work) {
+  if (work.marketMin == null || work.marketMax == null) return "";
+  return `${money(work.marketMin)}–${money(work.marketMax)}`;
+}
+
+function marketTable() {
+  const h = helpCopy();
+  const rows = EXTRA_WORK.map(
+    (work) => `
+      <tr>
+        <td>${esc(workLabel(work.id))}</td>
+        <td>${esc(marketRange(work))}</td>
+        <td>${money(work.cost)}</td>
+      </tr>
+    `
+  ).join("");
+  return `
+    <h2>${esc(h.marketTitle)}</h2>
+    <p class="lede">${esc(h.marketNote)}</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>${esc(
+              (FUND_I18N[lang] &&
+                FUND_I18N[lang].workHeaders &&
+                FUND_I18N[lang].workHeaders[1]) ||
+                "Item"
+            )}</th>
+            <th>${esc(h.marketRange)}</th>
+            <th>${esc(h.marketUsed)}</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
 
 function extraWorksSelected() {
   return EXTRA_WORK.filter((work) => {
@@ -231,17 +280,22 @@ const WORKSHOP_HELP = {
       "Also count work after 2050 (roof membrane, aluminum guards, block cladding). Costs are estimates, inflated 3%/year and folded into 2050 so the path has to fund them.",
     avgWork: "Average priced item in the 25-year list",
     extraNames: {
-      backflow: "Sewer backflow valve (estimate)",
-      guardRaise: "Raise balcony guards to 42 in. (estimate)",
-      roofMembrane: "Elastomeric roof membrane (est. from 2023 roof)",
-      alumGuards: "Aluminum guards (estimate, steel-stairs order)",
-      blockCladding: "Concrete-block cladding (est. ~2% of reconstruction)",
+      backflow: "Sewer backflow valve (Montréal mid-market)",
+      guardRaise: "Raise balcony guards to 42 in. (Montréal mid-market)",
+      roofMembrane: "Elastomeric roof membrane (Montréal mid-market)",
+      alumGuards: "Aluminum guards, full replace (Montréal mid-market)",
+      blockCladding: "Concrete-block cladding (Montréal mid-market)",
     },
+    marketTitle: "Montréal contractor ranges (2026)",
+    marketUsed: "Used in workshop",
+    marketRange: "Local range",
+    marketNote:
+      "Midpoints from Greater Montréal 2026 contractor guides, not quotes. Backflow $750–$2,500 (slab cut often $1,200–$2,500); RénoPlex may pay $90 or $600 under a slab. Aluminum guards about $80–$250/lin. ft plus install. Elastomeric reroof about $15–$23/sq. ft; your 2023 roof invoice was $35,311. Block/masonry rebuild about $240–$480/m². Get two or three RBQ quotes.",
     maintAvgTitle: "Upcoming work — average budget",
     maintEst: "Estimate",
     maintInStudy: "In the reserve study",
     maintAvgLead:
-      "Priced items in the 25-year study average this much each. Urgent carnet jobs already in the study use those figures. Jobs with no study price use the estimates and can be switched on in the reserve-fund workshop.",
+      "Priced items in the 25-year study average this much each. Urgent carnet jobs already in the study use those figures. Jobs with no study price use the Montréal mid-market figures below and can be switched on in the reserve-fund workshop.",
   },
   fr: {
     tipLabel: "Aide",
@@ -306,17 +360,22 @@ const WORKSHOP_HELP = {
       "Compter aussi les travaux après 2050 (membrane, garde-corps alu, blocs). Estimations, gonflées de 3 %/an et placées en 2050 pour que le chemin les finance.",
     avgWork: "Poste moyen (prix) dans la liste 25 ans",
     extraNames: {
-      backflow: "Clapet anti-retour (estimation)",
-      guardRaise: "Rehausser les garde-corps à 42 po (estimation)",
-      roofMembrane: "Membrane élastomère (est. toiture 2023)",
-      alumGuards: "Garde-corps aluminium (est., ordre des escaliers acier)",
-      blockCladding: "Revêtement en blocs (est. ~2 % de la reconstruction)",
+      backflow: "Clapet anti-retour (milieu de marché Montréal)",
+      guardRaise: "Rehausser les garde-corps à 42 po (milieu de marché Montréal)",
+      roofMembrane: "Membrane élastomère (milieu de marché Montréal)",
+      alumGuards: "Garde-corps aluminium, remplacement (milieu de marché Montréal)",
+      blockCladding: "Revêtement en blocs (milieu de marché Montréal)",
     },
+    marketTitle: "Fourchettes d’entrepreneurs à Montréal (2026)",
+    marketUsed: "Retenu dans l’atelier",
+    marketRange: "Fourchette locale",
+    marketNote:
+      "Milieux de fourchettes 2026 du Grand Montréal, pas des soumissions. Clapet 750–2 500 $ (dalle souvent 1 200–2 500 $); RénoPlex peut verser 90 $ ou 600 $ sous dalle. Garde-corps alu environ 80–250 $/pi lin. plus pose. Réfection élastomère environ 15–23 $/pi²; facture toiture 2023 : 35 311 $. Maçonnerie/blocs environ 240–480 $/m². Obtenir 2 ou 3 soumissions RBQ.",
     maintAvgTitle: "Travaux à venir — budget moyen",
     maintEst: "Estimation",
     maintInStudy: "Dans l’étude de prévoyance",
     maintAvgLead:
-      "Les postes chiffrés de l’étude 25 ans ont ce coût moyen. Les urgences déjà dans l’étude gardent ces montants. Sans prix d’étude : estimations, activables dans l’atelier du fonds.",
+      "Les postes chiffrés de l’étude 25 ans ont ce coût moyen. Les urgences déjà dans l’étude gardent ces montants. Sans prix d’étude : milieux de marché montréalais ci-dessous, activables dans l’atelier du fonds.",
   },
   pt: {
     tipLabel: "Ajuda",
@@ -381,17 +440,22 @@ const WORKSHOP_HELP = {
       "Contar também obras depois de 2050 (membrana, guarda-corpos, blocos). Estimativas, inflacionadas 3%/ano e somadas em 2050 para o caminho as financiar.",
     avgWork: "Item médio (com preço) na lista de 25 anos",
     extraNames: {
-      backflow: "Válvula anti-retorno (estimativa)",
-      guardRaise: "Elevar guarda-corpos para 42 pol. (estimativa)",
-      roofMembrane: "Membrana do telhado (est. do telhado 2023)",
-      alumGuards: "Guarda-corpos de alumínio (est., ordem das escadas de aço)",
-      blockCladding: "Revestimento de blocos (est. ~2% da reconstrução)",
+      backflow: "Válvula anti-retorno (médio de mercado em Montreal)",
+      guardRaise: "Elevar guarda-corpos para 42 pol. (médio de mercado em Montreal)",
+      roofMembrane: "Membrana elastomérica (médio de mercado em Montreal)",
+      alumGuards: "Guarda-corpos de alumínio, substituição (médio de mercado em Montreal)",
+      blockCladding: "Revestimento de blocos (médio de mercado em Montreal)",
     },
+    marketTitle: "Faixas de empreiteiros em Montreal (2026)",
+    marketUsed: "Usado na oficina",
+    marketRange: "Faixa local",
+    marketNote:
+      "Pontos médios de guias de 2026 na Grande Montreal, não orçamentos. Válvula 750–2.500 $ (laje muitas vezes 1.200–2.500 $); RénoPlex pode pagar 90 $ ou 600 $ sob laje. Guarda-corpos de alumínio cerca de 80–250 $/pé lin. mais instalação. Telhado elastomérico cerca de 15–23 $/pé²; fatura de 2023: 35.311 $. Alvenaria/blocos cerca de 240–480 $/m². Pedir 2 ou 3 orçamentos RBQ.",
     maintAvgTitle: "Obras futuras — orçamento médio",
     maintEst: "Estimativa",
     maintInStudy: "No estudo de reserva",
     maintAvgLead:
-      "Os itens com preço no estudo de 25 anos têm este custo médio. Urgências já no estudo usam esses valores. Sem preço: estimativas, ligáveis na oficina do fundo.",
+      "Os itens com preço no estudo de 25 anos têm este custo médio. Urgências já no estudo usam esses valores. Sem preço: médios de mercado de Montreal abaixo, ligáveis na oficina do fundo.",
   },
   ary: {
     tipLabel: "شرح",
@@ -456,17 +520,22 @@ const WORKSHOP_HELP = {
       "حسب حتى الأشغال من بعد 2050 (الميمبران، الكارد-كور، البلوك). تقديرات، كيزيدو 3% فالسنة وكيتجمعو فـ 2050.",
     avgWork: "المعدل ديال عنصر مسعّر فلائحة 25 عام",
     extraNames: {
-      backflow: "صمام رجوع الواد (تقدير)",
-      guardRaise: "طلع الكارد-كور لـ 42 إنش (تقدير)",
-      roofMembrane: "ميمبران السطح (تقدير من سطح 2023)",
-      alumGuards: "كارد-كور ألومنيوم (تقدير، بحال سلالم الحديد)",
-      blockCladding: "كسوة البلوك (تقدير ~2% من إعادة البناء)",
+      backflow: "صمام رجوع الواد (وسط سوق مونتريال)",
+      guardRaise: "طلع الكارد-كور لـ 42 إنش (وسط سوق مونتريال)",
+      roofMembrane: "ميمبران السطح (وسط سوق مونتريال)",
+      alumGuards: "كارد-كور ألومنيوم، تبديل كامل (وسط سوق مونتريال)",
+      blockCladding: "كسوة البلوك (وسط سوق مونتريال)",
     },
+    marketTitle: "أسعار المقاولين فمونتريال (2026)",
+    marketUsed: "المستعمل فالورشة",
+    marketRange: "المجال المحلي",
+    marketNote:
+      "أوساط مجالات 2026 فالمنطقة، ماشي دوڤيز. الصمام 750–2 500 $ (الدال غالبا 1 200–2 500 $)؛ RénoPlex يقدر يعطي 90 $ ولا 600 $ تحت الدال. الكارد-كور ألومنيوم تقريبا 80–250 $ لكل قدم + التركيب. السطح 15–23 $ للقدم²؛ فاتورة 2023: 35 311 $. البلوك/الماصونية 240–480 $ للمتر². خدّاو 2 ولا 3 دوڤيز RBQ.",
     maintAvgTitle: "الأشغال الجايين — معدل الميزانية",
     maintEst: "تقدير",
     maintInStudy: "فدراسة الاحتياط",
     maintAvgLead:
-      "العناصر المسعّرة فدراسة 25 عام عندها هاد المعدل. الطوارئ اللي ديجا فالدراسة كيبقاو بنفس الثمن. بلا ثمن: تقديرات تقدر تحسبهم فالورشة.",
+      "العناصر المسعّرة فدراسة 25 عام عندها هاد المعدل. الطوارئ اللي ديجا فالدراسة كيبقاو بنفس الثمن. بلا ثمن: وسط سوق مونتريال لتحت، تقدر تحسبهم فالورشة.",
   },
 };
 
@@ -1089,7 +1158,11 @@ function renderFund() {
           }</td>
           <td>${work.remaining} ${esc(f.yearsLeft)}</td>
           <td>${work.avg} ${esc(f.avgLife)}</td>
-          <td>${money(workCost(work))}</td>
+          <td>${money(workCost(work))}${
+            work.est && work.marketMin != null
+              ? `<div class="market-hint">${esc(h.marketRange)}: ${esc(marketRange(work))}</div>`
+              : ""
+          }</td>
         </tr>
       `;
     })
@@ -1195,6 +1268,7 @@ function renderFund() {
         <p class="lede">${esc(f.perUnitNow)}</p>
         ${unitStatCards()}
         ${feeTable(workshop.annual)}
+        ${marketTable()}
         <h2>${esc(f.tryTitle)}</h2>
         <p class="lede">${esc(f.tryLead)}</p>
         <aside class="how-box">
@@ -1671,8 +1745,8 @@ function renderMaint() {
     wall: { cost: 24258, study: true },
     drain: { cost: 19468, study: true },
     ceiling: { cost: 14037, study: true },
-    backflow: { cost: 2500, study: false },
-    guard: { cost: 3500, study: false },
+    backflow: { cost: 1800, study: false, extraId: "backflow" },
+    guard: { cost: 7500, study: false, extraId: "guardRaise" },
   };
   const study = studyWorkStats();
   const urgentPriced = MAINT.urgent
@@ -1691,7 +1765,16 @@ function renderMaint() {
             price
               ? `<p class="lede">${money(price.cost)} · ${esc(
                   price.study ? h.maintInStudy : h.maintEst
-                )}</p>`
+                )}${
+                  price.extraId
+                    ? ` · ${esc(h.marketRange)} ${esc(
+                        marketRange(
+                          EXTRA_WORK.find((work) => work.id === price.extraId) ||
+                            {}
+                        )
+                      )}`
+                    : ""
+                }</p>`
               : ""
           }
         </article>
@@ -1784,6 +1867,7 @@ function renderMaint() {
             <tbody>${carnetPlan}</tbody>
           </table>
         </div>
+        ${marketTable()}
         <h2>${esc(m.yearlyTitle)}</h2>
         <article class="card">
           <ul class="plain">${yearly}</ul>
