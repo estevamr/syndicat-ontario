@@ -897,7 +897,20 @@ const PLAN_I18N = {
     title: "Renovation plan — when, and what you pay",
     h1: "Renovation plan",
     lede:
-      "Give each job a year. The page finds the lowest yearly reserve that stays out of the red, then splits it by quote-part. Skip means that job is not funded in this 25-year window.",
+      "You pay a monthly condo fee every month. That money sits in a shared pot. The pot pays the contractor in the year of the repair — you do not pay the whole job in that month. Set the year on each job, then read the table.",
+    payStart: "Start paying this in January 2027",
+    payHow:
+      "Same fee every month that year. It rises 2% each January so the pot can cover later jobs (especially brick in 2050).",
+    scheduleTitle: "When the repair happens, and what you pay that year",
+    colYear: "Year",
+    colRepair: "Repairs paid from the pot",
+    noRepair: "No repair — you still pay the monthly fee.",
+    extraVs: "vs today",
+    flatAlt: "If you refuse a yearly increase, you would need a flat",
+    startYearNote: "First year of the new fee",
+    pickTitle: "Set the year of each repair",
+    recVsMix:
+      "The monthly numbers above follow the years you pick below. This green box is the study’s default path if you keep the inspector years.",
     off: "Skip",
     yearLabel: "Year",
     resultTitle: "Your years — what you would pay",
@@ -935,7 +948,20 @@ const PLAN_I18N = {
     title: "Plan des travaux — quand, et combien",
     h1: "Plan des travaux",
     lede:
-      "Donnez une année à chaque poste. La page cherche la plus petite cotisation annuelle qui reste dans le vert, puis la répartit selon la quote-part. « Ignorer » = ce poste n’est pas financé dans cette fenêtre de 25 ans.",
+      "Vous payez des frais mensuels tous les mois. Cet argent va dans une cagnotte commune. La cagnotte paie l’entrepreneur l’année du chantier — vous ne payez pas tout le poste ce mois-là. Fixez l’année de chaque poste, puis lisez le tableau.",
+    payStart: "Commencer à payer ça en janvier 2027",
+    payHow:
+      "Le même frais chaque mois de l’année. Il monte de 2 % chaque janvier pour les postes plus tard (surtout la brique en 2050).",
+    scheduleTitle: "Quand le chantier a lieu, et ce que vous payez cette année-là",
+    colYear: "Année",
+    colRepair: "Travaux payés par la cagnotte",
+    noRepair: "Pas de chantier — vous payez quand même le mensuel.",
+    extraVs: "vs aujourd’hui",
+    flatAlt: "Sans hausse annuelle, il faudrait un montant fixe de",
+    startYearNote: "Première année du nouveau frais",
+    pickTitle: "Fixez l’année de chaque poste",
+    recVsMix:
+      "Les mensuels ci-dessus suivent les années choisies plus bas. Ce cadre vert est le chemin par défaut de l’étude si vous gardez les années de l’inspecteur.",
     off: "Ignorer",
     yearLabel: "Année",
     resultTitle: "Vos années — ce que vous paieriez",
@@ -973,7 +999,20 @@ const PLAN_I18N = {
     title: "Plano de obras — quando, e quanto pagam",
     h1: "Plano de obras",
     lede:
-      "Dêem um ano a cada obra. A página procura a menor reserva anual que fica no verde e reparte pela quota. Saltar = essa obra não entra nestes 25 anos.",
+      "Pagam uma taxa mensal todos os meses. Esse dinheiro fica num pote comum. O pote paga o empreiteiro no ano da obra — não pagam a obra inteira nesse mês. Marquem o ano de cada obra e leiam a tabela.",
+    payStart: "Começar a pagar isto em janeiro de 2027",
+    payHow:
+      "A mesma taxa em todos os meses desse ano. Sobe 2% em cada janeiro para as obras mais tarde (sobretudo o tijolo em 2050).",
+    scheduleTitle: "Quando a obra acontece, e o que pagam nesse ano",
+    colYear: "Ano",
+    colRepair: "Obras pagas pelo pote",
+    noRepair: "Sem obra — continuam a pagar o mensal.",
+    extraVs: "vs hoje",
+    flatAlt: "Sem aumento anual, precisariam de um valor fixo de",
+    startYearNote: "Primeiro ano da nova taxa",
+    pickTitle: "Marquem o ano de cada obra",
+    recVsMix:
+      "Os mensais acima seguem os anos que escolherem abaixo. Esta caixa verde é o caminho por defeito do estudo se mantiverem os anos do inspetor.",
     off: "Saltar",
     yearLabel: "Ano",
     resultTitle: "Os vossos anos — o que pagariam",
@@ -1011,7 +1050,20 @@ const PLAN_I18N = {
     title: "مخطط الإصلاح — إيمتى، وشنو تخلصو",
     h1: "مخطط الإصلاح",
     lede:
-      "عطي عام لكل خدمة. الصفحة كاتقلب على أصغر فلوس فالسنة اللي كيبقاو فالخضر، وكاتقسمهم بالكوت-پار. تخطّى = هاد الخدمة ما ممولةش فهاد 25 عام.",
+      "كاتخلصو شهري كل شهر. هاد الفلوس كيمشيو لقادّة مشتركة. القادّة كاتخلّص المقاول عام الخدمة — ما كاتخلصش الخدمة كاملة فداك الشهر. حدّد العام ديال كل خدمة، وقرا الجدول.",
+    payStart: "بدا تخلّص هاد الشي من يناير 2027",
+    payHow:
+      "نفس الشهري كل شهر فداك العام. كيزيد 2% كل يناير باش يغطي الخدمات من بعد (خصوصا الابريك فـ 2050).",
+    scheduleTitle: "إيمتى الخدمة، وشنو كاتخلص فداك العام",
+    colYear: "العام",
+    colRepair: "الخدمات اللي كاتخلصهم القادّة",
+    noRepair: "ما كايناش خدمة — كاتخلص الشهري تا هو.",
+    extraVs: "مقابل دابا",
+    flatAlt: "بلا زيادة سنوية، خصّكم مبلغ ثابت",
+    startYearNote: "أول عام دالمصاريف الجداد",
+    pickTitle: "حدّد العام ديال كل خدمة",
+    recVsMix:
+      "الأرقام الشهرية لفوق كيتبعو السنين لتحت. الصندوق الأخضر هو طريق الدراسة إلا بقيتو بسنين الإنسپكتور.",
     off: "تخطّى",
     yearLabel: "العام",
     resultTitle: "السنين ديالكم — شنو غادي تخلصو",
@@ -2606,11 +2658,12 @@ function renderAssembly() {
   bindChrome();
 }
 
-function recommendBox() {
+function recommendBox(forPlan) {
   const p = planCopy();
   return `
     <aside class="callout ok recommend-box">
       <strong>${esc(p.recTitle)}</strong>
+      ${forPlan ? `<p>${esc(p.recVsMix)}</p>` : ""}
       <p>${esc(p.recLead)}</p>
       <p>${esc(p.recShape)}</p>
       <p>${esc(p.recFees)}</p>
@@ -2639,39 +2692,78 @@ function planYearSelect(work, assignment) {
   `;
 }
 
-function planMixStats(solved) {
-  const p = planCopy();
-  const sim = solved.grow.sim;
-  const gap = sim.ok ? p.mixOk : `${p.mixGap} ${sim.firstGap}`;
-  return `
-    <section class="stats">
-      <div class="stat"><b>${money(sim.end)}</b><span>${esc(p.mixEnd)}</span></div>
-      <div class="stat"><b>${money(sim.minBalance)}</b><span>${esc(p.mixMin)}</span></div>
-      <div class="stat"><b>${esc(gap)}</b><span>${esc(p.mixGap)}</span></div>
-    </section>
-  `;
+function planMonthlyInYear(annual0, increase, year) {
+  const index = Math.max(0, year - FUND.startYear);
+  const annual = roundCad(annual0 * Math.pow(1 + (increase || 0), index));
+  return portionFees(annual);
 }
 
-function planFeeCards(annual, label) {
+function planStartCards(solved) {
   const p = planCopy();
-  const fees = portionFees(annual);
+  const start = Math.max(2027, FUND.startYear);
+  const fees = planMonthlyInYear(solved.grow.annual, 0.02, start);
   return `
-    <h3>${esc(label)}</h3>
-    <p class="lede">${esc(p.yearPot)}: ${money(annual)}</p>
-    <section class="stats">
+    <h2>${esc(p.payStart)}</h2>
+    <p class="lede">${esc(p.payHow)}</p>
+    <section class="stats plan-pay">
       ${fees
-        .map(
-          (row) => `
+        .map((row) => {
+          const extra = row.monthlyNew - row.monthlyNow;
+          return `
             <div class="stat">
               <b>${money2(row.monthlyNew)} <small>${esc(p.month)}</small></b>
               <span>${esc(row.name)} · ${esc(p.today)} ${money2(
                 row.monthlyNow
-              )}</span>
+              )} (${extra >= 0 ? "+" : ""}${money2(extra)})</span>
             </div>
-          `
-        )
+          `;
+        })
         .join("")}
     </section>
+    <p class="lede">${esc(p.flatAlt)} ${money(solved.flat.annual)}.</p>
+  `;
+}
+
+function planScheduleTable(solved, byYear) {
+  const p = planCopy();
+  const portions = portionFees(solved.grow.annual);
+  const years = new Set([2027, ...byYear.keys()]);
+  const sortedYears = [...years].sort((left, right) => left - right);
+  const head = `<tr><th>${esc(p.colYear)}</th><th>${esc(p.colRepair)}</th>${portions
+    .map((row) => `<th>${esc(row.name)}</th>`)
+    .join("")}</tr>`;
+  const body = sortedYears
+    .map((year) => {
+      const jobs = byYear.get(year) || [];
+      const spend = jobs.reduce((sum, work) => {
+        const delta = year - work.year;
+        return sum + roundCad(work.cost * Math.pow(1 + FUND.inflation, delta));
+      }, 0);
+      const labels = jobs.map((work) => workLabel(work.id)).join(", ");
+      const fees = planMonthlyInYear(solved.grow.annual, 0.02, year);
+      return `
+        <tr${jobs.length ? "" : ' class="plan-quiet"'}>
+          <td>${year}${
+            year === 2027 ? ` <span class="extra-meta">${esc(p.startYearNote)}</span>` : ""
+          }</td>
+          <td>${
+            jobs.length ? `${esc(labels)} · ${money(spend)}` : esc(p.noRepair)
+          }</td>
+          ${fees
+            .map((row) => `<td>${money2(row.monthlyNew)} <span class="extra-meta">${esc(p.month)}</span></td>`)
+            .join("")}
+        </tr>
+      `;
+    })
+    .join("");
+  return `
+    <h2>${esc(p.scheduleTitle)}</h2>
+    <div class="table-wrap">
+      <table class="plan-schedule">
+        <thead>${head}</thead>
+        <tbody>${body}</tbody>
+      </table>
+    </div>
   `;
 }
 
@@ -2724,25 +2816,19 @@ function renderPlan() {
     .join("");
   const skipped = catalog.filter((work) => assignments[work.id] === "off");
   const growOk = solved.grow.sim.ok && !solved.grow.capped;
-  const flatOk = solved.flat.sim.ok && !solved.flat.capped;
 
   document.getElementById("app").innerHTML = chrome(`
         <h1>${esc(p.h1)}</h1>
         <p class="lede">${esc(p.lede)}</p>
-        ${recommendBox()}
-        <aside id="plan-result" class="callout ${growOk ? "ok" : ""}">
-          <strong>${esc(p.resultTitle)} · ${solved.included.length} ${esc(
-            p.worksIn
-          )}</strong>
-          <p class="lede">${esc(p.mixLead)}</p>
-          ${planMixStats(solved)}
+        <div id="plan-result">
           ${
             growOk
-              ? planFeeCards(solved.grow.annual, p.growLabel)
-              : `<p>${esc(p.cannot)}</p>`
+              ? `${planStartCards(solved)}${planScheduleTable(solved, byYear)}`
+              : `<aside class="callout">${esc(p.cannot)}</aside>`
           }
-          ${flatOk ? planFeeCards(solved.flat.annual, p.flatLabel) : ""}
-        </aside>
+        </div>
+        ${recommendBox(true)}
+        <h2>${esc(p.pickTitle)}</h2>
         <div class="plan-buckets">${columns}</div>
         ${
           skipped.length

@@ -1066,12 +1066,31 @@ td .pill {
   color: var(--muted);
 }
 
-#plan-result h3 {
-  margin: 18px 0 4px;
+#plan-result h2 {
+  margin: 28px 0 8px;
 }
 
-#plan-result h3:first-of-type {
-  margin-top: 10px;
+#plan-result h2:first-child {
+  margin-top: 8px;
+}
+
+.plan-pay {
+  margin: 8px 0 12px;
+}
+
+.plan-schedule th:nth-child(n + 3),
+.plan-schedule td:nth-child(n + 3) {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.plan-schedule tr.plan-quiet td {
+  color: var(--muted);
+}
+
+html[dir="rtl"] .plan-schedule th:nth-child(n + 3),
+html[dir="rtl"] .plan-schedule td:nth-child(n + 3) {
+  text-align: left;
 }
 
 @media (max-width: 800px) {

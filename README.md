@@ -1,6 +1,6 @@
 # syndicat-ontario
 
-Locked GitHub Pages site for the co-ownership at **4267-4271, rue Ontario Est** (Montréal). The published files live in `docs/`. The inspection and reserve-fund text is **encrypted**; the page asks for a password before it decrypts anything in the browser.
+Locked GitHub Pages site for the co-ownership at **4267, 4269, 4271, rue Ontario Est** (Montréal). The published files live in `docs/`. The inspection and reserve-fund text is **encrypted**; the page asks for a password before it decrypts anything in the browser.
 
 Live URL after Pages is enabled: **https://estevamr.github.io/syndicat-ontario/**
 
