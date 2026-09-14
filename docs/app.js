@@ -290,10 +290,11 @@ function studyWorkStats() {
   };
 }
 
-function spendPlan(shifts) {
+function spendPlan(shifts, extraList, workList) {
   const years = FUND.expenses.length;
-  const extras = extraWorksSelected();
-  const rebuild = hasShifts(shifts);
+  const extras = extraList !== undefined ? extraList : extraWorksSelected();
+  const catalog = workList !== undefined ? workList : FUND.works || [];
+  const rebuild = hasShifts(shifts) || workList !== undefined;
   const expenses = rebuild ? Array(years).fill(0) : FUND.expenses.slice();
   const dropped = [];
   const add = (work) => {
@@ -307,13 +308,13 @@ function spendPlan(shifts) {
     } else if (idx < 0) expenses[0] += cost;
     else expenses[idx] += cost;
   };
-  if (rebuild) (FUND.works || []).forEach(add);
+  if (rebuild) catalog.forEach(add);
   extras.forEach(add);
   return { expenses, dropped };
 }
 
 window.projectFund = function projectFund(opts) {
-  const plan = spendPlan(opts.shifts);
+  const plan = spendPlan(opts.shifts, opts.extraList, opts.workList);
   const expenses = plan.expenses;
   const annual = Number(opts.annual);
   const increase = Number(opts.increase) || 0;
@@ -876,6 +877,261 @@ function helpCopy() {
   return WORKSHOP_HELP[lang] || WORKSHOP_HELP.en;
 }
 
+const PLAN_NOW_IDS = [
+  "drain",
+  "foundationWall",
+  "woodBalconies",
+  "backflow",
+  "guardRaise",
+  "crackSeal",
+  "balconyGutter",
+];
+
+const PLAN_I18N = {
+  en: {
+    tab: "Plan",
+    title: "Renovation plan — when, and what you pay",
+    h1: "Renovation plan",
+    lede:
+      "Put each job in Now, Next, or Later. The page finds the lowest yearly reserve that stays out of the red, then splits it by quote-part. Tick Skip if you are not funding that job in this 25-year window.",
+    now: "Now",
+    next: "Next",
+    later: "Later",
+    off: "Skip",
+    nowYears: "2027–2028",
+    nextYears: "around 2031",
+    laterYears: "study year, through 2050",
+    nowLead: "Inspector and carnet first: moisture, backflow, guards.",
+    nextLead: "Jobs whose useful life is about gone in the next five to ten years.",
+    laterLead: "The long list, including the 2050 brick peak.",
+    resultTitle: "What each portion would pay",
+    growLabel: "If the reserve grows 2% / year (study’s recommended shape)",
+    flatLabel: "If the reserve stays a flat dollar amount",
+    today: "today",
+    month: "/ month",
+    yearPot: "Shared reserve / year",
+    worksIn: "Jobs in this plan",
+    cannot: "Even $45,000 / year does not cover this mix. Skip or delay a big item.",
+    loadWorkshop: "Open this mix in the reserve workshop",
+    reset: "Reset to inspector priority",
+    skipTitle: "Skipped (not in the pot)",
+    footnote:
+      "Now jobs land in 2027–2028, Next in 2031, Later on the study year. Costs inflate 3% / year if you delay. Unchecked jobs are omitted — the building still ages. Get RBQ quotes before you vote a fee.",
+    empty: "No job in this bucket.",
+  },
+  fr: {
+    tab: "Plan",
+    title: "Plan des travaux — quand, et combien",
+    h1: "Plan des travaux",
+    lede:
+      "Classez chaque poste : Maintenant, Ensuite ou Plus tard. La page cherche la plus petite cotisation annuelle qui reste dans le vert, puis la répartit selon la quote-part. « Ignorer » = ce poste n’est pas financé dans cette fenêtre de 25 ans.",
+    now: "Maintenant",
+    next: "Ensuite",
+    later: "Plus tard",
+    off: "Ignorer",
+    nowYears: "2027–2028",
+    nextYears: "vers 2031",
+    laterYears: "année de l’étude, jusqu’en 2050",
+    nowLead: "Priorité inspecteur et carnet : humidité, clapet, garde-corps.",
+    nextLead: "Postes dont la durée de vie s’achève dans les 5 à 10 prochaines années.",
+    laterLead: "La longue liste, y compris le pic de brique en 2050.",
+    resultTitle: "Ce que chaque portion paierait",
+    growLabel: "Si la prévoyance monte de 2 % / an (forme recommandée de l’étude)",
+    flatLabel: "Si le montant annuel reste le même",
+    today: "aujourd’hui",
+    month: "/ mois",
+    yearPot: "Prévoyance commune / an",
+    worksIn: "Postes dans ce plan",
+    cannot: "Même 45 000 $ / an ne couvrent pas ce mélange. Ignorez ou reportez un gros poste.",
+    loadWorkshop: "Ouvrir ce mélange dans l’atelier du fonds",
+    reset: "Revenir à la priorité de l’inspecteur",
+    skipTitle: "Ignorés (hors cagnotte)",
+    footnote:
+      "Maintenant = 2027–2028, Ensuite = 2031, Plus tard = année de l’étude. +3 % / an si vous reportez. Un poste ignoré n’est pas financé — l’immeuble vieillit quand même. Obtenir des soumissions RBQ avant de voter les frais.",
+    empty: "Aucun poste dans ce seau.",
+  },
+  pt: {
+    tab: "Plano",
+    title: "Plano de obras — quando, e quanto pagam",
+    h1: "Plano de obras",
+    lede:
+      "Ponham cada obra em Agora, Depois ou Mais tarde. A página procura a menor reserva anual que fica no verde e reparte pela quota. Saltar = essa obra não entra nestes 25 anos.",
+    now: "Agora",
+    next: "Depois",
+    later: "Mais tarde",
+    off: "Saltar",
+    nowYears: "2027–2028",
+    nextYears: "por 2031",
+    laterYears: "ano do estudo, até 2050",
+    nowLead: "Primeiro do inspetor e do caderno: humidade, válvula, guarda-corpos.",
+    nextLead: "Obras cuja vida útil acaba nos próximos 5 a 10 anos.",
+    laterLead: "A lista longa, incluindo o pico de tijolo em 2050.",
+    resultTitle: "O que cada porção pagaria",
+    growLabel: "Se a reserva crescer 2% / ano (forma recomendada do estudo)",
+    flatLabel: "Se o valor anual ficar igual",
+    today: "hoje",
+    month: "/ mês",
+    yearPot: "Reserva comum / ano",
+    worksIn: "Obras neste plano",
+    cannot: "Nem 45.000 $ / ano cobrem esta mistura. Saltem ou atrasem uma obra grande.",
+    loadWorkshop: "Abrir esta mistura na oficina do fundo",
+    reset: "Voltar à prioridade do inspetor",
+    skipTitle: "Saltadas (fora do pote)",
+    footnote:
+      "Agora = 2027–2028, Depois = 2031, Mais tarde = ano do estudo. +3% / ano se atrasarem. Obras saltadas não são financiadas — o prédio continua a envelhecer. Peçam orçamentos RBQ antes de votar a taxa.",
+    empty: "Nenhuma obra neste grupo.",
+  },
+  ary: {
+    tab: "المخطط",
+    title: "مخطط الإصلاح — إيمتى، وشنو تخلصو",
+    h1: "مخطط الإصلاح",
+    lede:
+      "حط كل خدمة فدابا، من بعد، ولا من بعد بزاف. الصفحة كاتقلب على أصغر فلوس فالسنة اللي كيبقاو فالخضر، وكاتقسمهم بالكوت-پار. تخطّى = هاد الخدمة ما ممولةش فهاد 25 عام.",
+    now: "دابا",
+    next: "من بعد",
+    later: "من بعد بزاف",
+    off: "تخطّى",
+    nowYears: "2027–2028",
+    nextYears: "حوالى 2031",
+    laterYears: "عام الدراسة، حتى 2050",
+    nowLead: "اللولين ديال الإنسپكتور والكارني: الرطوبة، الصمام، الكارد-كور.",
+    nextLead: "الخدمات اللي العمر ديالهم كيسالا فـ 5 حتى 10 سنين.",
+    laterLead: "اللائحة الطويلة، حتى قمة الابريك فـ 2050.",
+    resultTitle: "شنو غادي تخلص كل حصة",
+    growLabel: "إلا الاحتياط طلع 2% فالسنة (الشكل اللي وصّات بيه الدراسة)",
+    flatLabel: "إلا المبلغ السنوي بقا بحالو",
+    today: "دابا",
+    month: "/ شهر",
+    yearPot: "الاحتياط المشترك / عام",
+    worksIn: "الخدمات فهاد المخطط",
+    cannot: "حتى 45 000 $ فالسنة ما يكفيوش. تخطّاو ولا أخّرو خدمة كبيرة.",
+    loadWorkshop: "حلّ هاد الخلطة فورشة الصندوق",
+    reset: "رجع لأولوية الإنسپكتور",
+    skipTitle: "متخطّيين (برا القادّة)",
+    footnote:
+      "دابا = 2027–2028، من بعد = 2031، من بعد بزاف = عام الدراسة. +3% فالسنة إلا أخّرتي. الخدمة المتخطّاة ما ممولةش — العمارة كتكبر فالعمر. خدّاو دوڤيز RBQ قبل ما تصوّتو على المصاريف.",
+    empty: "حتى خدمة فهاد المجموعة.",
+  },
+};
+
+function planCopy() {
+  return PLAN_I18N[lang] || PLAN_I18N.en;
+}
+
+function defaultPlanAssignments() {
+  const assign = {};
+  (FUND.works || []).forEach((work) => {
+    if (PLAN_NOW_IDS.includes(work.id)) assign[work.id] = "now";
+    else if (work.remaining <= 10) assign[work.id] = "next";
+    else assign[work.id] = "later";
+  });
+  EXTRA_WORK.forEach((work) => {
+    if (PLAN_NOW_IDS.includes(work.id)) assign[work.id] = "now";
+    else if (work.kind === "near") assign[work.id] = "next";
+    else assign[work.id] = "later";
+  });
+  return assign;
+}
+
+const PLAN_STORE = "syndicat-ontario-plan-v1";
+
+function loadPlanAssignments() {
+  const base = defaultPlanAssignments();
+  try {
+    const raw = JSON.parse(localStorage.getItem(PLAN_STORE) || "null");
+    if (!raw || typeof raw !== "object") return base;
+    const next = { ...base };
+    Object.keys(raw).forEach((id) => {
+      if (["now", "next", "later", "off"].includes(raw[id])) next[id] = raw[id];
+    });
+    return next;
+  } catch (err) {
+    return base;
+  }
+}
+
+function persistPlanAssignments(assignments) {
+  localStorage.setItem(PLAN_STORE, JSON.stringify(assignments));
+}
+
+let planAssignments = null;
+
+function planState() {
+  if (!planAssignments) planAssignments = loadPlanAssignments();
+  return planAssignments;
+}
+
+function planJobCatalog() {
+  const seen = new Set();
+  const list = [];
+  const push = (work) => {
+    if (!work || seen.has(work.id)) return;
+    seen.add(work.id);
+    list.push(work);
+  };
+  PLAN_NOW_IDS.forEach((id) => push(findWork(id)));
+  (FUND.works || []).forEach(push);
+  EXTRA_WORK.forEach(push);
+  return list;
+}
+
+function planTargetYear(work, bucket) {
+  if (bucket === "now") {
+    return EXTRA_WORK.some((item) => item.id === work.id) ? 2027 : 2028;
+  }
+  if (bucket === "next") return 2031;
+  const last = FUND.startYear + FUND.expenses.length - 1;
+  return Math.min(last, work.year || last);
+}
+
+function isExtraWork(id) {
+  return EXTRA_WORK.some((item) => item.id === id);
+}
+
+function planSolve(assignments) {
+  const included = planJobCatalog().filter(
+    (work) => assignments[work.id] && assignments[work.id] !== "off"
+  );
+  const studyWorks = included.filter((work) => !isExtraWork(work.id));
+  const extras = included.filter((work) => isExtraWork(work.id));
+  const shifts = {};
+  included.forEach((work) => {
+    shifts[work.id] = planTargetYear(work, assignments[work.id]) - work.year;
+  });
+  const base = {
+    startBalance: FUND.startBalance,
+    interest: FUND.interest,
+    specialYear: 0,
+    specialAmount: 0,
+    usePhase2: false,
+    phaseYears: 25,
+    annual2: FUND.law16Contribution,
+    increase2: FUND.inflation,
+    shifts,
+    extraList: extras,
+    workList: studyWorks,
+  };
+  const search = (increase) => {
+    let lo = 500;
+    let hi = 45000;
+    let best = null;
+    while (lo <= hi) {
+      const mid = Math.round((lo + hi) / 2 / 50) * 50;
+      const sim = projectFund({ ...base, annual: mid, increase });
+      if (sim.ok) {
+        best = { annual: mid, increase, sim };
+        hi = mid - 50;
+      } else lo = mid + 50;
+    }
+    if (!best) {
+      const sim = projectFund({ ...base, annual: 45000, increase });
+      return { annual: 45000, increase, sim, capped: !sim.ok };
+    }
+    return best;
+  };
+  return { flat: search(0), grow: search(0.02), included, shifts };
+}
+
 function verdictHtml(sim) {
   const f = FUND_I18N[lang];
   const h = helpCopy();
@@ -913,7 +1169,13 @@ function detectLang() {
 function detectTab() {
   const params = new URLSearchParams(window.location.search);
   const next = params.get("tab");
-  if (next === "fund" || next === "maint" || next === "assembly") return next;
+  if (
+    next === "fund" ||
+    next === "maint" ||
+    next === "assembly" ||
+    next === "plan"
+  )
+    return next;
   return "inspection";
 }
 
@@ -1272,7 +1534,9 @@ function withCivic(text) {
 function chrome(inner) {
   const t = I18N[lang];
   return `
-    <div class="wrap ${tab === "fund" ? "fund-page" : ""}">
+    <div class="wrap ${tab === "fund" || tab === "plan" ? "fund-page" : ""} ${
+      tab === "plan" ? "plan-page" : ""
+    }">
       <header class="topbar">
         <div class="titles">
           <p class="site-title">${esc(withCivic(t.tabTitle))}</p>
@@ -1285,6 +1549,9 @@ function chrome(inner) {
             )}" aria-selected="${tab === "inspection"}">${esc(
               t.navInspection
             )}</button>
+            <button type="button" role="tab" data-tab="plan" title="${esc(
+              planCopy().tab
+            )}" aria-selected="${tab === "plan"}">${esc(planCopy().tab)}</button>
             <button type="button" role="tab" data-tab="fund" title="${esc(
               t.navFund
             )}" aria-selected="${tab === "fund"}">${esc(t.navFund)}</button>
@@ -1313,7 +1580,9 @@ function chrome(inner) {
           )}</button>
         </div>
       </header>
-      <main id="main" class="${tab === "fund" ? "fund-stack" : ""}">${inner}</main>
+      <main id="main" class="${
+        tab === "fund" || tab === "plan" ? "fund-stack" : ""
+      }">${inner}</main>
     </div>
   `;
 }
@@ -2288,11 +2557,171 @@ function renderAssembly() {
   bindChrome();
 }
 
+function planFeeCards(annual, label) {
+  const p = planCopy();
+  const fees = portionFees(annual);
+  return `
+    <h3>${esc(label)}</h3>
+    <p class="lede">${esc(p.yearPot)}: ${money(annual)}</p>
+    <section class="stats">
+      ${fees
+        .map(
+          (row) => `
+            <div class="stat">
+              <b>${money2(row.monthlyNew)} <small>${esc(p.month)}</small></b>
+              <span>${esc(row.name)} · ${esc(p.today)} ${money2(
+                row.monthlyNow
+              )}</span>
+            </div>
+          `
+        )
+        .join("")}
+    </section>
+  `;
+}
+
+function planJobRow(work, bucket) {
+  const p = planCopy();
+  const year = bucket === "off" ? "—" : String(planTargetYear(work, bucket));
+  const delta = bucket === "off" ? 0 : planTargetYear(work, bucket) - work.year;
+  const shown = roundCad(work.cost * Math.pow(1 + FUND.inflation, delta));
+  return `
+    <li class="plan-job">
+      <div>
+        <strong>${esc(workLabel(work.id))}</strong>
+        <span class="extra-meta">${money(shown)} · ${esc(year)}</span>
+      </div>
+      <label class="plan-pick">
+        <select data-plan-job="${esc(work.id)}">
+          <option value="now" ${bucket === "now" ? "selected" : ""}>${esc(p.now)}</option>
+          <option value="next" ${bucket === "next" ? "selected" : ""}>${esc(p.next)}</option>
+          <option value="later" ${bucket === "later" ? "selected" : ""}>${esc(p.later)}</option>
+          <option value="off" ${bucket === "off" ? "selected" : ""}>${esc(p.off)}</option>
+        </select>
+      </label>
+    </li>
+  `;
+}
+
+function renderPlan() {
+  const p = planCopy();
+  document.title = withCivic(p.title);
+  const assignments = planState();
+  const solved = planSolve(assignments);
+  const catalog = planJobCatalog();
+  const buckets = [
+    { id: "now", title: p.now, years: p.nowYears, lead: p.nowLead },
+    { id: "next", title: p.next, years: p.nextYears, lead: p.nextLead },
+    { id: "later", title: p.later, years: p.laterYears, lead: p.laterLead },
+  ];
+  const columns = buckets
+    .map((bucket) => {
+      const jobs = catalog.filter((work) => assignments[work.id] === bucket.id);
+      const spend = jobs.reduce((sum, work) => {
+        const delta = planTargetYear(work, bucket.id) - work.year;
+        return sum + roundCad(work.cost * Math.pow(1 + FUND.inflation, delta));
+      }, 0);
+      return `
+        <article class="card plan-col">
+          <h2>${esc(bucket.title)}</h2>
+          <p class="lede">${esc(bucket.years)} · ${money(spend)}</p>
+          <p>${esc(bucket.lead)}</p>
+          ${
+            jobs.length
+              ? `<ul class="plan-jobs">${jobs
+                  .map((work) => planJobRow(work, bucket.id))
+                  .join("")}</ul>`
+              : `<p class="lede">${esc(p.empty)}</p>`
+          }
+        </article>
+      `;
+    })
+    .join("");
+  const skipped = catalog.filter((work) => assignments[work.id] === "off");
+  const growOk = solved.grow.sim.ok && !solved.grow.capped;
+  const flatOk = solved.flat.sim.ok && !solved.flat.capped;
+
+  document.getElementById("app").innerHTML = chrome(`
+        <h1>${esc(p.h1)}</h1>
+        <p class="lede">${esc(p.lede)}</p>
+        <aside id="plan-result" class="callout ${growOk ? "ok" : ""}">
+          <strong>${esc(p.resultTitle)} · ${solved.included.length} ${esc(
+            p.worksIn
+          )}</strong>
+          ${
+            growOk
+              ? planFeeCards(solved.grow.annual, p.growLabel)
+              : `<p>${esc(p.cannot)}</p>`
+          }
+          ${flatOk ? planFeeCards(solved.flat.annual, p.flatLabel) : ""}
+        </aside>
+        <div class="plan-buckets">${columns}</div>
+        ${
+          skipped.length
+            ? `<h2>${esc(p.skipTitle)}</h2>
+               <ul class="plan-jobs plan-skipped">${skipped
+                 .map((work) => planJobRow(work, "off"))
+                 .join("")}</ul>`
+            : ""
+        }
+        <div class="sim-actions">
+          <button type="button" class="action" data-plan-workshop="true">${esc(
+            p.loadWorkshop
+          )}</button>
+          <button type="button" class="action ghost" data-plan-reset="true">${esc(
+            p.reset
+          )}</button>
+        </div>
+        <section class="footnote">
+          <p>${esc(p.footnote)}</p>
+        </section>
+  `);
+  bindChrome();
+  bindPlan(solved);
+}
+
+function bindPlan(solved) {
+  document.querySelectorAll("[data-plan-job]").forEach((select) => {
+    select.addEventListener("change", () => {
+      const assignments = planState();
+      assignments[select.dataset.planJob] = select.value;
+      persistPlanAssignments(assignments);
+      render();
+    });
+  });
+  document.querySelectorAll("[data-plan-reset]").forEach((button) => {
+    button.addEventListener("click", () => {
+      planAssignments = defaultPlanAssignments();
+      persistPlanAssignments(planAssignments);
+      render();
+    });
+  });
+  document.querySelectorAll("[data-plan-workshop]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const assignments = planState();
+      workshop.annual = solved.grow.annual;
+      workshop.increase = 0.02;
+      workshop.usePhase2 = false;
+      workshop.specialAmount = 0;
+      workshop.shifts = { ...solved.shifts };
+      workshop.extras = defaultExtras();
+      EXTRA_WORK.forEach((work) => {
+        workshop.extras[work.id] =
+          assignments[work.id] && assignments[work.id] !== "off";
+      });
+      workshop.loadedStudy = "";
+      persistWorkshop();
+      setTab("fund");
+    });
+  });
+}
+
 function render() {
   document.documentElement.lang = I18N[lang].htmlLang;
   document.documentElement.dir = I18N[lang].dir === "rtl" ? "rtl" : "ltr";
   try {
-    if (tab === "fund") renderFund();
+    if (tab === "plan") renderPlan();
+    else if (tab === "fund") renderFund();
     else if (tab === "maint") renderMaint();
     else if (tab === "assembly") renderAssembly();
     else renderInspection();

@@ -998,13 +998,74 @@ td .pill {
   color: var(--muted);
 }
 
+.plan-buckets {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin: 8px 0 28px;
+}
+
+.plan-col h2 {
+  margin: 0 0 6px;
+}
+
+.plan-jobs {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.plan-job {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--line);
+}
+
+.plan-job:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.plan-pick select {
+  font: inherit;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  max-width: 11rem;
+}
+
+.plan-skipped {
+  margin-bottom: 24px;
+}
+
+#plan-result .stat small {
+  font-size: 0.55em;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+#plan-result h3 {
+  margin: 18px 0 4px;
+}
+
+#plan-result h3:first-of-type {
+  margin-top: 10px;
+}
+
 @media (max-width: 800px) {
   .stats,
   .unit-stats,
   .grid-2,
   .grid-3,
   .sim-grid,
-  .gallery {
+  .gallery,
+  .plan-buckets {
     grid-template-columns: 1fr;
   }
 }
