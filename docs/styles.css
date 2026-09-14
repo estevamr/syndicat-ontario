@@ -679,6 +679,23 @@ tr:last-child td {
   color: var(--muted);
 }
 
+.extra-tally {
+  margin: 4px 0 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  background: var(--info-soft);
+}
+
+.extra-tally strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.extra-tally .lede,
+.extra-tally p {
+  margin: 8px 0 0;
+}
+
 .verdict-nums {
   margin: 8px 0 0;
 }

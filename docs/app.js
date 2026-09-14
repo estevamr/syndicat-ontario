@@ -180,6 +180,30 @@ function extraWorksSelected() {
   );
 }
 
+function extraSpendTotal() {
+  return extraWorksSelected().reduce((sum, work) => sum + workCost(work), 0);
+}
+
+function extraTallyHtml(sim) {
+  const h = helpCopy();
+  const f = FUND_I18N[lang];
+  const extras = extraWorksSelected();
+  const spend = extraSpendTotal();
+  if (!extras.length) {
+    return `<aside id="extra-tally" class="extra-tally">${esc(h.extraTallyNone)}</aside>`;
+  }
+  const result = sim.ok
+    ? h.resultOkLong
+    : `${h.resultBadLong} ${sim.firstGap}.`;
+  return `<aside id="extra-tally" class="extra-tally">
+    <strong>${esc(h.extraTallyOn)} ${money(spend)}</strong>
+    <p class="lede">${esc(h.extraTallyFees)}</p>
+    <p>${esc(h.extraTallyResult)} ${esc(result)} ${esc(f.endBalance)}: ${money(
+      sim.end
+    )}.</p>
+  </aside>`;
+}
+
 function extraCheckList() {
   const h = helpCopy();
   const row = (work) => `
@@ -202,6 +226,7 @@ function extraCheckList() {
       ${near.map(row).join("")}
       <p class="chart-label">${esc(h.extraLaterHead)}</p>
       ${later.map(row).join("")}
+      ${extraTallyHtml(projectFund(workshopOpts()))}
     </div>
   `;
 }
@@ -458,6 +483,13 @@ const WORKSHOP_HELP = {
     extraListLead:
       "Jobs the 25-year study skipped. Tick one to add it to the pot.",
     extraLaterHead: "After 2050 (folded into the last year)",
+    extraInResult: "Extra jobs on the work side",
+    extraTallyNone:
+      "No extra jobs ticked. The pot only covers the study’s 25-year list.",
+    extraTallyOn: "Extra jobs added to the work side:",
+    extraTallyFees:
+      "The yearly fee sliders above stay put. If the box turns red, raise the yearly pot.",
+    extraTallyResult: "Updated result:",
     marketTitle: "Montréal contractor ranges (2026)",
     marketUsed: "Used in workshop",
     marketRange: "Local range",
@@ -574,6 +606,13 @@ const WORKSHOP_HELP = {
     extraListLead:
       "Travaux absents de l’étude 25 ans. Cochez pour les ajouter à la cagnotte.",
     extraLaterHead: "Après 2050 (placés dans la dernière année)",
+    extraInResult: "Travaux extras côté dépenses",
+    extraTallyNone:
+      "Aucun extra coché. La cagnotte ne couvre que la liste 25 ans de l’étude.",
+    extraTallyOn: "Extras ajoutés côté travaux :",
+    extraTallyFees:
+      "Les curseurs de cotisation annuelle ne bougent pas. Si l’encadré passe au rouge, augmentez la cagnotte.",
+    extraTallyResult: "Résultat à jour :",
     marketTitle: "Fourchettes d’entrepreneurs à Montréal (2026)",
     marketUsed: "Retenu dans l’atelier",
     marketRange: "Fourchette locale",
@@ -690,6 +729,13 @@ const WORKSHOP_HELP = {
     extraListLead:
       "Obras que o estudo de 25 anos saltou. Marquem para as somar ao pote.",
     extraLaterHead: "Depois de 2050 (somadas no último ano)",
+    extraInResult: "Obras extra no lado das despesas",
+    extraTallyNone:
+      "Nenhuma extra marcada. O pote só cobre a lista de 25 anos do estudo.",
+    extraTallyOn: "Extras somados às obras:",
+    extraTallyFees:
+      "Os cursores da taxa anual não mexem. Se a caixa ficar vermelha, subam o pote.",
+    extraTallyResult: "Resultado atualizado:",
     marketTitle: "Faixas de empreiteiros em Montreal (2026)",
     marketUsed: "Usado na oficina",
     marketRange: "Faixa local",
@@ -806,6 +852,13 @@ const WORKSHOP_HELP = {
     extraListLead:
       "أشغال اللي الدراسة ديال 25 عام ما حسباتهمش. علّم باش تزيدهم للقادّة.",
     extraLaterHead: "من بعد 2050 (كيتجمعو فآخر عام)",
+    extraInResult: "الأشغال الزايدة فجهة الخرج",
+    extraTallyNone:
+      "ما علّمتي حتى شغل زايد. القادّة كاتغطي غير لائحة 25 عام ديال الدراسة.",
+    extraTallyOn: "الأشغال الزايدة اللي تزادو:",
+    extraTallyFees:
+      "السلايدر ديال الفلوس فالسنة ما كيتّحركوش. إلا الصندوق حمر، طلّع القادّة.",
+    extraTallyResult: "النتيجة دابا:",
     marketTitle: "أسعار المقاولين فمونتريال (2026)",
     marketUsed: "المستعمل فالورشة",
     marketRange: "المجال المحلي",
@@ -830,12 +883,18 @@ function verdictHtml(sim) {
     ? h.resultOkLong
     : `${h.resultBadLong} ${sim.firstGap}.`;
   const hint = sim.ok ? h.resultHintOk : h.resultHintBad;
+  const extraSpend = extraSpendTotal();
+  const extraLine =
+    extraSpend > 0
+      ? `<p class="verdict-nums">${esc(h.extraInResult)} ${money(extraSpend)}.</p>`
+      : "";
   return `<strong>${esc(headline)} ${tip("result", h.tips.result)}</strong>
     <p class="verdict-nums">${esc(f.endBalance)}: ${money(sim.end)}. ${esc(
       f.minBalance
     )}: ${money(sim.minBalance)}. ${esc(f.totalPaid)}: ${money(
       sim.totalContrib
     )}.</p>
+    ${extraLine}
     <p class="lede">${esc(hint)}</p>`;
 }
 
@@ -1881,6 +1940,12 @@ function bindSim() {
     document.querySelectorAll(".card.pick[data-path]").forEach((card) => {
       card.classList.toggle("active", card.dataset.path === workshop.loadedStudy);
     });
+    const extraTally = document.getElementById("extra-tally");
+    if (extraTally) {
+      const wrap = document.createElement("div");
+      wrap.innerHTML = extraTallyHtml(sim);
+      extraTally.replaceWith(wrap.firstElementChild);
+    }
     const feeBody = document.getElementById("fee-body");
     if (feeBody) {
       feeBody.innerHTML = portionFees(workshop.annual)
@@ -1938,7 +2003,7 @@ function bindSim() {
       workshop.extras[input.dataset.extra] = input.checked;
       if (workshop.loadedStudy) workshop.loadedStudy = "";
       persistWorkshop();
-      render();
+      paint();
     });
   });
   document.querySelectorAll("[data-shift]").forEach((input) => {
