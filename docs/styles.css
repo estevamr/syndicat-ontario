@@ -458,78 +458,106 @@ tr:last-child td {
   border-left-color: var(--ok);
 }
 
-.fund-page h1 {
-  margin-bottom: 16px;
+.fund-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
 }
 
-.fund-page h2 {
-  margin-top: 56px;
-  margin-bottom: 16px;
+.fund-stack > * {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
-.fund-page h3 {
-  margin-top: 32px;
-  margin-bottom: 14px;
+.fund-stack > h2 {
+  margin-top: 16px;
+}
+
+.fund-stack > h3 {
+  margin-top: 8px;
 }
 
 .fund-page .lede {
-  margin-bottom: 32px;
+  margin-bottom: 0;
 }
 
 .fund-page .stats {
-  gap: 14px;
-  margin-bottom: 28px;
+  gap: 16px;
+  margin-bottom: 0;
 }
 
 .fund-page .callout {
-  margin: 20px 0 32px;
-  padding: 20px 22px;
-}
-
-.fund-page .card {
+  margin: 0;
   padding: 22px 24px;
 }
 
+.fund-page .card {
+  padding: 24px 26px;
+}
+
 .fund-page .cards {
-  gap: 18px;
+  gap: 22px;
 }
 
 .fund-page .card.sim {
-  padding: 28px 26px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 32px 28px 36px;
+}
+
+.fund-page .card.sim > * {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .fund-page .sim-grid {
-  gap: 22px 24px;
-  margin-bottom: 24px;
+  gap: 24px 28px;
+  margin-bottom: 0;
 }
 
 .fund-page .sim label {
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 
 .fund-page .sim label.check {
-  margin: 8px 0 24px;
+  margin: 0;
 }
 
 .fund-page .sim-actions {
-  margin: 20px 0 24px;
+  margin: 0;
+  gap: 12px;
 }
 
 .fund-page .table-wrap {
-  margin: 12px 0 8px;
+  margin: 0;
+}
+
+.fund-page .chart-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .fund-page .chart-label {
-  margin: 28px 0 12px;
+  margin: 0;
 }
 
 .fund-page .chart {
-  height: 160px;
-  margin-bottom: 8px;
+  height: 168px;
+  margin: 0;
 }
 
 .fund-page #sim-per {
-  margin: 8px 0 20px;
+  margin: 0;
+}
+
+.fund-page .saved-list li {
+  padding: 14px 0;
+}
+
+.fund-page .card.pick {
+  gap: 14px;
 }
 
 .sim label {

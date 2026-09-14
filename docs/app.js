@@ -357,7 +357,7 @@ function chrome(inner) {
           )}</button>
         </div>
       </header>
-      <main id="main">${inner}</main>
+      <main id="main" class="${tab === "fund" ? "fund-stack" : ""}">${inner}</main>
     </div>
   `;
 }
@@ -716,18 +716,22 @@ function renderFund() {
             ${esc(f.minBalance)}: ${money(sim.minBalance)}.
             ${esc(f.totalPaid)}: ${money(sim.totalContrib)}.
           </aside>
-          <div class="chart-label">${esc(f.chartSpend)}</div>
-          <div id="chart-spend" class="chart">${chartBars(
-            sim.expenses,
-            spendMax,
-            "spend"
-          )}</div>
-          <div class="chart-label">${esc(f.chartBalance)}</div>
-          <div id="chart-balance" class="chart">${chartBars(
-            sim.rows.map((row) => row.balance),
-            balanceMax,
-            "bal"
-          )}</div>
+          <div class="chart-block">
+            <div class="chart-label">${esc(f.chartSpend)}</div>
+            <div id="chart-spend" class="chart">${chartBars(
+              sim.expenses,
+              spendMax,
+              "spend"
+            )}</div>
+          </div>
+          <div class="chart-block">
+            <div class="chart-label">${esc(f.chartBalance)}</div>
+            <div id="chart-balance" class="chart">${chartBars(
+              sim.rows.map((row) => row.balance),
+              balanceMax,
+              "bal"
+            )}</div>
+          </div>
           <h3>${esc(f.yearTable)}</h3>
           <div class="table-wrap">
             <table>
