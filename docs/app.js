@@ -90,6 +90,197 @@ const LANGS = [
   { id: "ary", label: "Darija" },
 ];
 
+const WORKSHOP_HELP = {
+  en: {
+    tipLabel: "Help",
+    howTitle: "How to test a path",
+    howSteps: [
+      "Load a printed path from the cards below, or start from today’s $5,647.",
+      "Move the sliders and years. The result box, charts, and fee table update as you go.",
+      "Red in the year table means the fund is short that year. Green in the result box means it stays positive for 25 years.",
+      "Name and save a path to compare later. Saves stay on this computer only.",
+    ],
+    tips: {
+      annual:
+        "Total reserve for the year, all three portions together. The fee table splits it 27.5% / 27.5% / 45%.",
+      increase:
+        "Added every year in phase 1. 0% keeps the same dollar amount. Proposed 1 uses 2%.",
+      start:
+        "Cash already in the reserve at the start of 2026. The study uses $5,881. Change this only if the bank balance is different.",
+      interest:
+        "Paid only when the balance is still positive after that year’s money in and money out. The study uses 1%.",
+      specialYear:
+        "Year the one-time extra payment hits the fund. Set the amount next to it. Leave the amount at 0 to skip this.",
+      specialAmount:
+        "One extra payment in the year you picked. Use this to test a special assessment before a big job.",
+      phase2:
+        "After N years, switch to a different yearly amount and increase. Proposed 3 does this: catch-up for 10 years, then Law 16.",
+      phaseYears:
+        "How long phase 1 lasts. 2026 is year 1, so 10 years means 2026–2035, then phase 2 starts in 2036.",
+      annual2:
+        "Yearly contribution once phase 2 starts. Proposed 3 uses $5,960 (0.5% of reconstruction).",
+      increase2:
+        "Yearly increase in phase 2. The study inflates the Law 16 amount at 3%/year.",
+      result:
+        "Green if the balance never goes below $0. Red shows the first shortfall year. Lowest balance is the deepest hole.",
+      save: "Stores this mix of sliders and moved work on this computer only. Other phones will not see it.",
+      reset:
+        "Back to today’s $5,647, no increase, no special assessment, and the study years for the work.",
+      loadStudy:
+        "Copies that printed scenario into the workshop so you can tweak it. Unsaved slider changes will be replaced.",
+      shift:
+        "Change when a job happens. Later years add 3% inflation; earlier years reduce it. After 2050 the cost leaves this 25-year window.",
+      fee: "New monthly ≈ (today’s fee − today’s reserve share) + new reserve share. Dwellings 27.5% each; 4267 is 45%.",
+      yearTable:
+        "Money in, special, money out, interest, closing balance. Red = short that year.",
+      saved:
+        "Load puts a named path back on the sliders. Delete removes it from this computer only.",
+    },
+  },
+  fr: {
+    tipLabel: "Aide",
+    howTitle: "Comment tester un chemin",
+    howSteps: [
+      "Chargez un chemin imprimé dans les cartes plus bas, ou partez de 5 647 $ aujourd’hui.",
+      "Bougez les curseurs et les années. L’encadré, les graphiques et le tableau des frais se mettent à jour tout de suite.",
+      "Le rouge dans le tableau annuel = déficit cette année. Le vert dans l’encadré = le fonds reste positif 25 ans.",
+      "Nommez et enregistrez un chemin pour comparer plus tard. Ça reste seulement sur cet ordinateur.",
+    ],
+    tips: {
+      annual:
+        "Cotisation de prévoyance de l’année, les trois portions ensemble. Le tableau la répartit 27,5 % / 27,5 % / 45 %.",
+      increase:
+        "Ajoutée chaque année en phase 1. 0 % = le même montant. Le proposé 1 utilise 2 %.",
+      start:
+        "Argent déjà dans le fonds au début de 2026. L’étude part de 5 881 $. Changez seulement si le solde bancaire est différent.",
+      interest:
+        "Versé seulement si le solde est encore positif après les entrées et sorties de l’année. L’étude utilise 1 %.",
+      specialYear:
+        "Année où le versement unique entre au fonds. Mettez le montant à côté. Laissez 0 $ pour l’ignorer.",
+      specialAmount:
+        "Un versement unique l’année choisie. Utile pour tester une cotisation spéciale avant un gros chantier.",
+      phase2:
+        "Après N années, on passe à un autre montant et une autre hausse. Le proposé 3 fait ça : rattrapage 10 ans, puis loi 16.",
+      phaseYears:
+        "Durée de la phase 1. 2026 est l’année 1, donc 10 ans = 2026–2035, puis la phase 2 commence en 2036.",
+      annual2:
+        "Cotisation annuelle une fois la phase 2 commencée. Le proposé 3 utilise 5 960 $ (0,5 % de la reconstruction).",
+      increase2:
+        "Hausse annuelle en phase 2. L’étude fait croître le montant loi 16 de 3 %/an.",
+      result:
+        "Vert si le solde ne passe jamais sous 0 $. Rouge = première année en déficit. Le solde le plus bas est le trou le plus profond.",
+      save: "Garde ce mélange de curseurs et de travaux déplacés sur cet ordinateur seulement. Un autre téléphone ne le verra pas.",
+      reset:
+        "Retour à 5 647 $ aujourd’hui, sans hausse, sans cotisation spéciale, et aux années de l’étude.",
+      loadStudy:
+        "Copie ce scénario imprimé dans l’atelier pour que vous puissiez le modifier. Les curseurs non enregistrés seront remplacés.",
+      shift:
+        "Changez l’année d’un chantier. Plus tard = +3 %/an ; plus tôt = moins cher. Après 2050, le coût sort de cette fenêtre de 25 ans.",
+      fee: "Nouveau mensuel ≈ (frais d’aujourd’hui − part prévoyance actuelle) + nouvelle part. Logements 27,5 % chacun ; 4267 = 45 %.",
+      yearTable:
+        "Entrées, spéciale, sorties, intérêt, solde de clôture. Rouge = déficit cette année.",
+      saved:
+        "Charger remet un chemin nommé sur les curseurs. Supprimer l’enlève seulement de cet ordinateur.",
+    },
+  },
+  pt: {
+    tipLabel: "Ajuda",
+    howTitle: "Como testar um caminho",
+    howSteps: [
+      "Carreguem um caminho impresso nos cartões abaixo, ou partam dos 5.647 $ de hoje.",
+      "Mexam nos cursores e nos anos. A caixa de resultado, os gráficos e a tabela de taxas atualizam na hora.",
+      "Vermelho na tabela anual = rombo nesse ano. Verde na caixa = o fundo fica positivo 25 anos.",
+      "Dêem um nome e guardem para comparar depois. Fica só neste computador.",
+    ],
+    tips: {
+      annual:
+        "Reserva do ano, as três porções juntas. A tabela reparte 27,5% / 27,5% / 45%.",
+      increase:
+        "Somado todos os anos na fase 1. 0% = o mesmo valor. O proposto 1 usa 2%.",
+      start:
+        "Dinheiro já no fundo no início de 2026. O estudo usa 5.881 $. Mudem só se o saldo bancário for outro.",
+      interest:
+        "Só entra se o saldo ainda for positivo depois das entradas e saídas do ano. O estudo usa 1%.",
+      specialYear:
+        "Ano em que o pagamento único entra no fundo. Ponham o valor ao lado. Deixem 0 $ para ignorar.",
+      specialAmount:
+        "Um pagamento extra no ano escolhido. Sirve para testar uma contribuição especial antes de uma obra grande.",
+      phase2:
+        "Depois de N anos, muda para outro valor e outro aumento. O proposto 3 faz isto: recuperação 10 anos, depois lei 16.",
+      phaseYears:
+        "Duração da fase 1. 2026 é o ano 1, por isso 10 anos = 2026–2035, e a fase 2 começa em 2036.",
+      annual2:
+        "Contribuição anual quando a fase 2 começa. O proposto 3 usa 5.960 $ (0,5% da reconstrução).",
+      increase2:
+        "Aumento anual na fase 2. O estudo faz crescer o valor da lei 16 a 3%/ano.",
+      result:
+        "Verde se o saldo nunca desce abaixo de 0 $. Vermelho = primeiro ano em rombo. O saldo mais baixo é o buraco mais fundo.",
+      save: "Guarda esta mistura de cursores e obras movidas só neste computador. Outro telemóvel não a vê.",
+      reset:
+        "Volta aos 5.647 $ de hoje, sem aumento, sem contribuição especial, e aos anos do estudo.",
+      loadStudy:
+        "Copia aquele cenário impresso para a oficina para o poderem ajustar. Alterações não guardadas são substituídas.",
+      shift:
+        "Mudam o ano da obra. Mais tarde = +3%/ano; mais cedo = mais barato. Depois de 2050 o custo sai desta janela de 25 anos.",
+      fee: "Novo mensal ≈ (taxa de hoje − quota de reserva atual) + nova quota. Habitações 27,5% cada; 4267 = 45%.",
+      yearTable:
+        "Entradas, especial, saídas, juro, saldo de fecho. Vermelho = rombo nesse ano.",
+      saved:
+        "Carregar põe um caminho com nome de volta nos cursores. Apagar tira-o só deste computador.",
+    },
+  },
+  ary: {
+    tipLabel: "شرح",
+    howTitle: "كيفاش تجرّب طريق",
+    howSteps: [
+      "حمّل طريق مطبوع من الكارطات لتحت، ولا بدا من 5 647 $ دابا.",
+      "حرّك السلايدر والسنين. النتيجة، الگراف والجدول كيتبدّلو دغيا.",
+      "الحمر فالجدول = نقص فداك العام. الخضر فصندوق النتيجة = الصندوق كيبقا إيجابي 25 عام.",
+      "سمّي وسجّل الطريق باش تقارن من بعد. كيبقا غير فهاد الجهاز.",
+    ],
+    tips: {
+      annual:
+        "الاحتياط ديال العام، التلاتة دالحصص مجموعين. الجدول كيقسمو 27,5% / 27,5% / 45%.",
+      increase:
+        "كاتزاد كل عام فالمرحلة 1. 0% = نفس المبلغ. المقترح 1 كيستعمل 2%.",
+      start:
+        "الفلوس اللي ديجا فالصندوق فبداية 2026. الدراسة كاتبدا بـ 5 881 $. بدّل غير إلا كان الرصيد فالبناك مختلف.",
+      interest:
+        "كاتدخل غير إلا بقا الرصيد إيجابي من بعد الدخل والخرج ديال العام. الدراسة كاتستعمل 1%.",
+      specialYear:
+        "العام اللي كاتدخل فيه الدفعة الواحدة للصندوق. حط المبلغ حداها. خلّي 0 $ باش تتجاهلها.",
+      specialAmount:
+        "دفعة زيادة فالعام اللي اخترتي. باش تجرّب كوتيزاسيون سبيسيال قبل أشغال كبار.",
+      phase2:
+        "من بعد N سنين، كتحول لمبلغ وزيادة خرين. المقترح 3 كيدير هاد الشي: تدارك 10 سنين، من بعد القانون 16.",
+      phaseYears:
+        "شحال كاتطول المرحلة 1. 2026 هو العام 1، يعني 10 سنين = 2026–2035، والمرحلة 2 كاتبدا فـ 2036.",
+      annual2:
+        "المساهمة السنوية منين كاتبدا المرحلة 2. المقترح 3 كيستعمل 5 960 $ (0,5% من إعادة البناء).",
+      increase2:
+        "الزيادة فالمرحلة 2. الدراسة كاتزيد مبلغ القانون 16 بـ 3% فالسنة.",
+      result:
+        "خضر إلا الرصيد عمرو هبط تحت 0 $. حمر = أول عام فالنقص. أقل رصيد هو أعمق حفرة.",
+      save: "كاتحفظ هاد الخلطة ديال السلايدر والأشغال المحرّكة غير فهاد الجهاز. تليفون آخر ما غادي يشوفهاش.",
+      reset:
+        "رجع لـ 5 647 $ دابا، بلا زيادة، بلا كوتيزاسيون سبيسيال، وسنين الدراسة.",
+      loadStudy:
+        "كاتنسخ داك السيناريو المطبوع للورشة باش تعدّلو. التغييرات اللي ما تسجّلاتش غادي تتبدّل.",
+      shift:
+        "بدّل عام الخدمة. من بعد = +3% فالسنة؛ من قبل = رخص. من بعد 2050 الثمن كايخرج من هاد 25 عام.",
+      fee: "الشهري الجديد ≈ (المصاريف دابا − حصة الاحتياط دابا) + الحصة الجديدة. السكن 27,5% لكل واحد؛ 4267 = 45%.",
+      yearTable:
+        "الدخل، السبيسيال، الخرج، الفايدة، الرصيد فالآخر. الحمر = نقص فداك العام.",
+      saved:
+        "حمّل كيرجع طريق مسمّى للسلايدر. مسح كيمحيها غير من هاد الجهاز.",
+    },
+  },
+};
+
+function helpCopy() {
+  return WORKSHOP_HELP[lang] || WORKSHOP_HELP.en;
+}
+
 function detectLang() {
   const params = new URLSearchParams(window.location.search);
   const fromUrl = params.get("lang");
@@ -229,6 +420,7 @@ function portionFees(annual) {
 
 function feeTable(annual) {
   const f = FUND_I18N[lang];
+  const h = helpCopy();
   const rows = portionFees(annual)
     .map(
       (row) => `
@@ -244,7 +436,7 @@ function feeTable(annual) {
     )
     .join("");
   return `
-    <h2>${esc(f.feeTitle)}</h2>
+    <h2>${labelLine(f.feeTitle, "fee", h.tips.fee)}</h2>
     <p class="lede">${esc(f.feeLead)}</p>
     <div class="table-wrap">
       <table>
@@ -311,6 +503,21 @@ function esc(value) {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
+}
+
+function tip(id, text, end) {
+  const h = helpCopy();
+  if (!text) return "";
+  return `<span class="tip${end ? " tip-end" : ""}">
+    <button type="button" class="tip-btn" aria-label="${esc(
+      h.tipLabel
+    )}" aria-describedby="tip-${esc(id)}">?</button>
+    <span id="tip-${esc(id)}" class="tip-pop" role="tooltip">${esc(text)}</span>
+  </span>`;
+}
+
+function labelLine(text, tipId, tipText, end) {
+  return `<span class="label-row">${esc(text)}${tip(tipId, tipText, end)}</span>`;
 }
 
 function chrome(inner) {
@@ -525,6 +732,7 @@ function workCost(work) {
 function renderFund() {
   const t = I18N[lang];
   const f = FUND_I18N[lang];
+  const h = helpCopy();
   document.title = f.title;
   const sim = projectFund(workshopOpts());
   const spendMax = Math.max(1, ...sim.expenses);
@@ -585,9 +793,12 @@ function renderFund() {
           </div>
           <h3>${esc(meta.name)}</h3>
           <p>${esc(meta.detail)}</p>
-          <button type="button" class="action" data-apply="${esc(item.id)}">${esc(
-            f.applyStudy
-          )}</button>
+          <div class="sim-actions">
+            <button type="button" class="action" data-apply="${esc(item.id)}">${esc(
+              f.applyStudy
+            )}</button>
+            ${tip(`load-${item.id}`, h.tips.loadStudy)}
+          </div>
         </article>
       `;
     })
@@ -650,53 +861,60 @@ function renderFund() {
         ${feeTable(workshop.annual)}
         <h2>${esc(f.tryTitle)}</h2>
         <p class="lede">${esc(f.tryLead)}</p>
+        <aside class="how-box">
+          <strong>${esc(h.howTitle)}</strong>
+          <ol>
+            ${h.howSteps.map((step) => `<li>${esc(step)}</li>`).join("")}
+          </ol>
+        </aside>
         <article class="card sim">
           <div class="sim-grid">
             <label>
-              ${esc(f.annualLabel)}
+              ${labelLine(f.annualLabel, "annual", h.tips.annual)}
               <strong id="annual-val">${money(workshop.annual)}</strong>
               <input id="annual" type="range" min="500" max="25000" step="50" value="${workshop.annual}" />
             </label>
             <label>
-              ${esc(f.increaseLabel)}
+              ${labelLine(f.increaseLabel, "increase", h.tips.increase, true)}
               <strong id="increase-val">${pct(workshop.increase)}</strong>
               <input id="increase" type="range" min="0" max="8" step="0.5" value="${
                 workshop.increase * 100
               }" />
             </label>
             <label>
-              ${esc(f.startBalance)}
+              ${labelLine(f.startBalance, "start", h.tips.start)}
               <input id="start-balance" type="number" min="0" step="100" value="${workshop.startBalance}" />
             </label>
             <label>
-              ${esc(f.interestLabel)}
+              ${labelLine(f.interestLabel, "interest", h.tips.interest, true)}
               <strong id="interest-val">${pct(workshop.interestPct / 100)}</strong>
               <input id="interest" type="range" min="0" max="5" step="0.1" value="${workshop.interestPct}" />
             </label>
             <label>
-              ${esc(f.specialYear)}
+              ${labelLine(f.specialYear, "specialYear", h.tips.specialYear)}
               <input id="special-year" type="number" min="${FUND.startYear}" max="${lastYear}" value="${workshop.specialYear}" />
             </label>
             <label>
-              ${esc(f.specialAmount)}
+              ${labelLine(f.specialAmount, "specialAmount", h.tips.specialAmount, true)}
               <input id="special-amount" type="number" min="0" step="100" value="${workshop.specialAmount}" />
             </label>
           </div>
           <label class="check">
             <input id="use-phase2" type="checkbox" ${workshop.usePhase2 ? "checked" : ""} />
             ${esc(f.phase2)}
+            ${tip("phase2", h.tips.phase2)}
           </label>
           <div class="sim-grid" id="phase2-fields" ${workshop.usePhase2 ? "" : "hidden"}>
             <label>
-              ${esc(f.phaseYears)}
+              ${labelLine(f.phaseYears, "phaseYears", h.tips.phaseYears)}
               <input id="phase-years" type="number" min="1" max="24" value="${workshop.phaseYears}" />
             </label>
             <label>
-              ${esc(f.annualAfter)}
+              ${labelLine(f.annualAfter, "annual2", h.tips.annual2, true)}
               <input id="annual2" type="number" min="0" step="50" value="${workshop.annual2}" />
             </label>
             <label>
-              ${esc(f.increaseAfter)}
+              ${labelLine(f.increaseAfter, "increase2", h.tips.increase2)}
               <strong id="increase2-val">${pct(workshop.increase2)}</strong>
               <input id="increase2" type="range" min="0" max="8" step="0.5" value="${
                 workshop.increase2 * 100
@@ -711,7 +929,7 @@ function renderFund() {
               sim.ok
                 ? esc(f.resultOk)
                 : `${esc(f.resultBad)} ${sim.firstGap}`
-            }</strong>
+            } ${tip("result", h.tips.result)}</strong>
             ${esc(f.endBalance)}: ${money(sim.end)}.
             ${esc(f.minBalance)}: ${money(sim.minBalance)}.
             ${esc(f.totalPaid)}: ${money(sim.totalContrib)}.
@@ -732,7 +950,7 @@ function renderFund() {
               "bal"
             )}</div>
           </div>
-          <h3>${esc(f.yearTable)}</h3>
+          <h3>${labelLine(f.yearTable, "yearTable", h.tips.yearTable)}</h3>
           <div class="table-wrap">
             <table>
               <thead>
@@ -750,21 +968,22 @@ function renderFund() {
           </div>
           <div class="sim-actions">
             <button type="button" class="action" data-reset="true">${esc(f.resetStudy)}</button>
+            ${tip("reset", h.tips.reset)}
           </div>
           <label>
-            ${esc(f.saveName)}
+            ${labelLine(f.saveName, "save", h.tips.save)}
             <input id="save-label" type="text" maxlength="80" value="${esc(workshop.saveLabel)}" />
           </label>
           <div class="sim-actions">
             <button type="button" class="action" data-save="true">${esc(f.saveBtn)}</button>
           </div>
-          <h3>${esc(f.savedTitle)}</h3>
+          <h3>${labelLine(f.savedTitle, "saved", h.tips.saved)}</h3>
           ${savedBlock}
         </article>
-        <h2>${esc(f.scenarios)}</h2>
+        <h2>${labelLine(f.scenarios, "scenarios", h.tips.loadStudy)}</h2>
         <p class="lede">${esc(f.scenarioNote)}</p>
         <div class="cards">${scenarioCards}</div>
-        <h2>${esc(f.shiftTitle)}</h2>
+        <h2>${labelLine(f.shiftTitle, "shift", h.tips.shift)}</h2>
         <p class="lede">${esc(f.shiftLead)}</p>
         <h3>${esc(f.works)}</h3>
         <div class="table-wrap">
@@ -825,6 +1044,7 @@ function bindSim() {
 
   const paint = () => {
     const f = FUND_I18N[lang];
+    const h = helpCopy();
     const sim = projectFund(workshopOpts());
     const spendMax = Math.max(1, ...sim.expenses);
     const balanceMax = Math.max(
@@ -852,11 +1072,11 @@ function bindSim() {
       result.className = `callout ${sim.ok ? "ok" : ""}`;
       result.innerHTML = `<strong>${
         sim.ok ? esc(f.resultOk) : `${esc(f.resultBad)} ${sim.firstGap}`
-      }</strong> ${esc(f.endBalance)}: ${money(sim.end)}. ${esc(
-        f.minBalance
-      )}: ${money(sim.minBalance)}. ${esc(f.totalPaid)}: ${money(
-        sim.totalContrib
-      )}.`;
+      } ${tip("result", h.tips.result)}</strong> ${esc(f.endBalance)}: ${money(
+        sim.end
+      )}. ${esc(f.minBalance)}: ${money(sim.minBalance)}. ${esc(
+        f.totalPaid
+      )}: ${money(sim.totalContrib)}.`;
     }
     const spendChart = document.getElementById("chart-spend");
     const balChart = document.getElementById("chart-balance");
@@ -925,6 +1145,12 @@ function bindSim() {
   ].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.addEventListener("input", live);
+  });
+  document.querySelectorAll(".tip-btn").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    });
   });
   const usePhase2 = document.getElementById("use-phase2");
   if (usePhase2) {
