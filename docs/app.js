@@ -887,130 +887,138 @@ const PLAN_NOW_IDS = [
   "balconyGutter",
 ];
 
+function isExtraWork(id) {
+  return EXTRA_WORK.some((item) => item.id === id);
+}
+
 const PLAN_I18N = {
   en: {
     tab: "Plan",
     title: "Renovation plan — when, and what you pay",
     h1: "Renovation plan",
     lede:
-      "Put each job in Now, Next, or Later. The page finds the lowest yearly reserve that stays out of the red, then splits it by quote-part. Tick Skip if you are not funding that job in this 25-year window.",
-    now: "Now",
-    next: "Next",
-    later: "Later",
+      "Give each job a year. The page finds the lowest yearly reserve that stays out of the red, then splits it by quote-part. Skip means that job is not funded in this 25-year window.",
     off: "Skip",
-    nowYears: "2027–2028",
-    nextYears: "around 2031",
-    laterYears: "study year, through 2050",
-    nowLead: "Inspector and carnet first: moisture, backflow, guards.",
-    nextLead: "Jobs whose useful life is about gone in the next five to ten years.",
-    laterLead: "The long list, including the 2050 brick peak.",
-    resultTitle: "What each portion would pay",
-    growLabel: "If the reserve grows 2% / year (study’s recommended shape)",
+    yearLabel: "Year",
+    resultTitle: "What this mix would cost each month",
+    growLabel: "If the reserve grows 2% / year",
     flatLabel: "If the reserve stays a flat dollar amount",
     today: "today",
     month: "/ month",
     yearPot: "Shared reserve / year",
-    worksIn: "Jobs in this plan",
+    worksIn: "jobs in this mix",
     cannot: "Even $45,000 / year does not cover this mix. Skip or delay a big item.",
     loadWorkshop: "Open this mix in the reserve workshop",
-    reset: "Reset to inspector priority",
+    reset: "Reset to inspector years",
     skipTitle: "Skipped (not in the pot)",
     footnote:
-      "Now jobs land in 2027–2028, Next in 2031, Later on the study year. Costs inflate 3% / year if you delay. Unchecked jobs are omitted — the building still ages. Get RBQ quotes before you vote a fee.",
-    empty: "No job in this bucket.",
+      "Moving a job later adds 3% / year. Skipped jobs are omitted — the building still ages. Get RBQ quotes before you vote a fee.",
+    empty: "No job in this year.",
+    recTitle: "The study’s recommendation",
+    recLead:
+      "Start the higher reserve in January 2027, before the moisture jobs. Do not wait until 2031, when today’s $5,647 / year first goes red.",
+    recShape:
+      "Recommended path (Proposed 1): $9,500 into the reserve in 2026, then +2% each year. That stays green through 2050.",
+    recFees:
+      "4269 and 4271: about $338 / month (today $250, +$88). 4267: about $571 / month (today $427, +$144). Together about $3,850 more per year.",
+    recNot:
+      "Today’s $5,647 and Law 16’s $5,960 are not enough. The May $6,140 / year target is a 5-year savings idea, not a 25-year plan. A flat $11,500 / year also works if you do not want a yearly increase.",
   },
   fr: {
     tab: "Plan",
     title: "Plan des travaux — quand, et combien",
     h1: "Plan des travaux",
     lede:
-      "Classez chaque poste : Maintenant, Ensuite ou Plus tard. La page cherche la plus petite cotisation annuelle qui reste dans le vert, puis la répartit selon la quote-part. « Ignorer » = ce poste n’est pas financé dans cette fenêtre de 25 ans.",
-    now: "Maintenant",
-    next: "Ensuite",
-    later: "Plus tard",
+      "Donnez une année à chaque poste. La page cherche la plus petite cotisation annuelle qui reste dans le vert, puis la répartit selon la quote-part. « Ignorer » = ce poste n’est pas financé dans cette fenêtre de 25 ans.",
     off: "Ignorer",
-    nowYears: "2027–2028",
-    nextYears: "vers 2031",
-    laterYears: "année de l’étude, jusqu’en 2050",
-    nowLead: "Priorité inspecteur et carnet : humidité, clapet, garde-corps.",
-    nextLead: "Postes dont la durée de vie s’achève dans les 5 à 10 prochaines années.",
-    laterLead: "La longue liste, y compris le pic de brique en 2050.",
-    resultTitle: "Ce que chaque portion paierait",
-    growLabel: "Si la prévoyance monte de 2 % / an (forme recommandée de l’étude)",
+    yearLabel: "Année",
+    resultTitle: "Ce que ce mélange coûterait par mois",
+    growLabel: "Si la prévoyance monte de 2 % / an",
     flatLabel: "Si le montant annuel reste le même",
     today: "aujourd’hui",
     month: "/ mois",
     yearPot: "Prévoyance commune / an",
-    worksIn: "Postes dans ce plan",
+    worksIn: "postes dans ce mélange",
     cannot: "Même 45 000 $ / an ne couvrent pas ce mélange. Ignorez ou reportez un gros poste.",
     loadWorkshop: "Ouvrir ce mélange dans l’atelier du fonds",
-    reset: "Revenir à la priorité de l’inspecteur",
+    reset: "Revenir aux années de l’inspecteur",
     skipTitle: "Ignorés (hors cagnotte)",
     footnote:
-      "Maintenant = 2027–2028, Ensuite = 2031, Plus tard = année de l’étude. +3 % / an si vous reportez. Un poste ignoré n’est pas financé — l’immeuble vieillit quand même. Obtenir des soumissions RBQ avant de voter les frais.",
-    empty: "Aucun poste dans ce seau.",
+      "Reporter un poste ajoute 3 % / an. Un poste ignoré n’est pas financé — l’immeuble vieillit quand même. Obtenir des soumissions RBQ avant de voter les frais.",
+    empty: "Aucun poste cette année-là.",
+    recTitle: "La recommandation de l’étude",
+    recLead:
+      "Montez la prévoyance dès janvier 2027, avant les travaux d’humidité. N’attendez pas 2031, quand les 5 647 $ / an d’aujourd’hui passent dans le rouge.",
+    recShape:
+      "Chemin recommandé (proposé 1) : 9 500 $ au fonds en 2026, puis +2 % / an. Reste positif jusqu’en 2050.",
+    recFees:
+      "4269 et 4271 : environ 338 $ / mois (aujourd’hui 250 $, +88 $). 4267 : environ 571 $ / mois (aujourd’hui 427 $, +144 $). Environ 3 850 $ de plus par an au total.",
+    recNot:
+      "Les 5 647 $ d’aujourd’hui et les 5 960 $ de la loi 16 ne suffisent pas. L’objectif de mai (6 140 $ / an) est une idée sur 5 ans, pas un plan 25 ans. 11 500 $ / an sans hausse fonctionne aussi.",
   },
   pt: {
     tab: "Plano",
     title: "Plano de obras — quando, e quanto pagam",
     h1: "Plano de obras",
     lede:
-      "Ponham cada obra em Agora, Depois ou Mais tarde. A página procura a menor reserva anual que fica no verde e reparte pela quota. Saltar = essa obra não entra nestes 25 anos.",
-    now: "Agora",
-    next: "Depois",
-    later: "Mais tarde",
+      "Dêem um ano a cada obra. A página procura a menor reserva anual que fica no verde e reparte pela quota. Saltar = essa obra não entra nestes 25 anos.",
     off: "Saltar",
-    nowYears: "2027–2028",
-    nextYears: "por 2031",
-    laterYears: "ano do estudo, até 2050",
-    nowLead: "Primeiro do inspetor e do caderno: humidade, válvula, guarda-corpos.",
-    nextLead: "Obras cuja vida útil acaba nos próximos 5 a 10 anos.",
-    laterLead: "A lista longa, incluindo o pico de tijolo em 2050.",
-    resultTitle: "O que cada porção pagaria",
-    growLabel: "Se a reserva crescer 2% / ano (forma recomendada do estudo)",
+    yearLabel: "Ano",
+    resultTitle: "O que esta mistura custaria por mês",
+    growLabel: "Se a reserva crescer 2% / ano",
     flatLabel: "Se o valor anual ficar igual",
     today: "hoje",
     month: "/ mês",
     yearPot: "Reserva comum / ano",
-    worksIn: "Obras neste plano",
+    worksIn: "obras nesta mistura",
     cannot: "Nem 45.000 $ / ano cobrem esta mistura. Saltem ou atrasem uma obra grande.",
     loadWorkshop: "Abrir esta mistura na oficina do fundo",
-    reset: "Voltar à prioridade do inspetor",
+    reset: "Voltar aos anos do inspetor",
     skipTitle: "Saltadas (fora do pote)",
     footnote:
-      "Agora = 2027–2028, Depois = 2031, Mais tarde = ano do estudo. +3% / ano se atrasarem. Obras saltadas não são financiadas — o prédio continua a envelhecer. Peçam orçamentos RBQ antes de votar a taxa.",
-    empty: "Nenhuma obra neste grupo.",
+      "Atrasar uma obra soma 3% / ano. Obras saltadas não são financiadas — o prédio continua a envelhecer. Peçam orçamentos RBQ antes de votar a taxa.",
+    empty: "Nenhuma obra neste ano.",
+    recTitle: "A recomendação do estudo",
+    recLead:
+      "Subam a reserva em janeiro de 2027, antes das obras de humidade. Não esperem por 2031, quando os 5.647 $ / ano de hoje ficam no vermelho.",
+    recShape:
+      "Caminho recomendado (proposto 1): 9.500 $ no fundo em 2026, depois +2% / ano. Fica positivo até 2050.",
+    recFees:
+      "4269 e 4271: cerca de 338 $ / mês (hoje 250 $, +88 $). 4267: cerca de 571 $ / mês (hoje 427 $, +144 $). Cerca de 3.850 $ a mais por ano no total.",
+    recNot:
+      "Os 5.647 $ de hoje e os 5.960 $ da lei 16 não chegam. Os 6.140 $ / ano de maio são uma ideia a 5 anos, não um plano a 25. 11.500 $ / ano sem aumento também funciona.",
   },
   ary: {
     tab: "المخطط",
     title: "مخطط الإصلاح — إيمتى، وشنو تخلصو",
     h1: "مخطط الإصلاح",
     lede:
-      "حط كل خدمة فدابا، من بعد، ولا من بعد بزاف. الصفحة كاتقلب على أصغر فلوس فالسنة اللي كيبقاو فالخضر، وكاتقسمهم بالكوت-پار. تخطّى = هاد الخدمة ما ممولةش فهاد 25 عام.",
-    now: "دابا",
-    next: "من بعد",
-    later: "من بعد بزاف",
+      "عطي عام لكل خدمة. الصفحة كاتقلب على أصغر فلوس فالسنة اللي كيبقاو فالخضر، وكاتقسمهم بالكوت-پار. تخطّى = هاد الخدمة ما ممولةش فهاد 25 عام.",
     off: "تخطّى",
-    nowYears: "2027–2028",
-    nextYears: "حوالى 2031",
-    laterYears: "عام الدراسة، حتى 2050",
-    nowLead: "اللولين ديال الإنسپكتور والكارني: الرطوبة، الصمام، الكارد-كور.",
-    nextLead: "الخدمات اللي العمر ديالهم كيسالا فـ 5 حتى 10 سنين.",
-    laterLead: "اللائحة الطويلة، حتى قمة الابريك فـ 2050.",
-    resultTitle: "شنو غادي تخلص كل حصة",
-    growLabel: "إلا الاحتياط طلع 2% فالسنة (الشكل اللي وصّات بيه الدراسة)",
+    yearLabel: "العام",
+    resultTitle: "شنو غادي تكلف هاد الخلطة فالشهر",
+    growLabel: "إلا الاحتياط طلع 2% فالسنة",
     flatLabel: "إلا المبلغ السنوي بقا بحالو",
     today: "دابا",
     month: "/ شهر",
     yearPot: "الاحتياط المشترك / عام",
-    worksIn: "الخدمات فهاد المخطط",
+    worksIn: "خدمات فهاد الخلطة",
     cannot: "حتى 45 000 $ فالسنة ما يكفيوش. تخطّاو ولا أخّرو خدمة كبيرة.",
     loadWorkshop: "حلّ هاد الخلطة فورشة الصندوق",
-    reset: "رجع لأولوية الإنسپكتور",
+    reset: "رجع لسنين الإنسپكتور",
     skipTitle: "متخطّيين (برا القادّة)",
     footnote:
-      "دابا = 2027–2028، من بعد = 2031، من بعد بزاف = عام الدراسة. +3% فالسنة إلا أخّرتي. الخدمة المتخطّاة ما ممولةش — العمارة كتكبر فالعمر. خدّاو دوڤيز RBQ قبل ما تصوّتو على المصاريف.",
-    empty: "حتى خدمة فهاد المجموعة.",
+      "إلا أخّرتي الخدمة كاتزيد 3% فالسنة. المتخطّاة ما ممولةش — العمارة كتكبر فالعمر. خدّاو دوڤيز RBQ قبل ما تصوّتو على المصاريف.",
+    empty: "حتى خدمة فهاد العام.",
+    recTitle: "توصية الدراسة",
+    recLead:
+      "طلعو الاحتياط من يناير 2027، قبل أشغال الرطوبة. ما تستناوش 2031، منين 5 647 $ دابا كيحمر.",
+    recShape:
+      "الطريق الموصى بيه (المقترح 1): 9 500 $ للصندوق فـ 2026، من بعد +2% فالسنة. كيبقا خضر حتى 2050.",
+    recFees:
+      "4269 و4271: تقريبا 338 $ فالشهر (دابا 250 $، +88 $). 4267: تقريبا 571 $ فالشهر (دابا 427 $، +144 $). زيادة تقريبا 3 850 $ فالسنة مجموعين.",
+    recNot:
+      "5 647 $ دابا و5 960 $ دالقانون 16 ما يكفيوش. 6 140 $ دماي فكرة د 5 سنين، ماشي مخطط 25 عام. 11 500 $ فالسنة بلا زيادة حتى هي كتصلح.",
   },
 };
 
@@ -1018,31 +1026,47 @@ function planCopy() {
   return PLAN_I18N[lang] || PLAN_I18N.en;
 }
 
+function defaultPlanYear(work) {
+  if (PLAN_NOW_IDS.includes(work.id)) {
+    return isExtraWork(work.id) ? 2027 : 2028;
+  }
+  if (isExtraWork(work.id)) return work.kind === "near" ? 2031 : 2050;
+  return work.year || FUND.startYear;
+}
+
 function defaultPlanAssignments() {
   const assign = {};
-  (FUND.works || []).forEach((work) => {
-    if (PLAN_NOW_IDS.includes(work.id)) assign[work.id] = "now";
-    else if (work.remaining <= 10) assign[work.id] = "next";
-    else assign[work.id] = "later";
-  });
-  EXTRA_WORK.forEach((work) => {
-    if (PLAN_NOW_IDS.includes(work.id)) assign[work.id] = "now";
-    else if (work.kind === "near") assign[work.id] = "next";
-    else assign[work.id] = "later";
-  });
+  const add = (work) => {
+    if (work) assign[work.id] = defaultPlanYear(work);
+  };
+  (FUND.works || []).forEach(add);
+  EXTRA_WORK.forEach(add);
   return assign;
 }
 
-const PLAN_STORE = "syndicat-ontario-plan-v1";
+const PLAN_STORE = "syndicat-ontario-plan-v2";
+
+function migratePlanValue(id, value) {
+  if (value === "off") return "off";
+  const year = Number(value);
+  if (Number.isFinite(year) && year >= 1900 && year <= 2100) return Math.round(year);
+  const work = findWork(id);
+  if (value === "now") return work && isExtraWork(id) ? 2027 : 2028;
+  if (value === "next") return 2031;
+  if (value === "later") return work ? defaultPlanYear(work) : 2050;
+  return work ? defaultPlanYear(work) : "off";
+}
 
 function loadPlanAssignments() {
   const base = defaultPlanAssignments();
   try {
-    const raw = JSON.parse(localStorage.getItem(PLAN_STORE) || "null");
+    const raw =
+      JSON.parse(localStorage.getItem(PLAN_STORE) || "null") ||
+      JSON.parse(localStorage.getItem("syndicat-ontario-plan-v1") || "null");
     if (!raw || typeof raw !== "object") return base;
     const next = { ...base };
     Object.keys(raw).forEach((id) => {
-      if (["now", "next", "later", "off"].includes(raw[id])) next[id] = raw[id];
+      next[id] = migratePlanValue(id, raw[id]);
     });
     return next;
   } catch (err) {
@@ -1075,17 +1099,15 @@ function planJobCatalog() {
   return list;
 }
 
-function planTargetYear(work, bucket) {
-  if (bucket === "now") {
-    return EXTRA_WORK.some((item) => item.id === work.id) ? 2027 : 2028;
-  }
-  if (bucket === "next") return 2031;
-  const last = FUND.startYear + FUND.expenses.length - 1;
-  return Math.min(last, work.year || last);
+function planLastYear() {
+  return FUND.startYear + FUND.expenses.length - 1;
 }
 
-function isExtraWork(id) {
-  return EXTRA_WORK.some((item) => item.id === id);
+function planTargetYear(work, assignment) {
+  if (assignment === "off" || assignment == null) return null;
+  const year = Number(assignment);
+  if (!Number.isFinite(year)) return migratePlanValue(work.id, assignment);
+  return Math.min(planLastYear(), Math.max(FUND.startYear, Math.round(year)));
 }
 
 function planSolve(assignments) {
@@ -1096,7 +1118,9 @@ function planSolve(assignments) {
   const extras = included.filter((work) => isExtraWork(work.id));
   const shifts = {};
   included.forEach((work) => {
-    shifts[work.id] = planTargetYear(work, assignments[work.id]) - work.year;
+    const year = planTargetYear(work, assignments[work.id]);
+    if (year == null) return;
+    shifts[work.id] = year - work.year;
   });
   const base = {
     startBalance: FUND.startBalance,
@@ -1885,6 +1909,7 @@ function renderFund() {
           <strong>${esc(f.calloutTitle)}</strong>
           ${esc(f.callout)}
         </aside>
+        ${recommendBox()}
         <p class="lede">${esc(f.perUnitNow)}</p>
         ${unitStatCards()}
         <h2>${esc(h.guideTitle)}</h2>
@@ -2557,6 +2582,39 @@ function renderAssembly() {
   bindChrome();
 }
 
+function recommendBox() {
+  const p = planCopy();
+  return `
+    <aside class="callout ok recommend-box">
+      <strong>${esc(p.recTitle)}</strong>
+      <p>${esc(p.recLead)}</p>
+      <p>${esc(p.recShape)}</p>
+      <p>${esc(p.recFees)}</p>
+      <p class="lede">${esc(p.recNot)}</p>
+    </aside>
+  `;
+}
+
+function planYearSelect(work, assignment) {
+  const p = planCopy();
+  const selected = assignment === "off" ? "off" : String(planTargetYear(work, assignment));
+  const years = [];
+  for (let year = FUND.startYear; year <= planLastYear(); year += 1) {
+    years.push(
+      `<option value="${year}" ${selected === String(year) ? "selected" : ""}>${year}</option>`
+    );
+  }
+  return `
+    <label class="plan-pick">
+      <span class="visually-hidden">${esc(p.yearLabel)}</span>
+      <select data-plan-job="${esc(work.id)}">
+        ${years.join("")}
+        <option value="off" ${assignment === "off" ? "selected" : ""}>${esc(p.off)}</option>
+      </select>
+    </label>
+  `;
+}
+
 function planFeeCards(annual, label) {
   const p = planCopy();
   const fees = portionFees(annual);
@@ -2580,25 +2638,17 @@ function planFeeCards(annual, label) {
   `;
 }
 
-function planJobRow(work, bucket) {
-  const p = planCopy();
-  const year = bucket === "off" ? "—" : String(planTargetYear(work, bucket));
-  const delta = bucket === "off" ? 0 : planTargetYear(work, bucket) - work.year;
+function planJobRow(work, assignment) {
+  const year = planTargetYear(work, assignment);
+  const delta = year == null ? 0 : year - work.year;
   const shown = roundCad(work.cost * Math.pow(1 + FUND.inflation, delta));
   return `
     <li class="plan-job">
       <div>
         <strong>${esc(workLabel(work.id))}</strong>
-        <span class="extra-meta">${money(shown)} · ${esc(year)}</span>
+        <span class="extra-meta">${money(shown)}</span>
       </div>
-      <label class="plan-pick">
-        <select data-plan-job="${esc(work.id)}">
-          <option value="now" ${bucket === "now" ? "selected" : ""}>${esc(p.now)}</option>
-          <option value="next" ${bucket === "next" ? "selected" : ""}>${esc(p.next)}</option>
-          <option value="later" ${bucket === "later" ? "selected" : ""}>${esc(p.later)}</option>
-          <option value="off" ${bucket === "off" ? "selected" : ""}>${esc(p.off)}</option>
-        </select>
-      </label>
+      ${planYearSelect(work, assignment)}
     </li>
   `;
 }
@@ -2609,30 +2659,28 @@ function renderPlan() {
   const assignments = planState();
   const solved = planSolve(assignments);
   const catalog = planJobCatalog();
-  const buckets = [
-    { id: "now", title: p.now, years: p.nowYears, lead: p.nowLead },
-    { id: "next", title: p.next, years: p.nextYears, lead: p.nextLead },
-    { id: "later", title: p.later, years: p.laterYears, lead: p.laterLead },
-  ];
-  const columns = buckets
-    .map((bucket) => {
-      const jobs = catalog.filter((work) => assignments[work.id] === bucket.id);
+  const byYear = new Map();
+  catalog.forEach((work) => {
+    const year = planTargetYear(work, assignments[work.id]);
+    if (year == null) return;
+    if (!byYear.has(year)) byYear.set(year, []);
+    byYear.get(year).push(work);
+  });
+  const columns = [...byYear.keys()]
+    .sort((a, b) => a - b)
+    .map((year) => {
+      const jobs = byYear.get(year);
       const spend = jobs.reduce((sum, work) => {
-        const delta = planTargetYear(work, bucket.id) - work.year;
+        const delta = year - work.year;
         return sum + roundCad(work.cost * Math.pow(1 + FUND.inflation, delta));
       }, 0);
       return `
         <article class="card plan-col">
-          <h2>${esc(bucket.title)}</h2>
-          <p class="lede">${esc(bucket.years)} · ${money(spend)}</p>
-          <p>${esc(bucket.lead)}</p>
-          ${
-            jobs.length
-              ? `<ul class="plan-jobs">${jobs
-                  .map((work) => planJobRow(work, bucket.id))
-                  .join("")}</ul>`
-              : `<p class="lede">${esc(p.empty)}</p>`
-          }
+          <h2>${year}</h2>
+          <p class="lede">${money(spend)} · ${jobs.length} ${esc(p.worksIn)}</p>
+          <ul class="plan-jobs">${jobs
+            .map((work) => planJobRow(work, assignments[work.id]))
+            .join("")}</ul>
         </article>
       `;
     })
@@ -2644,6 +2692,7 @@ function renderPlan() {
   document.getElementById("app").innerHTML = chrome(`
         <h1>${esc(p.h1)}</h1>
         <p class="lede">${esc(p.lede)}</p>
+        ${recommendBox()}
         <aside id="plan-result" class="callout ${growOk ? "ok" : ""}">
           <strong>${esc(p.resultTitle)} · ${solved.included.length} ${esc(
             p.worksIn
@@ -2684,7 +2733,8 @@ function bindPlan(solved) {
   document.querySelectorAll("[data-plan-job]").forEach((select) => {
     select.addEventListener("change", () => {
       const assignments = planState();
-      assignments[select.dataset.planJob] = select.value;
+      assignments[select.dataset.planJob] =
+        select.value === "off" ? "off" : Number(select.value);
       persistPlanAssignments(assignments);
       render();
     });
