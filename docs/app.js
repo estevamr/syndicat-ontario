@@ -387,10 +387,29 @@ function applyStudyPath(item) {
   persistWorkshop();
 }
 
-function scrollToWorkshop() {
+function revealPathChange() {
   requestAnimationFrame(() => {
-    const el = document.getElementById("workshop");
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    requestAnimationFrame(() => {
+      ["annual-val", "increase-val", "sim-per", "sim-result", "path-loaded"].forEach(
+        (id) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.classList.remove("just-changed");
+          void el.offsetWidth;
+          el.classList.add("just-changed");
+        }
+      );
+      const result = document.getElementById("sim-result");
+      const annual = document.getElementById("annual");
+      const target = result || annual || document.getElementById("workshop");
+      if (result) {
+        result.tabIndex = -1;
+        result.focus({ preventScroll: true });
+      } else if (annual) {
+        annual.focus({ preventScroll: true });
+      }
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
   });
 }
 
@@ -961,7 +980,7 @@ function renderFund() {
           <p id="sim-per">${esc(f.perUnit)}: ${money(perUnitYear)} (${money(
             perUnitMonth
           )}${esc(f.perMonth)})</p>
-          <aside id="sim-result" class="callout ${sim.ok ? "ok" : ""}">
+          <aside id="sim-result" class="callout ${sim.ok ? "ok" : ""}" tabindex="-1">
             <strong>${
               sim.ok
                 ? esc(f.resultOk)
@@ -1273,7 +1292,7 @@ function bindSim() {
       if (!item) return;
       applyStudyPath(item);
       render();
-      scrollToWorkshop();
+      revealPathChange();
     });
   });
   document.querySelectorAll("[data-reset]").forEach((button) => {
@@ -1321,7 +1340,7 @@ function bindSim() {
       workshop.loadedStudy = "";
       persistWorkshop();
       render();
-      scrollToWorkshop();
+      revealPathChange();
     });
   });
   document.querySelectorAll("[data-forget]").forEach((button) => {

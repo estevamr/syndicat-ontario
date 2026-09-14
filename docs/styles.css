@@ -662,6 +662,25 @@ tr:last-child td {
   border-color: var(--ink);
 }
 
+#sim-result:focus {
+  outline: 2px solid var(--info);
+  outline-offset: 3px;
+}
+
+.just-changed {
+  animation: flash-change 1.1s ease;
+}
+
+@keyframes flash-change {
+  0% {
+    box-shadow: 0 0 0 3px var(--info);
+    background-color: var(--info-soft);
+  }
+  100% {
+    box-shadow: none;
+  }
+}
+
 .sim label {
   display: block;
   margin-bottom: 14px;
