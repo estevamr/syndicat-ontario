@@ -598,6 +598,43 @@ tr:last-child td {
   margin-bottom: 0;
 }
 
+.workshop-step {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.workshop-step h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.workshop-step .lede {
+  margin: 0;
+}
+
+.more-box,
+.fold-box {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 4px 16px 14px;
+}
+
+.more-box > summary,
+.fold-box > summary {
+  cursor: pointer;
+  font-weight: 700;
+  padding: 12px 0;
+}
+
+.verdict-nums {
+  margin: 8px 0 0;
+}
+
+#sim-result .lede {
+  margin: 8px 0 0;
+}
+
 .tip {
   position: relative;
   display: inline-flex;

@@ -260,15 +260,44 @@ const LANGS = [
 const WORKSHOP_HELP = {
   en: {
     tipLabel: "Help",
-    howTitle: "How to test a path",
+    howTitle: "Three steps",
     howSteps: [
-      "Pick a printed path in the workshop (or on a card below). The sliders jump to that mix.",
-      "Move the sliders and years. The result box, charts, and fee table update as you go.",
-      "Red in the year table means the fund is short that year. Green in the result box means it stays positive for 25 years.",
-      "Name and save a path to compare later. Saves stay on this computer only.",
+      "Tap an idea below (today’s fees, or a mix from the study).",
+      "Read the green or red box — that is the answer.",
+      "Move the two sliders if you want a different yearly amount.",
     ],
-    pathPicks: "Start from a printed path",
-    loadedNote: "Loaded into the sliders. Change anything to explore.",
+    pathPicks: "Start from a printed idea",
+    loadedNote: "Loaded. Change the sliders or tap another idea.",
+    guideTitle: "What this workshop is",
+    guideBody:
+      "The reserve is a shared pot for big building jobs. You pick how much goes in each year. Green: the pot never goes below $0 through 2050. Red: it runs out that year.",
+    stepStart: "1 · Start from an idea",
+    stepStartLead:
+      "Same mixes the study printed. Tap one, then read the box.",
+    stepVerdict: "2 · Does the pot last?",
+    stepPay: "3 · What you put in each year",
+    stepPayLead:
+      "This is the shared reserve, all three portions together. The table under the box splits it by quote-part.",
+    moreTitle: "Less common knobs",
+    moreLead:
+      "Starting cash, interest, a one-time special, a second phase, extras the study left out, and save.",
+    chartsTitle: "Work cost vs pot, year by year",
+    yearsTitle: "Numbers for each year",
+    shiftWrapTitle: "Optional: move a job to another year",
+    nearShort:
+      "Also count the backflow valve and raising balcony guards (soon, estimates)",
+    laterShort:
+      "Also count roof, full guards, and block walls after 2050 (estimates)",
+    resultOkLong: "This mix lasts 25 years.",
+    resultBadLong: "This mix runs out in",
+    resultHintOk:
+      "You can still try a lower pot, or turn extras on, to see the edge.",
+    resultHintBad:
+      "Try a higher yearly amount, a one-time special, or start from Proposed 1.",
+    payCaption: "What each portion would pay with this yearly pot",
+    studyPrinted: "The study’s mixes, in words",
+    studyPrintedLead:
+      "Same ideas as step 1, with the study’s own comment on each mix.",
     unitBreak: "Breakdown per unit",
     unit: "Unit",
     share: "Quote-part",
@@ -340,15 +369,44 @@ const WORKSHOP_HELP = {
   },
   fr: {
     tipLabel: "Aide",
-    howTitle: "Comment tester un chemin",
+    howTitle: "Trois étapes",
     howSteps: [
-      "Choisissez un chemin imprimé dans l’atelier (ou sur une carte plus bas). Les curseurs prennent ce mélange.",
-      "Bougez les curseurs et les années. L’encadré, les graphiques et le tableau des frais se mettent à jour tout de suite.",
-      "Le rouge dans le tableau annuel = déficit cette année. Le vert dans l’encadré = le fonds reste positif 25 ans.",
-      "Nommez et enregistrez un chemin pour comparer plus tard. Ça reste seulement sur cet ordinateur.",
+      "Touchez une idée ci-dessous (frais d’aujourd’hui, ou un mélange de l’étude).",
+      "Lisez l’encadré vert ou rouge — c’est la réponse.",
+      "Bougez les deux curseurs pour essayer un autre montant annuel.",
     ],
-    pathPicks: "Partir d’un chemin imprimé",
-    loadedNote: "Chargé dans les curseurs. Changez ce que vous voulez pour explorer.",
+    pathPicks: "Partir d’une idée imprimée",
+    loadedNote: "Chargé. Changez les curseurs ou touchez une autre idée.",
+    guideTitle: "À quoi sert cet atelier",
+    guideBody:
+      "Le fonds est une cagnotte commune pour les gros travaux. Vous choisissez combien y entre chaque année. Vert : la cagnotte ne passe jamais sous 0 $ jusqu’en 2050. Rouge : elle est vide cette année-là.",
+    stepStart: "1 · Partir d’une idée",
+    stepStartLead:
+      "Les mêmes mélanges que l’étude. Touchez-en un, puis lisez l’encadré.",
+    stepVerdict: "2 · La cagnotte tient-elle ?",
+    stepPay: "3 · Ce que vous versez chaque année",
+    stepPayLead:
+      "C’est la prévoyance des trois portions ensemble. Le tableau sous l’encadré la répartit selon la quote-part.",
+    moreTitle: "Réglages moins courants",
+    moreLead:
+      "Solde de départ, intérêt, cotisation spéciale, deuxième phase, travaux hors étude, et enregistrement.",
+    chartsTitle: "Travaux vs cagnotte, année par année",
+    yearsTitle: "Chiffres pour chaque année",
+    shiftWrapTitle: "Optionnel : déplacer un chantier",
+    nearShort:
+      "Compter aussi le clapet anti-retour et le rehaussement des garde-corps (bientôt, estimations)",
+    laterShort:
+      "Compter aussi toiture, garde-corps complets et blocs après 2050 (estimations)",
+    resultOkLong: "Ce mélange tient 25 ans.",
+    resultBadLong: "Ce mélange est vide en",
+    resultHintOk:
+      "Vous pouvez encore baisser la cagnotte, ou activer les extras, pour voir la limite.",
+    resultHintBad:
+      "Essayez un montant annuel plus haut, une cotisation spéciale, ou partez du proposé 1.",
+    payCaption: "Ce que chaque portion paierait avec cette cagnotte annuelle",
+    studyPrinted: "Les mélanges de l’étude, en mots",
+    studyPrintedLead:
+      "Les mêmes idées qu’à l’étape 1, avec le commentaire de l’étude.",
     unitBreak: "Répartition par unité",
     unit: "Unité",
     share: "Quote-part",
@@ -420,15 +478,44 @@ const WORKSHOP_HELP = {
   },
   pt: {
     tipLabel: "Ajuda",
-    howTitle: "Como testar um caminho",
+    howTitle: "Três passos",
     howSteps: [
-      "Escolham um caminho impresso na oficina (ou num cartão abaixo). Os cursores saltam para essa mistura.",
-      "Mexam nos cursores e nos anos. A caixa de resultado, os gráficos e a tabela de taxas atualizam na hora.",
-      "Vermelho na tabela anual = rombo nesse ano. Verde na caixa = o fundo fica positivo 25 anos.",
-      "Dêem um nome e guardem para comparar depois. Fica só neste computador.",
+      "Toquem numa ideia abaixo (taxas de hoje, ou uma mistura do estudo).",
+      "Leiam a caixa verde ou vermelha — essa é a resposta.",
+      "Mexam nos dois cursores para tentar outro valor anual.",
     ],
-    pathPicks: "Começar por um caminho impresso",
-    loadedNote: "Carregado nos cursores. Mexam no que quiserem para explorar.",
+    pathPicks: "Começar por uma ideia impressa",
+    loadedNote: "Carregado. Mexam nos cursores ou toquem noutra ideia.",
+    guideTitle: "Para que serve esta oficina",
+    guideBody:
+      "O fundo é um pote comum para obras grandes. Escolhem quanto entra por ano. Verde: o pote nunca desce abaixo de 0 $ até 2050. Vermelho: esgota nesse ano.",
+    stepStart: "1 · Começar por uma ideia",
+    stepStartLead:
+      "As mesmas misturas que o estudo imprimiu. Toquem numa, depois leiam a caixa.",
+    stepVerdict: "2 · O pote aguenta?",
+    stepPay: "3 · O que põem por ano",
+    stepPayLead:
+      "É a reserva das três porções juntas. A tabela debaixo da caixa reparte pela quota.",
+    moreTitle: "Botões menos comuns",
+    moreLead:
+      "Saldo inicial, juro, contribuição especial, segunda fase, obras fora do estudo, e guardar.",
+    chartsTitle: "Obras vs pote, ano a ano",
+    yearsTitle: "Números de cada ano",
+    shiftWrapTitle: "Opcional: mudar o ano de uma obra",
+    nearShort:
+      "Contar também a válvula anti-retorno e elevar guarda-corpos (em breve, estimativas)",
+    laterShort:
+      "Contar também telhado, guarda-corpos completos e blocos depois de 2050 (estimativas)",
+    resultOkLong: "Esta mistura aguenta 25 anos.",
+    resultBadLong: "Esta mistura esgota em",
+    resultHintOk:
+      "Ainda podem baixar o pote, ou ligar extras, para ver o limite.",
+    resultHintBad:
+      "Tentem um valor anual mais alto, uma especial, ou comecem pelo proposto 1.",
+    payCaption: "O que cada porção pagaria com este pote anual",
+    studyPrinted: "As misturas do estudo, por palavras",
+    studyPrintedLead:
+      "As mesmas ideias do passo 1, com o comentário do estudo.",
     unitBreak: "Repartição por unidade",
     unit: "Unidade",
     share: "Quota",
@@ -500,15 +587,44 @@ const WORKSHOP_HELP = {
   },
   ary: {
     tipLabel: "شرح",
-    howTitle: "كيفاش تجرّب طريق",
+    howTitle: "تلاتة خطوات",
     howSteps: [
-      "ختار طريق مطبوع فالورشة (ولا من كارطة لتحت). السلايدر كيمشيو لهاد الخلطة.",
-      "حرّك السلايدر والسنين. النتيجة، الگراف والجدول كيتبدّلو دغيا.",
-      "الحمر فالجدول = نقص فداك العام. الخضر فصندوق النتيجة = الصندوق كيبقا إيجابي 25 عام.",
-      "سمّي وسجّل الطريق باش تقارن من بعد. كيبقا غير فهاد الجهاز.",
+      "ضغط على فكرة لتحت (المصاريف دابا، ولا خلطة من الدراسة).",
+      "قرا الصندوق الأخضر ولا الحمر — هادي هي الجواب.",
+      "حرّك جوج سلايدر إلا بغيتي مبلغ سنوي آخر.",
     ],
-    pathPicks: "بدا من طريق مطبوع",
-    loadedNote: "تحمّل فالسلايدر. بدّل اللي بغيتي باش تجرّب.",
+    pathPicks: "بدا من فكرة مطبوعة",
+    loadedNote: "تحمّل. بدّل السلايدر ولا ضغط على فكرة خرا.",
+    guideTitle: "علاش هاد الورشة",
+    guideBody:
+      "الصندوق هو قادّة مشتركة للأشغال الكبار. كتختار شحال كيدخل كل عام. أخضر: القادّة عمرو تهبط تحت 0 $ حتى 2050. حمر: كاتسالا فداك العام.",
+    stepStart: "1 · بدا من فكرة",
+    stepStartLead:
+      "نفس الخلطات اللي طبعت الدراسة. ضغط على وحدة، وقرا الصندوق.",
+    stepVerdict: "2 · واش القادّة كاتصمد؟",
+    stepPay: "3 · شنو كتحط كل عام",
+    stepPayLead:
+      "هاد الاحتياط ديال التلاتة مجموعين. الجدول تحت الصندوق كيقسمو بالكوت-پار.",
+    moreTitle: "إعدادات قلّ استعمال",
+    moreLead:
+      "الرصيد اللول، الفايدة، دفعة مرة، مرحلة تانية، أشغال برا الدراسة، والتسجيل.",
+    chartsTitle: "الأشغال مقابل القادّة، عام بعام",
+    yearsTitle: "الأرقام لكل عام",
+    shiftWrapTitle: "اختياري: بدّل عام الخدمة",
+    nearShort:
+      "حسب حتى صمام الرجوع وتعلية الكارد-كور (قريب، تقديرات)",
+    laterShort:
+      "حسب حتى السطح والكارد-كور الكامل والبلوك من بعد 2050 (تقديرات)",
+    resultOkLong: "هاد الخلطة كاتصمد 25 عام.",
+    resultBadLong: "هاد الخلطة كاتسالا فـ",
+    resultHintOk:
+      "تقدر تنقص القادّة، ولا تشعل الزيادات، باش تشوف الحد.",
+    resultHintBad:
+      "جرّب مبلغ سنوي أعلى، ولا دفعة مرة، ولا بدا من المقترح 1.",
+    payCaption: "شنو غادي تخلص كل حصة بهاد القادّة السنوية",
+    studyPrinted: "خلطات الدراسة، بالكلام",
+    studyPrintedLead:
+      "نفس الأفكار ديال الخطوة 1، مع تعليق الدراسة.",
     unitBreak: "التقسيم لكل وحدة",
     unit: "الوحدة",
     share: "الكوت-پار",
@@ -582,6 +698,22 @@ const WORKSHOP_HELP = {
 
 function helpCopy() {
   return WORKSHOP_HELP[lang] || WORKSHOP_HELP.en;
+}
+
+function verdictHtml(sim) {
+  const f = FUND_I18N[lang];
+  const h = helpCopy();
+  const headline = sim.ok
+    ? h.resultOkLong
+    : `${h.resultBadLong} ${sim.firstGap}.`;
+  const hint = sim.ok ? h.resultHintOk : h.resultHintBad;
+  return `<strong>${esc(headline)} ${tip("result", h.tips.result)}</strong>
+    <p class="verdict-nums">${esc(f.endBalance)}: ${money(sim.end)}. ${esc(
+      f.minBalance
+    )}: ${money(sim.minBalance)}. ${esc(f.totalPaid)}: ${money(
+      sim.totalContrib
+    )}.</p>
+    <p class="lede">${esc(hint)}</p>`;
 }
 
 function detectLang() {
@@ -797,7 +929,7 @@ function unitBreakTable(annual) {
   const h = helpCopy();
   return `
     <div class="unit-break" id="unit-break">
-      <div class="chart-label">${esc(h.unitBreak)}</div>
+      <div class="chart-label">${esc(h.payCaption || h.unitBreak)}</div>
       <div class="table-wrap">
         <table>
           <thead>
@@ -1304,10 +1436,8 @@ function renderFund() {
         </aside>
         <p class="lede">${esc(f.perUnitNow)}</p>
         ${unitStatCards()}
-        ${feeTable(workshop.annual)}
-        ${marketTable()}
-        <h2>${esc(f.tryTitle)}</h2>
-        <p class="lede">${esc(f.tryLead)}</p>
+        <h2>${esc(h.guideTitle)}</h2>
+        <p class="lede">${esc(h.guideBody)}</p>
         <aside class="how-box">
           <strong>${esc(h.howTitle)}</strong>
           <ol>
@@ -1315,86 +1445,110 @@ function renderFund() {
           </ol>
         </aside>
         <article class="card sim" id="workshop">
-          <div class="path-picks">
-            <span class="chart-label">${esc(h.pathPicks)}</span>
-            <div class="path-picks-row" id="path-picks">${pathPickButtons()}</div>
-            <p class="path-loaded" id="path-loaded" ${
-              workshop.loadedStudy ? "" : "hidden"
-            }>${esc(h.loadedNote)}</p>
+          <div class="workshop-step">
+            <h3>${esc(h.stepStart)}</h3>
+            <p class="lede">${esc(h.stepStartLead)}</p>
+            <div class="path-picks">
+              <div class="path-picks-row" id="path-picks">${pathPickButtons()}</div>
+              <p class="path-loaded" id="path-loaded" ${
+                workshop.loadedStudy ? "" : "hidden"
+              }>${esc(h.loadedNote)}</p>
+            </div>
           </div>
-          <div class="sim-grid">
-            <label>
-              ${labelLine(f.annualLabel, "annual", h.tips.annual)}
-              <strong id="annual-val">${money(workshop.annual)}</strong>
-              <input id="annual" type="range" min="500" max="25000" step="50" value="${workshop.annual}" />
-            </label>
-            <label>
-              ${labelLine(f.increaseLabel, "increase", h.tips.increase, true)}
-              <strong id="increase-val">${pct(workshop.increase)}</strong>
-              <input id="increase" type="range" min="0" max="8" step="0.5" value="${
-                workshop.increase * 100
-              }" />
-            </label>
-            <label>
-              ${labelLine(f.startBalance, "start", h.tips.start)}
-              <input id="start-balance" type="number" min="0" step="100" value="${workshop.startBalance}" />
-            </label>
-            <label>
-              ${labelLine(f.interestLabel, "interest", h.tips.interest, true)}
-              <strong id="interest-val">${pct(workshop.interestPct / 100)}</strong>
-              <input id="interest" type="range" min="0" max="5" step="0.1" value="${workshop.interestPct}" />
-            </label>
-            <label>
-              ${labelLine(f.specialYear, "specialYear", h.tips.specialYear)}
-              <input id="special-year" type="number" min="${FUND.startYear}" max="${lastYear}" value="${workshop.specialYear}" />
-            </label>
-            <label>
-              ${labelLine(f.specialAmount, "specialAmount", h.tips.specialAmount, true)}
-              <input id="special-amount" type="number" min="0" step="100" value="${workshop.specialAmount}" />
-            </label>
+          <div class="workshop-step">
+            <h3>${esc(h.stepVerdict)}</h3>
+            <aside id="sim-result" class="callout ${sim.ok ? "ok" : ""}" tabindex="-1">
+              ${verdictHtml(sim)}
+            </aside>
+            ${unitBreakTable(workshop.annual)}
           </div>
-          <label class="check">
-            <input id="use-phase2" type="checkbox" ${workshop.usePhase2 ? "checked" : ""} />
-            ${esc(f.phase2)}
-            ${tip("phase2", h.tips.phase2)}
-          </label>
-          <label class="check">
-            <input id="include-near" type="checkbox" ${workshop.includeNear ? "checked" : ""} />
-            ${esc(h.extraNear)}
-          </label>
-          <label class="check">
-            <input id="include-later" type="checkbox" ${workshop.includeLater ? "checked" : ""} />
-            ${esc(h.extraLater)}
-          </label>
-          <div class="sim-grid" id="phase2-fields" ${workshop.usePhase2 ? "" : "hidden"}>
-            <label>
-              ${labelLine(f.phaseYears, "phaseYears", h.tips.phaseYears)}
-              <input id="phase-years" type="number" min="1" max="24" value="${workshop.phaseYears}" />
+          <div class="workshop-step">
+            <h3>${esc(h.stepPay)}</h3>
+            <p class="lede">${esc(h.stepPayLead)}</p>
+            <div class="sim-grid">
+              <label>
+                ${labelLine(f.annualLabel, "annual", h.tips.annual)}
+                <strong id="annual-val">${money(workshop.annual)}</strong>
+                <input id="annual" type="range" min="500" max="25000" step="50" value="${workshop.annual}" />
+              </label>
+              <label>
+                ${labelLine(f.increaseLabel, "increase", h.tips.increase, true)}
+                <strong id="increase-val">${pct(workshop.increase)}</strong>
+                <input id="increase" type="range" min="0" max="8" step="0.5" value="${
+                  workshop.increase * 100
+                }" />
+              </label>
+            </div>
+            <label class="check">
+              <input id="include-near" type="checkbox" ${workshop.includeNear ? "checked" : ""} />
+              ${esc(h.nearShort)}
             </label>
-            <label>
-              ${labelLine(f.annualAfter, "annual2", h.tips.annual2, true)}
-              <input id="annual2" type="number" min="0" step="50" value="${workshop.annual2}" />
+            <label class="check">
+              <input id="include-later" type="checkbox" ${workshop.includeLater ? "checked" : ""} />
+              ${esc(h.laterShort)}
             </label>
-            <label>
-              ${labelLine(f.increaseAfter, "increase2", h.tips.increase2)}
-              <strong id="increase2-val">${pct(workshop.increase2)}</strong>
-              <input id="increase2" type="range" min="0" max="8" step="0.5" value="${
-                workshop.increase2 * 100
-              }" />
-            </label>
+            <div class="sim-actions">
+              <button type="button" class="action" data-reset="true">${esc(f.resetStudy)}</button>
+              ${tip("reset", h.tips.reset)}
+            </div>
           </div>
-          ${unitBreakTable(workshop.annual)}
-          <aside id="sim-result" class="callout ${sim.ok ? "ok" : ""}" tabindex="-1">
-            <strong>${
-              sim.ok
-                ? esc(f.resultOk)
-                : `${esc(f.resultBad)} ${sim.firstGap}`
-            } ${tip("result", h.tips.result)}</strong>
-            ${esc(f.endBalance)}: ${money(sim.end)}.
-            ${esc(f.minBalance)}: ${money(sim.minBalance)}.
-            ${esc(f.totalPaid)}: ${money(sim.totalContrib)}.
-          </aside>
+          <details class="more-box">
+            <summary>${esc(h.moreTitle)}</summary>
+            <p class="lede">${esc(h.moreLead)}</p>
+            <div class="sim-grid">
+              <label>
+                ${labelLine(f.startBalance, "start", h.tips.start)}
+                <input id="start-balance" type="number" min="0" step="100" value="${workshop.startBalance}" />
+              </label>
+              <label>
+                ${labelLine(f.interestLabel, "interest", h.tips.interest, true)}
+                <strong id="interest-val">${pct(workshop.interestPct / 100)}</strong>
+                <input id="interest" type="range" min="0" max="5" step="0.1" value="${workshop.interestPct}" />
+              </label>
+              <label>
+                ${labelLine(f.specialYear, "specialYear", h.tips.specialYear)}
+                <input id="special-year" type="number" min="${FUND.startYear}" max="${lastYear}" value="${workshop.specialYear}" />
+              </label>
+              <label>
+                ${labelLine(f.specialAmount, "specialAmount", h.tips.specialAmount, true)}
+                <input id="special-amount" type="number" min="0" step="100" value="${workshop.specialAmount}" />
+              </label>
+            </div>
+            <label class="check">
+              <input id="use-phase2" type="checkbox" ${workshop.usePhase2 ? "checked" : ""} />
+              ${esc(f.phase2)}
+              ${tip("phase2", h.tips.phase2)}
+            </label>
+            <div class="sim-grid" id="phase2-fields" ${workshop.usePhase2 ? "" : "hidden"}>
+              <label>
+                ${labelLine(f.phaseYears, "phaseYears", h.tips.phaseYears)}
+                <input id="phase-years" type="number" min="1" max="24" value="${workshop.phaseYears}" />
+              </label>
+              <label>
+                ${labelLine(f.annualAfter, "annual2", h.tips.annual2, true)}
+                <input id="annual2" type="number" min="0" step="50" value="${workshop.annual2}" />
+              </label>
+              <label>
+                ${labelLine(f.increaseAfter, "increase2", h.tips.increase2)}
+                <strong id="increase2-val">${pct(workshop.increase2)}</strong>
+                <input id="increase2" type="range" min="0" max="8" step="0.5" value="${
+                  workshop.increase2 * 100
+                }" />
+              </label>
+            </div>
+            ${feeTable(workshop.annual)}
+            <label>
+              ${labelLine(f.saveName, "save", h.tips.save)}
+              <input id="save-label" type="text" maxlength="80" value="${esc(workshop.saveLabel)}" />
+            </label>
+            <div class="sim-actions">
+              <button type="button" class="action" data-save="true">${esc(f.saveBtn)}</button>
+            </div>
+            <h3>${labelLine(f.savedTitle, "saved", h.tips.saved)}</h3>
+            ${savedBlock}
+          </details>
           <div class="chart-block">
+            <div class="chart-label">${esc(h.chartsTitle)}</div>
             <div class="chart-label">${esc(f.chartSpend)}</div>
             <div id="chart-spend" class="chart">${chartBars(
               sim.expenses,
@@ -1410,62 +1564,54 @@ function renderFund() {
               "bal"
             )}</div>
           </div>
-          <h3>${labelLine(f.yearTable, "yearTable", h.tips.yearTable)}</h3>
+          <details class="fold-box">
+            <summary>${labelLine(h.yearsTitle, "yearTable", h.tips.yearTable)}</summary>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>${esc(f.colYear)}</th>
+                    <th>${esc(f.colContrib)}</th>
+                    <th>${esc(f.colSpecial)}</th>
+                    <th>${esc(f.colSpend)}</th>
+                    <th>${esc(f.colInterest)}</th>
+                    <th>${esc(f.colBalance)}</th>
+                  </tr>
+                </thead>
+                <tbody id="year-body">${yearRows}</tbody>
+              </table>
+            </div>
+          </details>
+        </article>
+        <h2>${esc(h.studyPrinted)}</h2>
+        <p class="lede">${esc(h.studyPrintedLead)}</p>
+        <div class="cards">${scenarioCards}</div>
+        <details class="fold-box">
+          <summary>${labelLine(h.shiftWrapTitle, "shift", h.tips.shift)}</summary>
+          <p class="lede">${esc(f.shiftLead)}</p>
+          <h3>${esc(f.works)}</h3>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>${esc(f.colYear)}</th>
-                  <th>${esc(f.colContrib)}</th>
-                  <th>${esc(f.colSpecial)}</th>
-                  <th>${esc(f.colSpend)}</th>
-                  <th>${esc(f.colInterest)}</th>
-                  <th>${esc(f.colBalance)}</th>
+                  <th>${esc(f.targetYear)}</th>
+                  ${f.workHeaders.slice(1).map((header) => `<th>${esc(header)}</th>`).join("")}
                 </tr>
               </thead>
-              <tbody id="year-body">${yearRows}</tbody>
+              <tbody>${workRows}</tbody>
             </table>
           </div>
-          <div class="sim-actions">
-            <button type="button" class="action" data-reset="true">${esc(f.resetStudy)}</button>
-            ${tip("reset", h.tips.reset)}
+          <h3>${esc(f.outsideTitle)}</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>${f.workHeaders.map((header) => `<th>${esc(header)}</th>`).join("")}</tr>
+              </thead>
+              <tbody>${outsideRows}</tbody>
+            </table>
           </div>
-          <label>
-            ${labelLine(f.saveName, "save", h.tips.save)}
-            <input id="save-label" type="text" maxlength="80" value="${esc(workshop.saveLabel)}" />
-          </label>
-          <div class="sim-actions">
-            <button type="button" class="action" data-save="true">${esc(f.saveBtn)}</button>
-          </div>
-          <h3>${labelLine(f.savedTitle, "saved", h.tips.saved)}</h3>
-          ${savedBlock}
-        </article>
-        <h2>${esc(f.scenarios)}</h2>
-        <p class="lede">${esc(f.scenarioNote)}</p>
-        <div class="cards">${scenarioCards}</div>
-        <h2>${labelLine(f.shiftTitle, "shift", h.tips.shift)}</h2>
-        <p class="lede">${esc(f.shiftLead)}</p>
-        <h3>${esc(f.works)}</h3>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>${esc(f.targetYear)}</th>
-                ${f.workHeaders.slice(1).map((header) => `<th>${esc(header)}</th>`).join("")}
-              </tr>
-            </thead>
-            <tbody>${workRows}</tbody>
-          </table>
-        </div>
-        <h3>${esc(f.outsideTitle)}</h3>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>${f.workHeaders.map((header) => `<th>${esc(header)}</th>`).join("")}</tr>
-            </thead>
-            <tbody>${outsideRows}</tbody>
-          </table>
-        </div>
+        </details>
+        ${marketTable()}
         <section class="footnote">
           <h3>${esc(f.limits)}</h3>
           <p>${esc(f.limitsBody)}</p>
@@ -1559,8 +1705,6 @@ function bindSim() {
   };
 
   const paint = () => {
-    const f = FUND_I18N[lang];
-    const h = helpCopy();
     const sim = projectFund(workshopOpts());
     const spendMax = Math.max(1, ...sim.expenses);
     const balanceMax = Math.max(
@@ -1584,13 +1728,7 @@ function bindSim() {
     const result = document.getElementById("sim-result");
     if (result) {
       result.className = `callout ${sim.ok ? "ok" : ""}`;
-      result.innerHTML = `<strong>${
-        sim.ok ? esc(f.resultOk) : `${esc(f.resultBad)} ${sim.firstGap}`
-      } ${tip("result", h.tips.result)}</strong> ${esc(f.endBalance)}: ${money(
-        sim.end
-      )}. ${esc(f.minBalance)}: ${money(sim.minBalance)}. ${esc(
-        f.totalPaid
-      )}: ${money(sim.totalContrib)}.`;
+      result.innerHTML = verdictHtml(sim);
     }
     const spendChart = document.getElementById("chart-spend");
     const balChart = document.getElementById("chart-balance");
