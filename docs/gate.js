@@ -139,7 +139,7 @@ function loadApp() {
   if (document.querySelector("script[data-app]")) return;
   const script = document.createElement("script");
   const base = GATE_SCRIPT_URL.replace(/gate\.js(\?.*)?$/, "");
-  script.src = `${base}app.js?v=11`;
+  script.src = `${base}app.js?v=12`;
   script.dataset.app = "true";
   script.onerror = () => {
     document.getElementById("app").hidden = false;

@@ -316,7 +316,7 @@ function esc(value) {
 function chrome(inner) {
   const t = I18N[lang];
   return `
-    <div class="wrap">
+    <div class="wrap ${tab === "fund" ? "fund-page" : ""}">
       <header class="topbar">
         <div class="titles">
           <p class="site-title">${esc(t.tabTitle)}</p>

@@ -458,6 +458,80 @@ tr:last-child td {
   border-left-color: var(--ok);
 }
 
+.fund-page h1 {
+  margin-bottom: 16px;
+}
+
+.fund-page h2 {
+  margin-top: 56px;
+  margin-bottom: 16px;
+}
+
+.fund-page h3 {
+  margin-top: 32px;
+  margin-bottom: 14px;
+}
+
+.fund-page .lede {
+  margin-bottom: 32px;
+}
+
+.fund-page .stats {
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.fund-page .callout {
+  margin: 20px 0 32px;
+  padding: 20px 22px;
+}
+
+.fund-page .card {
+  padding: 22px 24px;
+}
+
+.fund-page .cards {
+  gap: 18px;
+}
+
+.fund-page .card.sim {
+  padding: 28px 26px 32px;
+}
+
+.fund-page .sim-grid {
+  gap: 22px 24px;
+  margin-bottom: 24px;
+}
+
+.fund-page .sim label {
+  margin-bottom: 20px;
+}
+
+.fund-page .sim label.check {
+  margin: 8px 0 24px;
+}
+
+.fund-page .sim-actions {
+  margin: 20px 0 24px;
+}
+
+.fund-page .table-wrap {
+  margin: 12px 0 8px;
+}
+
+.fund-page .chart-label {
+  margin: 28px 0 12px;
+}
+
+.fund-page .chart {
+  height: 160px;
+  margin-bottom: 8px;
+}
+
+.fund-page #sim-per {
+  margin: 8px 0 20px;
+}
+
 .sim label {
   display: block;
   margin-bottom: 14px;
