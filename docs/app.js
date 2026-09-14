@@ -62,6 +62,50 @@ const EXTRA_WORK = [
     kind: "later",
     est: true,
   },
+  {
+    id: "crackSeal",
+    year: 2027,
+    remaining: 1,
+    avg: 40,
+    cost: 1400,
+    marketMin: 800,
+    marketMax: 2500,
+    kind: "near",
+    est: true,
+  },
+  {
+    id: "balconyGutter",
+    year: 2027,
+    remaining: 1,
+    avg: 25,
+    cost: 900,
+    marketMin: 400,
+    marketMax: 1800,
+    kind: "near",
+    est: true,
+  },
+  {
+    id: "waterHeater",
+    year: 2027,
+    remaining: 1,
+    avg: 10,
+    cost: 2400,
+    marketMin: 1500,
+    marketMax: 3800,
+    kind: "near",
+    est: true,
+  },
+  {
+    id: "smokeAlarms",
+    year: 2027,
+    remaining: 1,
+    avg: 10,
+    cost: 500,
+    marketMin: 250,
+    marketMax: 900,
+    kind: "near",
+    est: true,
+  },
 ];
 
 function marketRange(work) {
@@ -103,12 +147,63 @@ function marketTable() {
   `;
 }
 
-function extraWorksSelected() {
-  return EXTRA_WORK.filter((work) => {
-    if (work.kind === "near") return workshop && workshop.includeNear;
-    if (work.kind === "later") return workshop && workshop.includeLater;
-    return false;
+function defaultExtras() {
+  const extras = {};
+  EXTRA_WORK.forEach((work) => {
+    extras[work.id] = work.id === "backflow" || work.id === "guardRaise";
   });
+  return extras;
+}
+
+function normalizeExtras(raw) {
+  const extras = defaultExtras();
+  if (!raw || typeof raw !== "object") return extras;
+  if (raw.extras && typeof raw.extras === "object") {
+    EXTRA_WORK.forEach((work) => {
+      if (raw.extras[work.id] != null) extras[work.id] = Boolean(raw.extras[work.id]);
+    });
+    return extras;
+  }
+  const nearOn = raw.includeNear !== false;
+  const laterOn = Boolean(raw.includeLater);
+  extras.backflow = nearOn;
+  extras.guardRaise = nearOn;
+  extras.roofMembrane = laterOn;
+  extras.alumGuards = laterOn;
+  extras.blockCladding = laterOn;
+  return extras;
+}
+
+function extraWorksSelected() {
+  return EXTRA_WORK.filter(
+    (work) => workshop && workshop.extras && workshop.extras[work.id]
+  );
+}
+
+function extraCheckList() {
+  const h = helpCopy();
+  const row = (work) => `
+    <label class="check extra-item">
+      <input type="checkbox" data-extra="${esc(work.id)}" ${
+        workshop.extras && workshop.extras[work.id] ? "checked" : ""
+      } />
+      <span>
+        ${esc(workLabel(work.id))}
+        <span class="extra-meta">${money(work.cost)} · ${esc(h.marketRange)} ${esc(
+          marketRange(work)
+        )}</span>
+      </span>
+    </label>`;
+  const near = EXTRA_WORK.filter((work) => work.kind === "near");
+  const later = EXTRA_WORK.filter((work) => work.kind === "later");
+  return `
+    <div class="extra-list">
+      <p class="lede">${esc(h.extraListLead)}</p>
+      ${near.map(row).join("")}
+      <p class="chart-label">${esc(h.extraLaterHead)}</p>
+      ${later.map(row).join("")}
+    </div>
+  `;
 }
 
 function workLabel(id) {
@@ -355,7 +450,14 @@ const WORKSHOP_HELP = {
       roofMembrane: "Elastomeric roof membrane (Montréal mid-market)",
       alumGuards: "Aluminum guards, full replace (Montréal mid-market)",
       blockCladding: "Concrete-block cladding (Montréal mid-market)",
+      crackSeal: "Seal rear foundation crack (Montréal mid-market)",
+      balconyGutter: "Balcony gutter at restaurant ceiling (Montréal mid-market)",
+      waterHeater: "Replace 2017 water heater (Montréal mid-market)",
+      smokeAlarms: "Replace common-area smoke alarms (Montréal mid-market)",
     },
+    extraListLead:
+      "Jobs the 25-year study skipped. Tick one to add it to the pot.",
+    extraLaterHead: "After 2050 (folded into the last year)",
     marketTitle: "Montréal contractor ranges (2026)",
     marketUsed: "Used in workshop",
     marketRange: "Local range",
@@ -464,7 +566,14 @@ const WORKSHOP_HELP = {
       roofMembrane: "Membrane élastomère (milieu de marché Montréal)",
       alumGuards: "Garde-corps aluminium, remplacement (milieu de marché Montréal)",
       blockCladding: "Revêtement en blocs (milieu de marché Montréal)",
+      crackSeal: "Colmater la fissure arrière (milieu de marché Montréal)",
+      balconyGutter: "Gouttière du balcon au plafond du restaurant (milieu de marché Montréal)",
+      waterHeater: "Remplacer le chauffe-eau 2017 (milieu de marché Montréal)",
+      smokeAlarms: "Remplacer les détecteurs des communs (milieu de marché Montréal)",
     },
+    extraListLead:
+      "Travaux absents de l’étude 25 ans. Cochez pour les ajouter à la cagnotte.",
+    extraLaterHead: "Après 2050 (placés dans la dernière année)",
     marketTitle: "Fourchettes d’entrepreneurs à Montréal (2026)",
     marketUsed: "Retenu dans l’atelier",
     marketRange: "Fourchette locale",
@@ -573,7 +682,14 @@ const WORKSHOP_HELP = {
       roofMembrane: "Membrana elastomérica (médio de mercado em Montreal)",
       alumGuards: "Guarda-corpos de alumínio, substituição (médio de mercado em Montreal)",
       blockCladding: "Revestimento de blocos (médio de mercado em Montreal)",
+      crackSeal: "Selar a fenda traseira da fundação (médio de mercado em Montreal)",
+      balconyGutter: "Calha do varanda no tecto do restaurante (médio de mercado em Montreal)",
+      waterHeater: "Substituir o termoacumulador de 2017 (médio de mercado em Montreal)",
+      smokeAlarms: "Substituir detetores das zonas comuns (médio de mercado em Montreal)",
     },
+    extraListLead:
+      "Obras que o estudo de 25 anos saltou. Marquem para as somar ao pote.",
+    extraLaterHead: "Depois de 2050 (somadas no último ano)",
     marketTitle: "Faixas de empreiteiros em Montreal (2026)",
     marketUsed: "Usado na oficina",
     marketRange: "Faixa local",
@@ -682,7 +798,14 @@ const WORKSHOP_HELP = {
       roofMembrane: "ميمبران السطح (وسط سوق مونتريال)",
       alumGuards: "كارد-كور ألومنيوم، تبديل كامل (وسط سوق مونتريال)",
       blockCladding: "كسوة البلوك (وسط سوق مونتريال)",
+      crackSeal: "سلك الشقّة الورانية (وسط سوق مونتريال)",
+      balconyGutter: "ڭوّيير البالكون فسقف الريسطو (وسط سوق مونتريال)",
+      waterHeater: "بدّل الشوفو-أو ديال 2017 (وسط سوق مونتريال)",
+      smokeAlarms: "بدّل كاشف الدخان دالمشترك (وسط سوق مونتريال)",
     },
+    extraListLead:
+      "أشغال اللي الدراسة ديال 25 عام ما حسباتهمش. علّم باش تزيدهم للقادّة.",
+    extraLaterHead: "من بعد 2050 (كيتجمعو فآخر عام)",
     marketTitle: "أسعار المقاولين فمونتريال (2026)",
     marketUsed: "المستعمل فالورشة",
     marketRange: "المجال المحلي",
@@ -757,8 +880,7 @@ function defaultWorkshop() {
     saved: [],
     saveLabel: "",
     loadedStudy: "",
-    includeNear: true,
-    includeLater: false,
+    extras: defaultExtras(),
   };
 }
 
@@ -772,6 +894,7 @@ function loadWorkshop() {
       ...raw,
       shifts: { ...(raw.shifts || {}) },
       saved: Array.isArray(raw.saved) ? raw.saved : [],
+      extras: normalizeExtras(raw),
     };
   } catch (err) {
     return base;
@@ -1479,14 +1602,7 @@ function renderFund() {
                 }" />
               </label>
             </div>
-            <label class="check">
-              <input id="include-near" type="checkbox" ${workshop.includeNear ? "checked" : ""} />
-              ${esc(h.nearShort)}
-            </label>
-            <label class="check">
-              <input id="include-later" type="checkbox" ${workshop.includeLater ? "checked" : ""} />
-              ${esc(h.laterShort)}
-            </label>
+            ${extraCheckList()}
             <div class="sim-actions">
               <button type="button" class="action" data-reset="true">${esc(f.resetStudy)}</button>
               ${tip("reset", h.tips.reset)}
@@ -1682,8 +1798,6 @@ function bindSim() {
     const specialYear = document.getElementById("special-year");
     const specialAmount = document.getElementById("special-amount");
     const usePhase2 = document.getElementById("use-phase2");
-    const includeNear = document.getElementById("include-near");
-    const includeLater = document.getElementById("include-later");
     const phaseYears = document.getElementById("phase-years");
     const annual2 = document.getElementById("annual2");
     const increase2 = document.getElementById("increase2");
@@ -1695,8 +1809,6 @@ function bindSim() {
     if (specialYear) workshop.specialYear = Number(specialYear.value);
     if (specialAmount) workshop.specialAmount = Number(specialAmount.value);
     if (usePhase2) workshop.usePhase2 = usePhase2.checked;
-    if (includeNear) workshop.includeNear = includeNear.checked;
-    if (includeLater) workshop.includeLater = includeLater.checked;
     if (phaseYears) workshop.phaseYears = Number(phaseYears.value);
     if (annual2) workshop.annual2 = Number(annual2.value);
     if (increase2) workshop.increase2 = Number(increase2.value) / 100;
@@ -1820,14 +1932,14 @@ function bindSim() {
       render();
     });
   }
-  ["include-near", "include-later"].forEach((id) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener("change", () => {
-        readFields();
-        render();
-      });
-    }
+  document.querySelectorAll("[data-extra]").forEach((input) => {
+    input.addEventListener("change", () => {
+      if (!workshop.extras) workshop.extras = defaultExtras();
+      workshop.extras[input.dataset.extra] = input.checked;
+      if (workshop.loadedStudy) workshop.loadedStudy = "";
+      persistWorkshop();
+      render();
+    });
   });
   document.querySelectorAll("[data-shift]").forEach((input) => {
     const onYear = () => {
@@ -1876,8 +1988,7 @@ function bindSim() {
           specialAmount: workshop.specialAmount,
           startBalance: workshop.startBalance,
           interestPct: workshop.interestPct,
-          includeNear: workshop.includeNear,
-          includeLater: workshop.includeLater,
+          extras: { ...workshop.extras },
           shifts: { ...workshop.shifts },
         },
       });
@@ -1892,6 +2003,7 @@ function bindSim() {
       if (!item) return;
       Object.assign(workshop, item.state);
       workshop.shifts = { ...(item.state.shifts || {}) };
+      workshop.extras = normalizeExtras(item.state);
       workshop.loadedStudy = "";
       persistWorkshop();
       render();

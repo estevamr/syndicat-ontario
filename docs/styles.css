@@ -617,14 +617,66 @@ tr:last-child td {
 .fold-box {
   border: 1px solid var(--line);
   background: var(--panel);
-  padding: 4px 16px 14px;
+  padding: 8px 20px 22px;
+}
+
+.more-box[open],
+.fold-box[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
 }
 
 .more-box > summary,
 .fold-box > summary {
   cursor: pointer;
   font-weight: 700;
-  padding: 12px 0;
+  padding: 14px 0;
+}
+
+.more-box .sim-grid {
+  gap: 28px 36px;
+}
+
+.more-box .sim-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.more-box .lede {
+  margin: 0;
+}
+
+.more-box .check {
+  padding: 6px 0 10px;
+}
+
+.extra-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.extra-list .chart-label {
+  margin: 8px 0 0;
+}
+
+.fund-page .sim label.check.extra-item,
+.sim label.check.extra-item {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  gap: 12px;
+}
+
+.extra-meta {
+  display: block;
+  margin-top: 4px;
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--muted);
 }
 
 .verdict-nums {
