@@ -3034,7 +3034,6 @@ function planSpecialBox() {
       `<option value="${item}" ${item === year ? "selected" : ""}>${item}</option>`
     );
   }
-  const shares = portionOnce(amount);
   return `
     <aside class="card plan-special">
       <h2>${esc(p.specialTitle)}</h2>
@@ -3049,19 +3048,91 @@ function planSpecialBox() {
           <input data-plan-special-amount type="number" min="0" step="100" value="${amount}" />
         </label>
       </div>
-      ${
-        amount > 0
-          ? `<p class="lede">${esc(p.specialEach)}</p>
-             <ul class="plain">${shares
-               .map(
-                 (row) =>
-                   `<li>${esc(row.name)}: ${money(row.once)}</li>`
-               )
-               .join("")}</ul>`
-          : `<p class="lede">${esc(p.specialNone)}</p>`
-      }
+      <div id="plan-special-shares">${planSpecialSharesHtml()}</div>
     </aside>
   `;
+}
+
+function planSpecialSharesHtml() {
+  const p = planCopy();
+  const amount = roundCad(workshop.specialAmount || 0);
+  if (amount <= 0) return `<p class="lede">${esc(p.specialNone)}</p>`;
+  const shares = portionOnce(amount);
+  return `
+    <p class="lede">${esc(p.specialEach)}</p>
+    <ul class="plain">${shares
+      .map((row) => `<li>${esc(row.name)}: ${money(row.once)}</li>`)
+      .join("")}</ul>
+  `;
+}
+
+function planJobsByYear(assignments) {
+  const byYear = new Map();
+  planJobCatalog().forEach((work) => {
+    const year = planTargetYear(work, assignments[work.id]);
+    if (year == null) return;
+    if (!byYear.has(year)) byYear.set(year, []);
+    byYear.get(year).push(work);
+  });
+  return byYear;
+}
+
+function planResultInner(solved, byYear) {
+  const p = planCopy();
+  const sim = projectFund(workshopOpts());
+  const customFee =
+    Math.abs((workshop.annual || 0) - (solved.grow.annual || 0)) > 1 ||
+    Math.abs((workshop.increase || 0) - 0.02) > 0.0001;
+  return `
+    ${
+      !sim.ok
+        ? `<aside class="callout">${
+            solved.grow.capped
+              ? esc(p.cannot)
+              : `${esc(helpCopy().resultBadLong)} ${sim.firstGap}.`
+          }</aside>`
+        : ""
+    }
+    ${planStartCards(solved)}${planScheduleTable(solved, byYear)}
+    ${
+      customFee && solved.grow.sim.ok && !solved.grow.capped
+        ? `<aside class="callout">
+             ${esc(p.customFee)} ${money(solved.grow.annual)}
+             (${pct(0.02)}).
+             <div class="sim-actions">
+               <button type="button" class="action" data-plan-needed="true">${esc(
+                 p.useNeeded
+               )}</button>
+             </div>
+           </aside>`
+        : ""
+    }
+  `;
+}
+
+function paintPlanOutputs() {
+  syncWorkshopToPlanYears(true);
+  const assignments = planState();
+  const solved = planSolve(assignments);
+  const byYear = planJobsByYear(assignments);
+  const live = document.getElementById("plan-live");
+  if (live) {
+    const wrap = document.createElement("div");
+    wrap.innerHTML = planStickyFees().trim();
+    live.replaceWith(wrap.firstElementChild);
+    const next = document.getElementById("plan-live");
+    if (next) next.classList.add("just-changed");
+  }
+  const shares = document.getElementById("plan-special-shares");
+  if (shares) shares.innerHTML = planSpecialSharesHtml();
+  const result = document.getElementById("plan-result");
+  if (result) result.innerHTML = planResultInner(solved, byYear);
+  document.querySelectorAll("[data-plan-needed]").forEach((button) => {
+    button.addEventListener("click", () => {
+      syncWorkshopToPlanYears(true);
+      render();
+    });
+  });
 }
 
 function planStartCards(solved) {
@@ -3178,13 +3249,7 @@ function renderPlan() {
   const assignments = planState();
   const solved = planSolve(assignments);
   const catalog = planJobCatalog();
-  const byYear = new Map();
-  catalog.forEach((work) => {
-    const year = planTargetYear(work, assignments[work.id]);
-    if (year == null) return;
-    if (!byYear.has(year)) byYear.set(year, []);
-    byYear.get(year).push(work);
-  });
+  const byYear = planJobsByYear(assignments);
   const columns = planColumnYears(byYear)
     .map((year) => {
       const jobs = byYear.get(year) || [];
@@ -3214,10 +3279,6 @@ function renderPlan() {
     })
     .join("");
   const skipped = catalog.filter((work) => assignments[work.id] === "off");
-  const sim = projectFund(workshopOpts());
-  const customFee =
-    Math.abs((workshop.annual || 0) - (solved.grow.annual || 0)) > 1 ||
-    Math.abs((workshop.increase || 0) - 0.02) > 0.0001;
 
   document.getElementById("app").innerHTML = chrome(`
         <h1>${esc(p.h1)}</h1>
@@ -3243,29 +3304,7 @@ function renderPlan() {
                <p class="lede plan-skipped" data-plan-drop="off">${esc(p.emptyDrop)}</p>`
         }
         <div id="plan-result">
-          ${
-            !sim.ok
-              ? `<aside class="callout">${
-                  solved.grow.capped
-                    ? esc(p.cannot)
-                    : `${esc(helpCopy().resultBadLong)} ${sim.firstGap}.`
-                }</aside>`
-              : ""
-          }
-          ${planStartCards(solved)}${planScheduleTable(solved, byYear)}
-          ${
-            customFee && solved.grow.sim.ok && !solved.grow.capped
-              ? `<aside class="callout">
-                   ${esc(p.customFee)} ${money(solved.grow.annual)}
-                   (${pct(0.02)}).
-                   <div class="sim-actions">
-                     <button type="button" class="action" data-plan-needed="true">${esc(
-                       p.useNeeded
-                     )}</button>
-                   </div>
-                 </aside>`
-              : ""
-          }
+          ${planResultInner(solved, byYear)}
         </div>
         <section class="footnote">
           <h3>${esc(p.otherTitle)}</h3>
@@ -3347,14 +3386,17 @@ function bindPlan(solved) {
   }
   const specialAmount = document.querySelector("[data-plan-special-amount]");
   if (specialAmount) {
-    specialAmount.addEventListener("change", () => {
-      workshop.specialAmount = roundCad(specialAmount.value);
+    const commit = () => {
+      workshop.specialAmount = Math.max(0, roundCad(specialAmount.value));
       persistWorkshop();
-      const scrollY = window.scrollY;
-      syncWorkshopToPlanYears(true);
-      render();
-      window.scrollTo(0, scrollY);
+      paintPlanOutputs();
+    };
+    specialAmount.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+        event.stopPropagation();
+      }
     });
+    specialAmount.addEventListener("input", commit);
   }
   document.querySelectorAll("[data-plan-reset]").forEach((button) => {
     button.addEventListener("click", () => {
