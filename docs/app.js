@@ -3037,18 +3037,18 @@ function planSpecialBox() {
   return `
     <aside class="card plan-special">
       <h2>${esc(p.specialTitle)}</h2>
-      <p class="lede">${esc(p.specialLead)}</p>
-      <div class="sim-grid">
-        <label>
+      <p class="plan-special-lead">${esc(p.specialLead)}</p>
+      <div class="plan-special-fields">
+        <label class="plan-special-field">
           ${esc(p.specialYear)}
           <select data-plan-special-year>${years.join("")}</select>
         </label>
-        <label>
+        <label class="plan-special-field">
           ${esc(p.specialAmount)}
           <input data-plan-special-amount type="number" min="0" step="100" value="${amount}" />
         </label>
       </div>
-      <div id="plan-special-shares">${planSpecialSharesHtml()}</div>
+      <div class="plan-special-shares" id="plan-special-shares">${planSpecialSharesHtml()}</div>
     </aside>
   `;
 }
@@ -3056,11 +3056,13 @@ function planSpecialBox() {
 function planSpecialSharesHtml() {
   const p = planCopy();
   const amount = roundCad(workshop.specialAmount || 0);
-  if (amount <= 0) return `<p class="lede">${esc(p.specialNone)}</p>`;
+  if (amount <= 0) {
+    return `<p class="plan-special-note">${esc(p.specialNone)}</p>`;
+  }
   const shares = portionOnce(amount);
   return `
-    <p class="lede">${esc(p.specialEach)}</p>
-    <ul class="plain">${shares
+    <p class="plan-special-note">${esc(p.specialEach)}</p>
+    <ul class="plan-special-list">${shares
       .map((row) => `<li>${esc(row.name)}: ${money(row.once)}</li>`)
       .join("")}</ul>
   `;
