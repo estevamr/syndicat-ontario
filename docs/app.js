@@ -118,6 +118,47 @@ function workLabel(id) {
   return (names && names[id]) || id;
 }
 
+function findWork(id) {
+  return (
+    (FUND.works || []).find((item) => item.id === id) ||
+    EXTRA_WORK.find((item) => item.id === id) ||
+    null
+  );
+}
+
+function workCostHtml(work) {
+  const h = helpCopy();
+  return `${money(workCost(work))}${
+    work.est && work.marketMin != null
+      ? `<div class="market-hint">${esc(h.marketRange)}: ${esc(marketRange(work))}</div>`
+      : ""
+  }`;
+}
+
+function paintWorkShifts() {
+  const lastYear = FUND.startYear + FUND.expenses.length - 1;
+  document.querySelectorAll("[data-shift]").forEach((input) => {
+    const work = findWork(input.dataset.shift);
+    if (!work) return;
+    const year = workYear(work);
+    if (document.activeElement !== input) input.value = String(year);
+    const hint = document.querySelector(`[data-dropped="${work.id}"]`);
+    if (hint) hint.hidden = year <= lastYear;
+    const costCell = document.querySelector(`[data-work-cost="${work.id}"]`);
+    if (costCell) costCell.innerHTML = workCostHtml(work);
+  });
+}
+
+function applyYearShift(input) {
+  const work = findWork(input.dataset.shift);
+  if (!work) return false;
+  const year = Number(input.value);
+  if (!Number.isFinite(year) || year < 1900 || year > 2100) return false;
+  workshop.shifts[work.id] = Math.round(year) - work.year;
+  persistWorkshop();
+  return true;
+}
+
 function studyWorkStats() {
   const costs = (FUND.works || []).map((work) => Number(work.cost) || 0).filter((cost) => cost > 0);
   const total = costs.reduce((sum, cost) => sum + cost, 0);
@@ -1145,7 +1186,7 @@ function renderFund() {
         <tr>
           <td>
             <input class="year-input" data-shift="${esc(work.id)}" type="number" min="${FUND.startYear}" max="2075" value="${year}" />
-            ${dropped ? `<div class="hint">${esc(f.dropped)}</div>` : ""}
+            <div class="hint" data-dropped="${esc(work.id)}" ${dropped ? "" : "hidden"}>${esc(f.dropped)}</div>
           </td>
           <td>${esc(name)}${
             work.linked
@@ -1158,11 +1199,7 @@ function renderFund() {
           }</td>
           <td>${work.remaining} ${esc(f.yearsLeft)}</td>
           <td>${work.avg} ${esc(f.avgLife)}</td>
-          <td>${money(workCost(work))}${
-            work.est && work.marketMin != null
-              ? `<div class="market-hint">${esc(h.marketRange)}: ${esc(marketRange(work))}</div>`
-              : ""
-          }</td>
+          <td data-work-cost="${esc(work.id)}">${workCostHtml(work)}</td>
         </tr>
       `;
     })
@@ -1613,6 +1650,7 @@ function bindSim() {
     }
     const resultBox = document.getElementById("sim-result");
     if (resultBox) wireTips(resultBox);
+    paintWorkShifts();
   };
 
   const live = () => {
@@ -1654,16 +1692,13 @@ function bindSim() {
     }
   });
   document.querySelectorAll("[data-shift]").forEach((input) => {
-    input.addEventListener("change", () => {
-      const id = input.dataset.shift;
-      const work =
-        (FUND.works || []).find((item) => item.id === id) ||
-        EXTRA_WORK.find((item) => item.id === id);
-      if (!work) return;
-      workshop.shifts[id] = Number(input.value) - work.year;
-      persistWorkshop();
-      render();
-    });
+    const onYear = () => {
+      if (!applyYearShift(input)) return;
+      if (workshop.loadedStudy) workshop.loadedStudy = "";
+      paint();
+    };
+    input.addEventListener("input", onYear);
+    input.addEventListener("change", onYear);
   });
   document.querySelectorAll("[data-apply]").forEach((button) => {
     button.addEventListener("click", (event) => {
