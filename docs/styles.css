@@ -593,6 +593,8 @@ tr:last-child td {
 .tip {
   position: relative;
   display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
   vertical-align: middle;
 }
 
@@ -614,45 +616,50 @@ tr:last-child td {
 
 .tip-pop {
   display: none;
-  position: absolute;
+  position: fixed;
   left: 0;
-  top: calc(100% + 8px);
-  width: min(280px, 72vw);
-  z-index: 8;
+  top: 0;
+  width: max-content;
+  max-width: min(280px, calc(100vw - 24px));
+  z-index: 40;
   background: var(--ink);
   color: var(--paper);
   font-size: 14px;
   font-weight: 400;
   line-height: 1.45;
   padding: 10px 12px;
+  pointer-events: none;
 }
 
-.tip-end .tip-pop {
-  left: auto;
-  right: 0;
-}
-
-.tip:hover .tip-pop,
-.tip:focus-within .tip-pop {
+.tip-pop.is-open {
   display: block;
-}
-
-html[dir="rtl"] .tip-pop {
-  left: auto;
-  right: 0;
-}
-
-html[dir="rtl"] .tip-end .tip-pop {
-  right: auto;
-  left: 0;
 }
 
 .callout strong .tip {
   margin-inline-start: 6px;
 }
 
-.card.pick .tip {
-  margin-inline-start: 8px;
+.path-picks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.path-picks-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.path-loaded {
+  margin: 0;
+  color: var(--info);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.card.pick.active {
+  border-color: var(--ink);
 }
 
 .sim label {

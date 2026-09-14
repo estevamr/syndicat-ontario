@@ -95,11 +95,13 @@ const WORKSHOP_HELP = {
     tipLabel: "Help",
     howTitle: "How to test a path",
     howSteps: [
-      "Load a printed path from the cards below, or start from today’s $5,647.",
+      "Pick a printed path in the workshop (or on a card below). The sliders jump to that mix.",
       "Move the sliders and years. The result box, charts, and fee table update as you go.",
       "Red in the year table means the fund is short that year. Green in the result box means it stays positive for 25 years.",
       "Name and save a path to compare later. Saves stay on this computer only.",
     ],
+    pathPicks: "Start from a printed path",
+    loadedNote: "Loaded into the sliders. Change anything to explore.",
     tips: {
       annual:
         "Total reserve for the year, all three portions together. The fee table splits it 27.5% / 27.5% / 45%.",
@@ -141,11 +143,13 @@ const WORKSHOP_HELP = {
     tipLabel: "Aide",
     howTitle: "Comment tester un chemin",
     howSteps: [
-      "Chargez un chemin imprimé dans les cartes plus bas, ou partez de 5 647 $ aujourd’hui.",
+      "Choisissez un chemin imprimé dans l’atelier (ou sur une carte plus bas). Les curseurs prennent ce mélange.",
       "Bougez les curseurs et les années. L’encadré, les graphiques et le tableau des frais se mettent à jour tout de suite.",
       "Le rouge dans le tableau annuel = déficit cette année. Le vert dans l’encadré = le fonds reste positif 25 ans.",
       "Nommez et enregistrez un chemin pour comparer plus tard. Ça reste seulement sur cet ordinateur.",
     ],
+    pathPicks: "Partir d’un chemin imprimé",
+    loadedNote: "Chargé dans les curseurs. Changez ce que vous voulez pour explorer.",
     tips: {
       annual:
         "Cotisation de prévoyance de l’année, les trois portions ensemble. Le tableau la répartit 27,5 % / 27,5 % / 45 %.",
@@ -187,11 +191,13 @@ const WORKSHOP_HELP = {
     tipLabel: "Ajuda",
     howTitle: "Como testar um caminho",
     howSteps: [
-      "Carreguem um caminho impresso nos cartões abaixo, ou partam dos 5.647 $ de hoje.",
+      "Escolham um caminho impresso na oficina (ou num cartão abaixo). Os cursores saltam para essa mistura.",
       "Mexam nos cursores e nos anos. A caixa de resultado, os gráficos e a tabela de taxas atualizam na hora.",
       "Vermelho na tabela anual = rombo nesse ano. Verde na caixa = o fundo fica positivo 25 anos.",
       "Dêem um nome e guardem para comparar depois. Fica só neste computador.",
     ],
+    pathPicks: "Começar por um caminho impresso",
+    loadedNote: "Carregado nos cursores. Mexam no que quiserem para explorar.",
     tips: {
       annual:
         "Reserva do ano, as três porções juntas. A tabela reparte 27,5% / 27,5% / 45%.",
@@ -233,11 +239,13 @@ const WORKSHOP_HELP = {
     tipLabel: "شرح",
     howTitle: "كيفاش تجرّب طريق",
     howSteps: [
-      "حمّل طريق مطبوع من الكارطات لتحت، ولا بدا من 5 647 $ دابا.",
+      "ختار طريق مطبوع فالورشة (ولا من كارطة لتحت). السلايدر كيمشيو لهاد الخلطة.",
       "حرّك السلايدر والسنين. النتيجة، الگراف والجدول كيتبدّلو دغيا.",
       "الحمر فالجدول = نقص فداك العام. الخضر فصندوق النتيجة = الصندوق كيبقا إيجابي 25 عام.",
       "سمّي وسجّل الطريق باش تقارن من بعد. كيبقا غير فهاد الجهاز.",
     ],
+    pathPicks: "بدا من طريق مطبوع",
+    loadedNote: "تحمّل فالسلايدر. بدّل اللي بغيتي باش تجرّب.",
     tips: {
       annual:
         "الاحتياط ديال العام، التلاتة دالحصص مجموعين. الجدول كيقسمو 27,5% / 27,5% / 45%.",
@@ -321,6 +329,7 @@ function defaultWorkshop() {
     shifts: {},
     saved: [],
     saveLabel: "",
+    loadedStudy: "",
   };
 }
 
@@ -374,7 +383,15 @@ function applyStudyPath(item) {
   workshop.startBalance = FUND.startBalance;
   workshop.interestPct = FUND.interest * 100;
   workshop.shifts = {};
+  workshop.loadedStudy = item.id;
   persistWorkshop();
+}
+
+function scrollToWorkshop() {
+  requestAnimationFrame(() => {
+    const el = document.getElementById("workshop");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
 }
 
 function locale() {
@@ -518,6 +535,20 @@ function tip(id, text, end) {
 
 function labelLine(text, tipId, tipText, end) {
   return `<span class="label-row">${esc(text)}${tip(tipId, tipText, end)}</span>`;
+}
+
+function pathPickButtons() {
+  const f = FUND_I18N[lang];
+  return (FUND.scenarios || [])
+    .map((item) => {
+      const meta = f.scenarioMeta[item.id];
+      if (!meta) return "";
+      const on = workshop.loadedStudy === item.id;
+      return `<button type="button" class="action${
+        on ? "" : " ghost"
+      }" data-apply="${esc(item.id)}" aria-pressed="${on}">${esc(meta.name)}</button>`;
+    })
+    .join("");
 }
 
 function chrome(inner) {
@@ -785,7 +816,7 @@ function renderFund() {
     .map((item) => {
       const meta = f.scenarioMeta[item.id];
       return `
-        <article class="card pick">
+        <article class="card pick${workshop.loadedStudy === item.id ? " active" : ""}" data-path="${esc(item.id)}">
           <div class="meta">
             <span class="pill ${item.ok ? "ok" : "now"}">${
               item.ok ? "OK" : "—"
@@ -797,7 +828,6 @@ function renderFund() {
             <button type="button" class="action" data-apply="${esc(item.id)}">${esc(
               f.applyStudy
             )}</button>
-            ${tip(`load-${item.id}`, h.tips.loadStudy)}
           </div>
         </article>
       `;
@@ -867,7 +897,14 @@ function renderFund() {
             ${h.howSteps.map((step) => `<li>${esc(step)}</li>`).join("")}
           </ol>
         </aside>
-        <article class="card sim">
+        <article class="card sim" id="workshop">
+          <div class="path-picks">
+            <span class="chart-label">${esc(h.pathPicks)}</span>
+            <div class="path-picks-row" id="path-picks">${pathPickButtons()}</div>
+            <p class="path-loaded" id="path-loaded" ${
+              workshop.loadedStudy ? "" : "hidden"
+            }>${esc(h.loadedNote)}</p>
+          </div>
           <div class="sim-grid">
             <label>
               ${labelLine(f.annualLabel, "annual", h.tips.annual)}
@@ -980,7 +1017,7 @@ function renderFund() {
           <h3>${labelLine(f.savedTitle, "saved", h.tips.saved)}</h3>
           ${savedBlock}
         </article>
-        <h2>${labelLine(f.scenarios, "scenarios", h.tips.loadStudy)}</h2>
+        <h2>${esc(f.scenarios)}</h2>
         <p class="lede">${esc(f.scenarioNote)}</p>
         <div class="cards">${scenarioCards}</div>
         <h2>${labelLine(f.shiftTitle, "shift", h.tips.shift)}</h2>
@@ -1013,6 +1050,58 @@ function renderFund() {
   `);
   bindChrome();
   bindSim();
+}
+
+function closeTips() {
+  document.querySelectorAll(".tip-pop.is-open").forEach((pop) => {
+    pop.classList.remove("is-open");
+    pop.style.left = "";
+    pop.style.top = "";
+  });
+}
+
+function placeTip(button) {
+  const wrap = button && button.closest(".tip");
+  const pop = wrap && wrap.querySelector(".tip-pop");
+  if (!pop) return;
+  closeTips();
+  pop.classList.add("is-open");
+  const gap = 10;
+  const rect = button.getBoundingClientRect();
+  const width = pop.offsetWidth;
+  const height = pop.offsetHeight;
+  let left = rect.left + rect.width / 2 - width / 2;
+  left = Math.max(12, Math.min(left, window.innerWidth - width - 12));
+  let top = rect.top - height - gap;
+  if (top < 12) top = Math.min(rect.bottom + gap, window.innerHeight - height - 12);
+  pop.style.left = `${Math.round(left)}px`;
+  pop.style.top = `${Math.round(top)}px`;
+}
+
+function wireTips(root) {
+  if (!root) return;
+  if (!window.__fundTipWindow) {
+    window.__fundTipWindow = true;
+    window.addEventListener("scroll", closeTips, true);
+    window.addEventListener("resize", closeTips);
+  }
+  root.querySelectorAll(".tip").forEach((wrap) => {
+    if (wrap.dataset.wired === "true") return;
+    wrap.dataset.wired = "true";
+    const button = wrap.querySelector(".tip-btn");
+    if (!button) return;
+    wrap.addEventListener("mouseenter", () => placeTip(button));
+    wrap.addEventListener("mouseleave", closeTips);
+    wrap.addEventListener("focusin", () => placeTip(button));
+    wrap.addEventListener("focusout", closeTips);
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const pop = wrap.querySelector(".tip-pop");
+      if (pop && pop.classList.contains("is-open")) closeTips();
+      else placeTip(button);
+    });
+  });
 }
 
 function bindSim() {
@@ -1107,6 +1196,16 @@ function bindSim() {
         )
         .join("");
     }
+    document.querySelectorAll("#path-picks [data-apply]").forEach((button) => {
+      const on = workshop.loadedStudy === button.dataset.apply;
+      button.setAttribute("aria-pressed", String(on));
+      button.classList.toggle("ghost", !on);
+    });
+    const loadedNote = document.getElementById("path-loaded");
+    if (loadedNote) loadedNote.hidden = !workshop.loadedStudy;
+    document.querySelectorAll(".card.pick[data-path]").forEach((card) => {
+      card.classList.toggle("active", card.dataset.path === workshop.loadedStudy);
+    });
     const feeBody = document.getElementById("fee-body");
     if (feeBody) {
       feeBody.innerHTML = portionFees(workshop.annual)
@@ -1124,9 +1223,12 @@ function bindSim() {
         )
         .join("");
     }
+    const resultBox = document.getElementById("sim-result");
+    if (resultBox) wireTips(resultBox);
   };
 
   const live = () => {
+    if (workshop.loadedStudy) workshop.loadedStudy = "";
     readFields();
     paint();
   };
@@ -1146,12 +1248,7 @@ function bindSim() {
     const el = document.getElementById(id);
     if (el) el.addEventListener("input", live);
   });
-  document.querySelectorAll(".tip-btn").forEach((button) => {
-    button.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-    });
-  });
+  wireTips(document.getElementById("app"));
   const usePhase2 = document.getElementById("use-phase2");
   if (usePhase2) {
     usePhase2.addEventListener("change", () => {
@@ -1170,11 +1267,13 @@ function bindSim() {
     });
   });
   document.querySelectorAll("[data-apply]").forEach((button) => {
-    button.addEventListener("click", () => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
       const item = FUND.scenarios.find((row) => row.id === button.dataset.apply);
       if (!item) return;
       applyStudyPath(item);
       render();
+      scrollToWorkshop();
     });
   });
   document.querySelectorAll("[data-reset]").forEach((button) => {
@@ -1219,8 +1318,10 @@ function bindSim() {
       if (!item) return;
       Object.assign(workshop, item.state);
       workshop.shifts = { ...(item.state.shifts || {}) };
+      workshop.loadedStudy = "";
       persistWorkshop();
       render();
+      scrollToWorkshop();
     });
   });
   document.querySelectorAll("[data-forget]").forEach((button) => {
