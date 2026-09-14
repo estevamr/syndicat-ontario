@@ -900,7 +900,13 @@ const PLAN_I18N = {
       "Give each job a year. The page finds the lowest yearly reserve that stays out of the red, then splits it by quote-part. Skip means that job is not funded in this 25-year window.",
     off: "Skip",
     yearLabel: "Year",
-    resultTitle: "What this mix would cost each month",
+    resultTitle: "Your years — what you would pay",
+    mixLead:
+      "This block follows the years you pick below. The green recommendation above does not move.",
+    mixEnd: "Balance in 2050",
+    mixMin: "Lowest balance",
+    mixGap: "First shortfall",
+    mixOk: "Stays positive",
     growLabel: "If the reserve grows 2% / year",
     flatLabel: "If the reserve stays a flat dollar amount",
     today: "today",
@@ -932,7 +938,13 @@ const PLAN_I18N = {
       "Donnez une année à chaque poste. La page cherche la plus petite cotisation annuelle qui reste dans le vert, puis la répartit selon la quote-part. « Ignorer » = ce poste n’est pas financé dans cette fenêtre de 25 ans.",
     off: "Ignorer",
     yearLabel: "Année",
-    resultTitle: "Ce que ce mélange coûterait par mois",
+    resultTitle: "Vos années — ce que vous paieriez",
+    mixLead:
+      "Ce bloc suit les années choisies plus bas. La recommandation verte ci-dessus ne bouge pas.",
+    mixEnd: "Solde en 2050",
+    mixMin: "Solde le plus bas",
+    mixGap: "Premier déficit",
+    mixOk: "Reste positif",
     growLabel: "Si la prévoyance monte de 2 % / an",
     flatLabel: "Si le montant annuel reste le même",
     today: "aujourd’hui",
@@ -964,7 +976,13 @@ const PLAN_I18N = {
       "Dêem um ano a cada obra. A página procura a menor reserva anual que fica no verde e reparte pela quota. Saltar = essa obra não entra nestes 25 anos.",
     off: "Saltar",
     yearLabel: "Ano",
-    resultTitle: "O que esta mistura custaria por mês",
+    resultTitle: "Os vossos anos — o que pagariam",
+    mixLead:
+      "Este bloco segue os anos que escolherem abaixo. A recomendação verde acima não mexe.",
+    mixEnd: "Saldo em 2050",
+    mixMin: "Saldo mais baixo",
+    mixGap: "Primeiro rombo",
+    mixOk: "Fica positivo",
     growLabel: "Se a reserva crescer 2% / ano",
     flatLabel: "Se o valor anual ficar igual",
     today: "hoje",
@@ -996,7 +1014,13 @@ const PLAN_I18N = {
       "عطي عام لكل خدمة. الصفحة كاتقلب على أصغر فلوس فالسنة اللي كيبقاو فالخضر، وكاتقسمهم بالكوت-پار. تخطّى = هاد الخدمة ما ممولةش فهاد 25 عام.",
     off: "تخطّى",
     yearLabel: "العام",
-    resultTitle: "شنو غادي تكلف هاد الخلطة فالشهر",
+    resultTitle: "السنين ديالكم — شنو غادي تخلصو",
+    mixLead:
+      "هاد الصندوق كيتبع السنين لتحت. التوصية الخضرا لفوق ما كاتتحركش.",
+    mixEnd: "الرصيد فـ 2050",
+    mixMin: "أقل رصيد",
+    mixGap: "أول نقص",
+    mixOk: "كيبقا إيجابي",
     growLabel: "إلا الاحتياط طلع 2% فالسنة",
     flatLabel: "إلا المبلغ السنوي بقا بحالو",
     today: "دابا",
@@ -2615,6 +2639,19 @@ function planYearSelect(work, assignment) {
   `;
 }
 
+function planMixStats(solved) {
+  const p = planCopy();
+  const sim = solved.grow.sim;
+  const gap = sim.ok ? p.mixOk : `${p.mixGap} ${sim.firstGap}`;
+  return `
+    <section class="stats">
+      <div class="stat"><b>${money(sim.end)}</b><span>${esc(p.mixEnd)}</span></div>
+      <div class="stat"><b>${money(sim.minBalance)}</b><span>${esc(p.mixMin)}</span></div>
+      <div class="stat"><b>${esc(gap)}</b><span>${esc(p.mixGap)}</span></div>
+    </section>
+  `;
+}
+
 function planFeeCards(annual, label) {
   const p = planCopy();
   const fees = portionFees(annual);
@@ -2697,6 +2734,8 @@ function renderPlan() {
           <strong>${esc(p.resultTitle)} · ${solved.included.length} ${esc(
             p.worksIn
           )}</strong>
+          <p class="lede">${esc(p.mixLead)}</p>
+          ${planMixStats(solved)}
           ${
             growOk
               ? planFeeCards(solved.grow.annual, p.growLabel)
@@ -2727,6 +2766,12 @@ function renderPlan() {
   `);
   bindChrome();
   bindPlan(solved);
+  const live = document.getElementById("plan-result");
+  if (live) {
+    live.classList.remove("just-changed");
+    void live.offsetWidth;
+    live.classList.add("just-changed");
+  }
 }
 
 function bindPlan(solved) {
